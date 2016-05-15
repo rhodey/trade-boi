@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
 public class OpenAccessor extends MarketAccessor {
 

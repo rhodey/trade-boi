@@ -18,7 +18,7 @@
 package org.anhonesteffort.btc;
 
 import org.anhonesteffort.btc.http.HttpClient;
-import org.anhonesteffort.btc.message.Message;
+import org.anhonesteffort.btc.ws.message.Message;
 import org.anhonesteffort.btc.ws.WsErrorCallback;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;

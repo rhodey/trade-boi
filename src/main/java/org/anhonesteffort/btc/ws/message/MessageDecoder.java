@@ -15,12 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
-public class ErrorAccessor extends Accessor {
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.lmax.disruptor.EventFactory;
+import okhttp3.ResponseBody;
 
-  public String getMessage(Message message) {
-    return message.root.get("message").textValue();
+import java.io.IOException;
+
+public class MessageDecoder implements EventFactory<Message> {
+
+  private final ObjectReader reader = new ObjectMapper().reader();
+
+  @Override
+  public Message newInstance() {
+    return new Message();
+  }
+
+  public void decode(ResponseBody source, Message destination) throws IOException {
+    try     { destination.init(reader.readTree(source.byteStream())); }
+    finally { source.close(); }
   }
 
 }

@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.ws;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.lmax.disruptor.ExceptionHandler;
-import org.anhonesteffort.btc.message.Message;
+import org.anhonesteffort.btc.ws.message.Message;
 
 public abstract class WsErrorCallback implements FutureCallback<Void>, ExceptionHandler<Message> {
 

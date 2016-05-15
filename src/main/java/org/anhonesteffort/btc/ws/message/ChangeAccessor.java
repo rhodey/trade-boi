@@ -15,28 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
-public class ReceivedAccessor extends MarketAccessor {
-
-  public String getOrderType(Message message) {
-    return message.root.get("order_type").textValue();
-  }
+public class ChangeAccessor extends MarketAccessor {
 
   public String getOrderId(Message message) {
     return message.root.get("order_id").textValue();
   }
 
-  public double getSize(Message message) {
-    return doubleValueOrNeg(message.root, "size");
+  public double getNewSize(Message message) {
+    return doubleValueOrNeg(message.root, "new_size");
+  }
+
+  public double getOldSize(Message message) {
+    return doubleValueOrNeg(message.root, "old_size");
+  }
+
+  public double getNewFunds(Message message) {
+    return doubleValueOrNeg(message.root, "new_funds");
+  }
+
+  public double getOldFunds(Message message) {
+    return doubleValueOrNeg(message.root, "old_funds");
   }
 
   public double getPrice(Message message) {
     return doubleValueOrNeg(message.root, "price");
-  }
-
-  public double getFunds(Message message) {
-    return doubleValueOrNeg(message.root, "funds");
   }
 
 }

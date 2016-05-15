@@ -15,27 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.lmax.disruptor.EventFactory;
-import okhttp3.ResponseBody;
+public class ReceivedAccessor extends MarketAccessor {
 
-import java.io.IOException;
-
-public class MessageDecoder implements EventFactory<Message> {
-
-  private final ObjectReader reader = new ObjectMapper().reader();
-
-  @Override
-  public Message newInstance() {
-    return new Message();
+  public String getOrderType(Message message) {
+    return message.root.get("order_type").textValue();
   }
 
-  public void decode(ResponseBody source, Message destination) throws IOException {
-    try     { destination.init(reader.readTree(source.byteStream())); }
-    finally { source.close(); }
+  public String getOrderId(Message message) {
+    return message.root.get("order_id").textValue();
+  }
+
+  public double getSize(Message message) {
+    return doubleValueOrNeg(message.root, "size");
+  }
+
+  public double getPrice(Message message) {
+    return doubleValueOrNeg(message.root, "price");
+  }
+
+  public double getFunds(Message message) {
+    return doubleValueOrNeg(message.root, "funds");
   }
 
 }

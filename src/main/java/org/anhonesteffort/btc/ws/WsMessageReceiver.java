@@ -26,8 +26,8 @@ import okhttp3.ResponseBody;
 import okhttp3.ws.WebSocket;
 import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
-import org.anhonesteffort.btc.message.Message;
-import org.anhonesteffort.btc.message.MessageDecoder;
+import org.anhonesteffort.btc.ws.message.Message;
+import org.anhonesteffort.btc.ws.message.MessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

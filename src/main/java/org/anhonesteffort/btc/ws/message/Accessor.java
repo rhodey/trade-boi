@@ -15,24 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
-public class MarketAccessor extends Accessor {
+import com.fasterxml.jackson.databind.JsonNode;
 
-  public long getSequence(Message message) {
-    return message.root.get("sequence").longValue();
-  }
+public abstract class Accessor {
 
-  public String getTime(Message message) {
-    return message.root.get("time").textValue();
-  }
-
-  public String getProductId(Message message) {
-    return message.root.get("product_id").textValue();
-  }
-
-  public String getSide(Message message) {
-    return message.root.get("side").textValue();
+  protected double doubleValueOrNeg(JsonNode root, String tag) {
+    return (root.get(tag) == null) ? -1 : root.get(tag).asDouble(-1);
   }
 
 }

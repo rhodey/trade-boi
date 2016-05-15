@@ -27,8 +27,8 @@ import com.lmax.disruptor.dsl.ProducerType;
 import okhttp3.Request;
 import okhttp3.ws.WebSocketCall;
 import org.anhonesteffort.btc.http.HttpClient;
-import org.anhonesteffort.btc.message.Message;
-import org.anhonesteffort.btc.message.MessageDecoder;
+import org.anhonesteffort.btc.ws.message.Message;
+import org.anhonesteffort.btc.ws.message.MessageDecoder;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;

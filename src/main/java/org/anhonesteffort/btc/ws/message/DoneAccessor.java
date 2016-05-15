@@ -15,28 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.message;
+package org.anhonesteffort.btc.ws.message;
 
-public class MatchAccessor extends MarketAccessor {
+public class DoneAccessor extends MarketAccessor {
 
-  public long getTradeId(Message message) {
-    return message.root.get("trade_id").longValue();
+  public String getOrderType(Message message) {
+    return message.root.get("order_type").textValue();
   }
 
-  public String getMakerOrderId(Message message) {
-    return message.root.get("maker_order_id").textValue();
+  public String getOrderId(Message message) {
+    return message.root.get("order_id").textValue();
   }
 
-  public String getTakerOrderId(Message message) {
-    return message.root.get("taker_order_id").textValue();
+  public String getReason(Message message) {
+    return message.root.get("reason").textValue();
   }
 
-  public double getSize(Message message) throws NumberFormatException {
-    return Double.parseDouble(message.root.get("size").textValue());
+  public double getPrice(Message message) {
+    return doubleValueOrNeg(message.root, "price");
   }
 
-  public double getPrice(Message message) throws NumberFormatException {
-    return Double.parseDouble(message.root.get("price").textValue());
+  public double getRemainingSize(Message message) {
+    return doubleValueOrNeg(message.root, "remaining_size");
   }
 
 }

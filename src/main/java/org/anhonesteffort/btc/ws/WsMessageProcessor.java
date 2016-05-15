@@ -18,9 +18,9 @@
 package org.anhonesteffort.btc.ws;
 
 import com.lmax.disruptor.EventHandler;
-import org.anhonesteffort.btc.message.ErrorAccessor;
-import org.anhonesteffort.btc.message.MarketAccessor;
-import org.anhonesteffort.btc.message.Message;
+import org.anhonesteffort.btc.ws.message.ErrorAccessor;
+import org.anhonesteffort.btc.ws.message.MarketAccessor;
+import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
