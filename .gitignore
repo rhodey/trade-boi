@@ -1,0 +1,7 @@
+notes.txt
+
+target/
+.idea/
+
+*.class
+*.iml
