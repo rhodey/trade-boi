@@ -22,7 +22,7 @@ import org.junit.Test;
 public class LimitTest {
 
   private Order newOrder(String orderId, double size) {
-    return new Order(orderId, Order.Side.BUY, 10.20, size);
+    return new Order(orderId, Order.Side.BID, 10.20, size);
   }
 
   @Test

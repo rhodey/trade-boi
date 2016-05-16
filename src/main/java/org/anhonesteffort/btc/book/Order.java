@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.book;
 
 public class Order {
 
-  public enum Side { BUY, SELL }
+  public enum Side { ASK, BID }
 
   private String orderId;
   private Side   side;

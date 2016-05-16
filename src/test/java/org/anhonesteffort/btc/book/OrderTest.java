@@ -23,10 +23,10 @@ public class OrderTest {
 
   @Test
   public void test() {
-    final Order ORDER = new Order("lol", Order.Side.BUY, 10, 20);
+    final Order ORDER = new Order("lol", Order.Side.BID, 10, 20);
 
     assert ORDER.getOrderId().equals("lol");
-    assert ORDER.getSide().equals(Order.Side.BUY);
+    assert ORDER.getSide().equals(Order.Side.BID);
     assert ORDER.getPrice()     == 10;
     assert ORDER.getSize()      == 20;
     assert ORDER.getRemaining() == 20;
