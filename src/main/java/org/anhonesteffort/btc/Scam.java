@@ -28,9 +28,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Test implements Runnable, FutureCallback<Void> {
+public class Scam implements Runnable, FutureCallback<Void> {
 
-  private static final Logger log = LoggerFactory.getLogger(Test.class);
+  private static final Logger log = LoggerFactory.getLogger(Scam.class);
   private static final Integer WS_BUFFER_SIZE = 1024;
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
@@ -38,7 +38,7 @@ public class Test implements Runnable, FutureCallback<Void> {
   private final ShutdownProcedure shutdownProcedure;
   private final WsService         wsService;
 
-  public Test() {
+  public Scam() {
     this.wsService         = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
     this.shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
   }
@@ -66,7 +66,7 @@ public class Test implements Runnable, FutureCallback<Void> {
   }
 
   public static void main(String[] args) {
-    new Test().run();
+    new Scam().run();
   }
 
 }
