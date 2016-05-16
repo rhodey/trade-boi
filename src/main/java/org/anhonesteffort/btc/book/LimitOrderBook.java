@@ -20,6 +20,7 @@ package org.anhonesteffort.btc.book;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -59,6 +60,17 @@ public class LimitOrderBook {
       addAsk(order);
     } else {
       addBid(order);
+    }
+  }
+
+  public Optional<Double> getSpread() {
+    Optional<Limit> ask = Optional.ofNullable(askQueue.peek());
+    Optional<Limit> bid = Optional.ofNullable(bidQueue.peek());
+
+    if (ask.isPresent() && bid.isPresent()) {
+      return Optional.of(ask.get().getPrice() - bid.get().getPrice());
+    } else {
+      return Optional.empty();
     }
   }
 
