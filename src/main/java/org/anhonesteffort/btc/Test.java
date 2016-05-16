@@ -24,28 +24,45 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class Test implements Runnable, FutureCallback<Void> {
 
-  private static final Logger  log            = LoggerFactory.getLogger(Test.class);
+  private static final Logger log = LoggerFactory.getLogger(Test.class);
   private static final Integer WS_BUFFER_SIZE = 1024;
+
+  private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
+  private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
+  private final ShutdownProcedure shutdownProcedure;
+  private final WsService         wsService;
+
+  public Test() {
+    this.wsService         = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
+    this.shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
+  }
 
   @Override
   public void run() {
-    WsService wsService = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
     Futures.addCallback(wsService.getShutdownFuture(), this);
     wsService.start();
   }
 
   @Override
   public void onSuccess(Void aVoid) {
-    log.error("WsService shutdown with unknown cause");
-    System.exit(1);
+    if (!shuttingDown.getAndSet(true)) {
+      log.warn("shutdown procedure initiated");
+      shutdownPool.submit(shutdownProcedure);
+    }
   }
 
   @Override
   public void onFailure(Throwable throwable) {
-    log.error("WsService shutdown with error", throwable);
-    System.exit(1);
+    if (!shuttingDown.getAndSet(true)) {
+      log.warn("shutdown procedure initiated");
+      shutdownPool.submit(shutdownProcedure);
+    }
   }
 
   public static void main(String[] args) {

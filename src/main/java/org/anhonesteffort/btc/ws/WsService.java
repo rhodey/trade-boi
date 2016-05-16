@@ -77,43 +77,56 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<Message
     ).enqueue(wsReceiver);
   }
 
+  public boolean shutdown() {
+    if (shutdownFuture.set(null)) {
+      http.shutdown();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean shutdown(Throwable throwable) {
+    if (shutdownFuture.setException(throwable)) {
+      http.shutdown();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @Override
   public void onSuccess(Void aVoid) {
-    if (shutdownFuture.set(null)) {
+    if (shutdown()) {
       log.error("websocket error future completed with unknown cause");
-      http.shutdown();
     }
   }
 
   @Override
   public void onFailure(Throwable throwable) {
-    if (shutdownFuture.setException(throwable)) {
+    if (shutdown(throwable)) {
       log.error("websocket error", throwable);
-      http.shutdown();
     }
   }
 
   @Override
   public void handleOnStartException(Throwable throwable) {
-    if (shutdownFuture.setException(throwable)) {
+    if (shutdown(throwable)) {
       log.error("error starting disruptor", throwable);
-      http.shutdown();
     }
   }
 
   @Override
   public void handleEventException(Throwable throwable, long sequence, Message message) {
-    if (shutdownFuture.setException(throwable)) {
+    if (shutdown(throwable)) {
       log.error("error processing disruptor event", throwable);
-      http.shutdown();
     }
   }
 
   @Override
   public void handleOnShutdownException(Throwable throwable) {
-    if (shutdownFuture.setException(throwable)) {
+    if (shutdown(throwable)) {
       log.error("error shutting down disruptor", throwable);
-      http.shutdown();
     }
   }
 
