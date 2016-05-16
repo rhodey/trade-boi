@@ -63,10 +63,10 @@ public class OrderBookResponse {
 
   private static class AskSorter implements Comparator<OrderResponse> {
     @Override
-    public int compare(OrderResponse bid1, OrderResponse bid2) {
-      if (bid1.getPrice() < bid2.getPrice()) {
+    public int compare(OrderResponse ask1, OrderResponse ask2) {
+      if (ask1.getPrice() < ask2.getPrice()) {
         return -1;
-      } else if (bid1.getPrice() == bid2.getPrice()) {
+      } else if (ask1.getPrice() == ask2.getPrice()) {
         return 0;
       } else {
         return 1;
