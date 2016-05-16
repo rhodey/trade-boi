@@ -26,30 +26,30 @@ import java.util.Queue;
 
 public class LimitOrderBook {
 
-  private final Queue<Limit>       askQueue = new PriorityQueue<>(new AskSorter());
-  private final Queue<Limit>       bidQueue = new PriorityQueue<>(new BidSorter());
-  private final Map<Double, Limit> askMap   = new HashMap<>();
-  private final Map<Double, Limit> bidMap   = new HashMap<>();
+  private final Queue<Limit>       askLimitQueue = new PriorityQueue<>(new AskSorter());
+  private final Queue<Limit>       bidLimitQueue = new PriorityQueue<>(new BidSorter());
+  private final Map<Double, Limit> askLimitMap   = new HashMap<>();
+  private final Map<Double, Limit> bidLimitMap   = new HashMap<>();
 
   private void addAsk(Order order) {
-    Limit limit = askMap.get(order.getPrice());
+    Limit limit = askLimitMap.get(order.getPrice());
 
     if (limit == null) {
       limit = new Limit(order.getPrice());
-      askMap.put(order.getPrice(), limit);
-      askQueue.add(limit);
+      askLimitMap.put(order.getPrice(), limit);
+      askLimitQueue.add(limit);
     }
 
     limit.add(order);
   }
 
   private void addBid(Order order) {
-    Limit limit = bidMap.get(order.getPrice());
+    Limit limit = bidLimitMap.get(order.getPrice());
 
     if (limit == null) {
       limit = new Limit(order.getPrice());
-      bidMap.put(order.getPrice(), limit);
-      bidQueue.add(limit);
+      bidLimitMap.put(order.getPrice(), limit);
+      bidLimitQueue.add(limit);
     }
 
     limit.add(order);
@@ -64,8 +64,8 @@ public class LimitOrderBook {
   }
 
   public Optional<Double> getSpread() {
-    Optional<Limit> ask = Optional.ofNullable(askQueue.peek());
-    Optional<Limit> bid = Optional.ofNullable(bidQueue.peek());
+    Optional<Limit> ask = Optional.ofNullable(askLimitQueue.peek());
+    Optional<Limit> bid = Optional.ofNullable(bidLimitQueue.peek());
 
     if (ask.isPresent() && bid.isPresent()) {
       return Optional.of(ask.get().getPrice() - bid.get().getPrice());
