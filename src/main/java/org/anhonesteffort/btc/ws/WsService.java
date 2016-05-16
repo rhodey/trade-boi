@@ -17,32 +17,39 @@
 
 package org.anhonesteffort.btc.ws;
 
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import okhttp3.Request;
 import okhttp3.ws.WebSocketCall;
 import org.anhonesteffort.btc.http.HttpClient;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.ws.message.Message;
 import org.anhonesteffort.btc.ws.message.MessageDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class WsService {
+public class WsService implements FutureCallback<Void>, ExceptionHandler<Message> {
 
+  private static final Logger log         = LoggerFactory.getLogger(WsService.class);
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
 
-  private final MessageDecoder           decoder  = new MessageDecoder();
-  private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+  private final MessageDecoder           decoder        = new MessageDecoder();
+  private final HttpClientWrapper        http           = new HttpClientWrapper();
+  private final SettableFuture<Void>     shutdownFuture = SettableFuture.create();
+  private final ListeningExecutorService executor       = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
   private final Disruptor<Message> wsDisruptor;
-  private       WsMessageReceiver  wsReceiver;
 
   public WsService(WaitStrategy waitStrategy, int bufferSize) {
     wsDisruptor = new Disruptor<>(
@@ -50,18 +57,19 @@ public class WsService {
     );
   }
 
-  @SuppressWarnings("unchecked")
-  public void start(WsErrorCallback errorCb) {
-    WsSubscribeHelper    wsHelper = new WsSubscribeHelper(executor);
-    SettableFuture<Void> wsError  = SettableFuture.create();
+  public ListenableFuture<Void> getShutdownFuture() {
+    return shutdownFuture;
+  }
 
-    wsReceiver = new WsMessageReceiver(
-        wsDisruptor.getRingBuffer(), decoder, wsHelper, wsError
+  public void start() {
+    WsMessageProcessor wsProcessor = new WsMessageProcessor(http);
+    WsMessageReceiver  wsReceiver  = new WsMessageReceiver(
+        wsDisruptor.getRingBuffer(), decoder, new WsSubscribeHelper(executor)
     );
 
-    wsDisruptor.handleEventsWith(new WsMessageProcessor());
-    wsDisruptor.setDefaultExceptionHandler(errorCb);
-    Futures.addCallback(wsError, errorCb);
+    wsDisruptor.handleEventsWith(wsProcessor);
+    wsDisruptor.setDefaultExceptionHandler(this);
+    Futures.addCallback(wsReceiver.getErrorFuture(), this);
 
     wsDisruptor.start();
     WebSocketCall.create(
@@ -69,14 +77,43 @@ public class WsService {
     ).enqueue(wsReceiver);
   }
 
-  public void stop() throws IOException {
-    try {
+  @Override
+  public void onSuccess(Void aVoid) {
+    if (shutdownFuture.set(null)) {
+      log.error("websocket error future completed with unknown cause");
+      http.shutdown();
+    }
+  }
 
-      wsReceiver.closeSocket();
+  @Override
+  public void onFailure(Throwable throwable) {
+    if (shutdownFuture.setException(throwable)) {
+      log.error("websocket error", throwable);
+      http.shutdown();
+    }
+  }
 
-    } finally {
-      executor.shutdownNow();
-      wsDisruptor.shutdown();
+  @Override
+  public void handleOnStartException(Throwable throwable) {
+    if (shutdownFuture.setException(throwable)) {
+      log.error("error starting disruptor", throwable);
+      http.shutdown();
+    }
+  }
+
+  @Override
+  public void handleEventException(Throwable throwable, long sequence, Message message) {
+    if (shutdownFuture.setException(throwable)) {
+      log.error("error processing disruptor event", throwable);
+      http.shutdown();
+    }
+  }
+
+  @Override
+  public void handleOnShutdownException(Throwable throwable) {
+    if (shutdownFuture.setException(throwable)) {
+      log.error("error shutting down disruptor", throwable);
+      http.shutdown();
     }
   }
 

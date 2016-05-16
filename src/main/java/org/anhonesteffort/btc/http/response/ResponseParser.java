@@ -15,12 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.ws;
+package org.anhonesteffort.btc.http.response;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.lmax.disruptor.ExceptionHandler;
-import org.anhonesteffort.btc.ws.message.Message;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import okhttp3.ResponseBody;
 
-public abstract class WsErrorCallback implements FutureCallback<Void>, ExceptionHandler<Message> {
+import java.io.IOException;
+
+public class ResponseParser {
+
+  private final ObjectReader reader = new ObjectMapper().reader();
+
+  public JsonNode root(ResponseBody source) throws IOException {
+    return reader.readTree(source.byteStream());
+  }
 
 }

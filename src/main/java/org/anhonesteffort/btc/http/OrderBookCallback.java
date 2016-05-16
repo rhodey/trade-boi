@@ -15,26 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.ws.message;
+package org.anhonesteffort.btc.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.lmax.disruptor.EventFactory;
-import okhttp3.ResponseBody;
+import com.google.common.util.concurrent.SettableFuture;
+import okhttp3.Call;
+import okhttp3.Response;
+import org.anhonesteffort.btc.http.response.OrderBookResponse;
+import org.anhonesteffort.btc.http.response.ResponseParser;
 
 import java.io.IOException;
 
-public class MessageDecoder implements EventFactory<Message> {
+public class OrderBookCallback extends HttpCallback<OrderBookResponse> {
 
-  private final ObjectReader reader = new ObjectMapper().reader();
+  private final ResponseParser parser;
 
-  @Override
-  public Message newInstance() {
-    return new Message();
+  public OrderBookCallback(ResponseParser parser, SettableFuture<OrderBookResponse> future) {
+    super(future);
+    this.parser = parser;
   }
 
-  public void decode(ResponseBody source, Message destination) throws IOException {
-    destination.init(reader.readTree(source.byteStream()));
+  @Override
+  protected void set(Call call, Response response) throws IOException, NumberFormatException {
+    future.set(new OrderBookResponse(parser.root(response.body())));
   }
 
 }

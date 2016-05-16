@@ -17,24 +17,35 @@
 
 package org.anhonesteffort.btc;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import org.anhonesteffort.btc.ws.WsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Test implements Runnable {
+public class Test implements Runnable, FutureCallback<Void> {
 
+  private static final Logger  log            = LoggerFactory.getLogger(Test.class);
   private static final Integer WS_BUFFER_SIZE = 1024;
-
-  private final WsService        wsService;
-  private final CriticalCallback criticalCb;
-
-  public Test() {
-    wsService  = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
-    criticalCb = new CriticalCallback(wsService);
-  }
 
   @Override
   public void run() {
-    wsService.start(criticalCb);
+    WsService wsService = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
+    Futures.addCallback(wsService.getShutdownFuture(), this);
+    wsService.start();
+  }
+
+  @Override
+  public void onSuccess(Void aVoid) {
+    log.error("WsService shutdown with unknown cause");
+    System.exit(1);
+  }
+
+  @Override
+  public void onFailure(Throwable throwable) {
+    log.error("WsService shutdown with error", throwable);
+    System.exit(1);
   }
 
   public static void main(String[] args) {

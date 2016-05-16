@@ -33,7 +33,7 @@ public class Message {
   protected JsonNode root;
   protected String   type;
 
-  public Message() { }
+  protected Message() { }
 
   protected void init(JsonNode root) throws IOException {
     this.root = root;
@@ -41,7 +41,7 @@ public class Message {
     if (root.get("type") != null && !root.get("type").isNull()) {
       this.type = root.get("type").textValue();
     } else {
-      throw new IOException("json root has no type tag");
+      throw new IOException("json root has invalid type tag");
     }
   }
 

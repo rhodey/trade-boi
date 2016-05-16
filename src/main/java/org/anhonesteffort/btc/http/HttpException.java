@@ -15,26 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.ws.message;
+package org.anhonesteffort.btc.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.lmax.disruptor.EventFactory;
-import okhttp3.ResponseBody;
+public class HttpException extends Exception {
 
-import java.io.IOException;
-
-public class MessageDecoder implements EventFactory<Message> {
-
-  private final ObjectReader reader = new ObjectMapper().reader();
-
-  @Override
-  public Message newInstance() {
-    return new Message();
+  public HttpException(String message) {
+    super(message);
   }
 
-  public void decode(ResponseBody source, Message destination) throws IOException {
-    destination.init(reader.readTree(source.byteStream()));
+  public HttpException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

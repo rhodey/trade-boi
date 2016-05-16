@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.ws;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.lmax.disruptor.RingBuffer;
 import okhttp3.Response;
@@ -32,34 +33,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageReceiver.class);
 
+  private final SettableFuture<Void> errorFuture = SettableFuture.create();
   private final RingBuffer<Message>  ringBuffer;
   private final MessageDecoder       decoder;
   private final WsSubscribeHelper    helper;
-  private final SettableFuture<Void> errorFuture;
 
-  private Optional<WebSocket> socket = Optional.empty();
-
-  public WsMessageReceiver(RingBuffer<Message>  ringBuffer,
-                           MessageDecoder       decoder,
-                           WsSubscribeHelper    helper,
-                           SettableFuture<Void> errorFuture)
+  public WsMessageReceiver(RingBuffer<Message> ringBuffer,
+                           MessageDecoder      decoder,
+                           WsSubscribeHelper   helper)
   {
-    this.ringBuffer  = ringBuffer;
-    this.decoder     = decoder;
-    this.helper      = helper;
-    this.errorFuture = errorFuture;
+    this.ringBuffer = ringBuffer;
+    this.decoder    = decoder;
+    this.helper     = helper;
+  }
+
+  public ListenableFuture<Void> getErrorFuture() {
+    return errorFuture;
   }
 
   @Override
   public void onOpen(WebSocket socket, Response response) {
     log.info("connection opened");
-    this.socket = Optional.of(socket);
     Futures.addCallback(helper.subscribe(socket), this);
   }
 
@@ -78,6 +77,8 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
 
     } catch (Throwable e) {
       errorFuture.setException(e);
+    } finally {
+      body.close();
     }
   }
 
@@ -91,17 +92,11 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
     errorFuture.setException(e);
   }
 
-  public void closeSocket() throws IOException {
-    if (socket.isPresent()) {
-      socket.get().close(1000, "cya later");
-    }
-  }
-
   @Override
   public void onClose(int code, String reason) {
     errorFuture.setException(new WsException(
-        "websocket closed with code " + code + " and reason -> " + reason)
-    );
+        "websocket closed with code " + code + " and reason -> " + reason
+    ));
   }
 
   @Override

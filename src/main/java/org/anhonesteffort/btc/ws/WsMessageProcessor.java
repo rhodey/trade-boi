@@ -18,51 +18,76 @@
 package org.anhonesteffort.btc.ws;
 
 import com.lmax.disruptor.EventHandler;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.http.response.OrderBookResponse;
 import org.anhonesteffort.btc.ws.message.ErrorAccessor;
 import org.anhonesteffort.btc.ws.message.MarketAccessor;
 import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 public class WsMessageProcessor implements EventHandler<Message> {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageProcessor.class);
 
-  private final ErrorAccessor  error  = new ErrorAccessor();
-  private final MarketAccessor market = new MarketAccessor();
+  private final ErrorAccessor     error  = new ErrorAccessor();
+  private final MarketAccessor    market = new MarketAccessor();
+  private final HttpClientWrapper http;
 
   private Optional<Long> messageSeqLast = Optional.empty();
+
+  public WsMessageProcessor(HttpClientWrapper http) {
+    this.http = http;
+  }
 
   private void process(Message message) {
     log.info("process -> " + market.getSequence(message));
   }
 
-  private void rebuildOrderBook() throws IOException {
-    log.warn("gotta ask coinbase for the order book");
+  private void rebuildOrderBook() throws InterruptedException, ExecutionException {
+    log.info("asking coinbase for the order book...");
+    OrderBookResponse orderBook = http.geOrderBook().get();
+    log.info("received the order book, seq -> " + orderBook.getSequence());
+
+    log.info("___asks___");
+    for (int i = 0; i < 15; i++) {
+      log.info(orderBook.getAsks().remove().toString());
+    }
+
+    log.info("___bids___");
+    for (int i = 0; i < 15; i++) {
+      log.info(orderBook.getBids().remove().toString());
+    }
+
+    messageSeqLast = Optional.of(orderBook.getSequence());
+  }
+
+  public void checkSeqAndProcess(Message message) throws InterruptedException, ExecutionException {
+    long messageSeq = market.getSequence(message);
+
+    if (!messageSeqLast.isPresent() || messageSeq == (messageSeqLast.get() + 1)) {
+      messageSeqLast = Optional.of(messageSeq);
+      process(message);
+    } else if (messageSeq > messageSeqLast.get()) {
+      log.warn("received out of order seq -> " + messageSeq + ", expected -> " + (messageSeqLast.get() + 1));
+      rebuildOrderBook();
+    } else {
+      log.warn("received duplicate sequence -> " + messageSeq + ", ignoring");
+    }
   }
 
   @Override
-  public void onEvent(Message message, long sequence, boolean endOfBatch) throws IOException, WsException {
+  public void onEvent(Message message, long sequence, boolean endOfBatch) throws Exception {
     switch (message.getType()) {
       case Message.TYPE_RECEIVED:
       case Message.TYPE_OPEN:
       case Message.TYPE_DONE:
       case Message.TYPE_MATCH:
       case Message.TYPE_CHANGE:
-        long messageSeq = market.getSequence(message);
-
-        if (!messageSeqLast.isPresent() || messageSeq == (messageSeqLast.get() + 1)) {
-          messageSeqLast = Optional.of(messageSeq);
-          process(message);
-        } else if (messageSeq <= messageSeqLast.get()) {
-          log.warn("received duplicate sequence " + messageSeq + ", ignoring");
-        } else {
-          log.warn("received out of order seq " + messageSeq + ", expected -> " + (messageSeqLast.get() + 1));
-          rebuildOrderBook();
-        }
+        checkSeqAndProcess(message);
         break;
 
       case Message.TYPE_ERROR:
