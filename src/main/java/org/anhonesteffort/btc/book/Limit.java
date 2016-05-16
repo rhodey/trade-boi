@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.book;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -78,7 +79,7 @@ public class Limit {
   }
 
   public FillResult fillVolume(double targetVolume) {
-    Queue<Order> fills        = new LinkedList<>();
+    List<Order>  fills        = new LinkedList<>();
     double       filledVolume = 0;
     VolumeResult result       = null;
 
@@ -108,15 +109,15 @@ public class Limit {
   }
 
   public static class FillResult {
-    private final Queue<Order> fills;
+    private final List<Order> fills;
     private final double volume;
 
-    public FillResult(Queue<Order> fills, double volume) {
+    public FillResult(List<Order> fills, double volume) {
       this.fills  = fills;
       this.volume = volume;
     }
 
-    public Queue<Order> getFills() {
+    public List<Order> getFills() {
       return fills;
     }
 

@@ -48,21 +48,22 @@ public class LimitTest {
     final Limit            LIMIT = new Limit(10.20);
     final Limit.FillResult FILL1 = LIMIT.fillVolume(10);
 
-    assert FILL1.getVolume() == 0;
+    assert FILL1.getVolume()       == 0;
     assert FILL1.getFills().size() == 0;
   }
 
   @Test
-  public void testFillVolumeOneFill() {
+  public void testFillVolumeOneFullFill() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
 
     final Limit.FillResult FILL1 = LIMIT.fillVolume(10);
 
-    assert FILL1.getVolume()       == 10;
-    assert FILL1.getFills().size() == 1;
-    assert LIMIT.getVolume()       == 0;
+    assert FILL1.getVolume()                      == 10;
+    assert FILL1.getFills().size()                ==  1;
+    assert FILL1.getFills().get(0).getRemaining() ==  0;
+    assert LIMIT.getVolume()                      ==  0;
   }
 
   @Test
@@ -73,9 +74,63 @@ public class LimitTest {
 
     final Limit.FillResult FILL1 = LIMIT.fillVolume(8);
 
-    assert FILL1.getVolume()       == 8;
-    assert FILL1.getFills().size() == 1;
-    assert LIMIT.getVolume()       == 2;
+    assert FILL1.getVolume()                      == 8;
+    assert FILL1.getFills().size()                == 1;
+    assert FILL1.getFills().get(0).getRemaining() == 2;
+    assert LIMIT.getVolume()                      == 2;
+  }
+
+  @Test
+  public void testFillVolumeTwoPartialFills() {
+    final Limit LIMIT = new Limit(10.20);
+
+    LIMIT.add(newOrder("00", 10));
+
+    final Limit.FillResult FILL1 = LIMIT.fillVolume(8);
+
+    assert FILL1.getVolume()                      == 8;
+    assert FILL1.getFills().size()                == 1;
+    assert FILL1.getFills().get(0).getRemaining() == 2;
+    assert LIMIT.getVolume()                      == 2;
+
+    final Limit.FillResult FILL2 = LIMIT.fillVolume(4);
+
+    assert FILL2.getVolume()                      == 2;
+    assert FILL2.getFills().size()                == 1;
+    assert FILL2.getFills().get(0).getRemaining() == 0;
+    assert LIMIT.getVolume()                      == 0;
+  }
+
+  @Test
+  public void testFillVolumeTwoFullFills() {
+    final Limit LIMIT = new Limit(10.20);
+
+    LIMIT.add(newOrder("00", 10));
+    LIMIT.add(newOrder("01", 30));
+
+    final Limit.FillResult FILL1 = LIMIT.fillVolume(40);
+
+    assert FILL1.getVolume()                      == 40;
+    assert FILL1.getFills().size()                ==  2;
+    assert FILL1.getFills().get(0).getRemaining() ==  0;
+    assert FILL1.getFills().get(1).getRemaining() ==  0;
+    assert LIMIT.getVolume()                      ==  0;
+  }
+
+  @Test
+  public void testFillVolumeOneFullOnePartial() {
+    final Limit LIMIT = new Limit(10.20);
+
+    LIMIT.add(newOrder("00", 10));
+    LIMIT.add(newOrder("01", 30));
+
+    final Limit.FillResult FILL1 = LIMIT.fillVolume(30);
+
+    assert FILL1.getVolume()                      == 30;
+    assert FILL1.getFills().size()                ==  2;
+    assert FILL1.getFills().get(0).getRemaining() ==  0;
+    assert FILL1.getFills().get(1).getRemaining() == 10;
+    assert LIMIT.getVolume()                      == 10;
   }
 
 }
