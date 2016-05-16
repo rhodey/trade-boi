@@ -43,6 +43,17 @@ public class LimitOrderBook {
     limit.add(order);
   }
 
+  private Limit.FillResult processAsk(Order ask) {
+    Optional<Limit> bestBid = Optional.ofNullable(bidLimitQueue.peek());
+
+    if (bestBid.isPresent() && bestBid.get().getPrice() >= ask.getPrice()) {
+      return bestBid.get().fillVolume(ask.getSize());
+    } else {
+      addAsk(ask);
+      return Limit.FillResult.EMPTY;
+    }
+  }
+
   private void addBid(Order order) {
     Limit limit = bidLimitMap.get(order.getPrice());
 
@@ -55,11 +66,22 @@ public class LimitOrderBook {
     limit.add(order);
   }
 
+  public Limit.FillResult processBid(Order bid) {
+    Optional<Limit> bestAsk = Optional.ofNullable(askLimitQueue.peek());
+
+    if (bestAsk.isPresent() && bestAsk.get().getPrice() <= bid.getPrice()) {
+      return bestAsk.get().fillVolume(bid.getSize());
+    } else {
+      addBid(bid);
+      return Limit.FillResult.EMPTY;
+    }
+  }
+
   public void add(Order order) {
     if (order.getSide().equals(Order.Side.ASK)) {
-      addAsk(order);
+      processAsk(order);
     } else {
-      addBid(order);
+      processBid(order);
     }
   }
 

@@ -109,6 +109,7 @@ public class Limit {
   }
 
   public static class FillResult {
+    public static final FillResult EMPTY = new FillResult(new LinkedList<>(), 0);
     private final List<Order> fills;
     private final double volume;
 
