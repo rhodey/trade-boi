@@ -23,8 +23,8 @@ import java.util.Optional;
 
 public class LimitOrderBook {
 
-  private final LimitQueue askLimits = new LimitQueue(Order.Side.ASK);
-  private final LimitQueue bidLimits = new LimitQueue(Order.Side.BID);
+  protected final LimitQueue askLimits = new LimitQueue(Order.Side.ASK);
+  protected final LimitQueue bidLimits = new LimitQueue(Order.Side.BID);
 
   private List<Order> processAsk(Order ask) {
     List<Order> makers = new LinkedList<>();
@@ -76,17 +76,6 @@ public class LimitOrderBook {
       return askLimits.removeOrder(price, orderId);
     } else {
       return bidLimits.removeOrder(price, orderId);
-    }
-  }
-
-  public Optional<Double> getSpread() {
-    Optional<Limit> bestAsk = askLimits.peek();
-    Optional<Limit> bestBid = bidLimits.peek();
-
-    if (bestAsk.isPresent() && bestBid.isPresent()) {
-      return Optional.of(bestAsk.get().getPrice() - bestBid.get().getPrice());
-    } else {
-      return Optional.empty();
     }
   }
 
