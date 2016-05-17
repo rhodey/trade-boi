@@ -21,10 +21,10 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class LimitTest {
+public class LimitTest extends BaseTest {
 
   private Order newOrder(String orderId, double size) {
-    return new Order(orderId, Order.Side.BID, 10.20, size);
+    return newBid(orderId, 10.20d, size);
   }
 
   @Test

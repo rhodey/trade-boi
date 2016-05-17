@@ -22,15 +22,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TakeResultTest {
-
-  private Order newAsk(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.ASK, price, size);
-  }
-
-  private Order newBid(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.BID, price, size);
-  }
+public class TakeResultTest extends BaseTest {
 
   @Test
   public void testEmpty() {

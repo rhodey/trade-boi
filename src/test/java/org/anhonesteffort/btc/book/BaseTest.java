@@ -17,30 +17,24 @@
 
 package org.anhonesteffort.btc.book;
 
-import org.junit.Test;
+public class BaseTest {
 
-public class HeuristicOrderBookTest extends BaseTest {
+  private Integer nextOrderId = 0;
 
-  @Test
-  public void testEmptyBookSpread() {
-    final HeuristicLimitOrderBook BOOK = new HeuristicLimitOrderBook();
-    assert !BOOK.getSpread().isPresent();
+  protected Order newAsk(String orderId, double price, double size) {
+    return new Order(orderId, Order.Side.ASK, price, size);
   }
 
-  @Test
-  public void testSpread() {
-    final HeuristicLimitOrderBook BOOK = new HeuristicLimitOrderBook();
+  protected Order newAsk(double price, double size) {
+    return newAsk((nextOrderId++).toString(), price, size);
+  }
 
-    BOOK.add(newAsk(10, 20));
-    assert !BOOK.getSpread().isPresent();
+  protected Order newBid(String orderId, double price, double size) {
+    return new Order(orderId, Order.Side.BID, price, size);
+  }
 
-    BOOK.add(newBid(8, 20));
-    assert BOOK.getSpread().isPresent();
-    assert BOOK.getSpread().get() == 2;
-
-    BOOK.add(newBid(9, 20));
-    assert BOOK.getSpread().isPresent();
-    assert BOOK.getSpread().get() == 1;
+  protected Order newBid(double price, double size) {
+    return newBid((nextOrderId++).toString(), price, size);
   }
 
 }

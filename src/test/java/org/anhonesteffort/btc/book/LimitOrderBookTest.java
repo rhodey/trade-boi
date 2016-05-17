@@ -19,25 +19,7 @@ package org.anhonesteffort.btc.book;
 
 import org.junit.Test;
 
-public class LimitOrderBookTest {
-
-  private Integer nextOrderId = 0;
-
-  private Order newAsk(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.ASK, price, size);
-  }
-
-  private Order newAsk(double price, double size) {
-    return newAsk((nextOrderId++).toString(), price, size);
-  }
-
-  private Order newBid(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.BID, price, size);
-  }
-
-  private Order newBid(double price, double size) {
-    return newBid((nextOrderId++).toString(), price, size);
-  }
+public class LimitOrderBookTest extends BaseTest {
 
   @Test
   public void testAddRemoveAsk() {

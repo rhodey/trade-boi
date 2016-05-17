@@ -22,15 +22,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
-public class LimitQueueTest {
-
-  private Order newAsk(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.ASK, price, size);
-  }
-
-  private Order newBid(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.BID, price, size);
-  }
+public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testAddPeekRemoveAsks() {
