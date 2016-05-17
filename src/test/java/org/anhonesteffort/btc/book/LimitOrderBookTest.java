@@ -52,6 +52,38 @@ public class LimitOrderBookTest {
   }
 
   @Test
+  public void testAskWontTakeSmallerBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(8, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(9, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+  }
+
+  @Test
+  public void testBidWontTakeLargerAsk() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newAsk(8, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(7, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+  }
+
+  @Test
   public void testAskTakesOneSmallerSizeBid() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newBid(10, 5));
