@@ -84,7 +84,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testAskTakesOneSmallerSizeBid() {
+  public void testOneAskTakesOneSmallerSizeBid() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newBid(10, 5));
 
@@ -99,7 +99,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testAskTakesOneEqualSizeBid() {
+  public void testOneAskTakesOneEqualSizeBid() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newBid(10, 5));
 
@@ -114,7 +114,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testAskTakesOneLargerSizeBid() {
+  public void testOneAskTakesOneLargerSizeBid() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newBid(10, 15));
 
@@ -129,7 +129,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testBidTakesOneSmallerSizeAsk() {
+  public void testOneBidTakesOneSmallerSizeAsk() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newAsk(10, 5));
 
@@ -144,7 +144,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testBidTakesOneEqualSizeAsk() {
+  public void testOneBidTakesOneEqualSizeAsk() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newAsk(10, 5));
 
@@ -159,7 +159,7 @@ public class LimitOrderBookTest {
   }
 
   @Test
-  public void testBidTakesOneLargerSizeAsk() {
+  public void testOneBidTakesOneLargerSizeAsk() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
           TakeResult     RESULT = BOOK.add(newAsk(10, 5));
 
@@ -170,6 +170,69 @@ public class LimitOrderBookTest {
     RESULT = BOOK.add(newBid(10, 2));
     assert RESULT.getTakeSize()      == 2;
     assert RESULT.getTakeValue()     == 10 * 2;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testTwoAsksTakesOneSmallerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 20));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(10, 5));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newAsk(10, 25));
+    assert RESULT.getTakeSize()      == 15;
+    assert RESULT.getTakeValue()     == 10 * 15;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testTwoAsksTakesOneEqualSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 20));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(10, 12));
+    assert RESULT.getTakeSize()      == 12;
+    assert RESULT.getTakeValue()     == 10 * 12;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newAsk(10, 8));
+    assert RESULT.getTakeSize()      == 8;
+    assert RESULT.getTakeValue()     == 10 * 8;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testTwoAsksTakesOneLargerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 30));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(10, 12));
+    assert RESULT.getTakeSize()      == 12;
+    assert RESULT.getTakeValue()     == 10 * 12;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newAsk(10, 8));
+    assert RESULT.getTakeSize()      == 8;
+    assert RESULT.getTakeValue()     == 10 * 8;
     assert RESULT.getMakers().size() == 1;
   }
 
