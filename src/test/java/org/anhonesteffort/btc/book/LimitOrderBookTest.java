@@ -21,23 +21,65 @@ import org.junit.Test;
 
 public class LimitOrderBookTest {
 
-  private Order newAsk(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.ASK, price, size);
+  private Integer nextOrderId = 0;
+
+  private Order newAsk(double price, double size) {
+    return new Order((nextOrderId++).toString(), Order.Side.ASK, price, size);
   }
 
-  private Order newBid(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.BID, price, size);
+  private Order newBid(double price, double size) {
+    return new Order((nextOrderId++).toString(), Order.Side.BID, price, size);
   }
 
   @Test
-  public void test() {
-    final LimitOrderBook BOOK = new LimitOrderBook();
-          TakeResult     RESULT = BOOK.add(newAsk("00", 10, 10));
+  public void testAskTakesEmptyBook() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+    final TakeResult     RESULT = BOOK.add(newAsk(10, 10));
 
-    assert RESULT.getMakers().isEmpty();
     assert RESULT.getTakeSize()  == 0;
     assert RESULT.getTakeValue() == 0;
-    RESULT.clearMakerValueRemoved();
+    assert RESULT.getMakers().isEmpty();
+  }
+
+  @Test
+  public void testBidTakesEmptyBook() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+    final TakeResult     RESULT = BOOK.add(newBid(10, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+  }
+
+  @Test
+  public void testAskTakesOneBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(10, 20));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testBidTakesOneBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newAsk(10, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(10, 2));
+    assert RESULT.getTakeSize() == 2;
+
+    assert RESULT.getMakers().size() == 1;
+    assert RESULT.getTakeValue()     == 10 * 2;
   }
 
 }
