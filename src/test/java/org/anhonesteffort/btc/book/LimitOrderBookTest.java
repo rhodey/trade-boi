@@ -42,7 +42,7 @@ public class LimitOrderBookTest extends BaseTest {
   }
 
   @Test
-  public void testAskTakesEmptyBook() {
+  public void testAskWontTakeEmptyBook() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
     final TakeResult     RESULT = BOOK.add(newAsk(10, 10));
 
@@ -52,7 +52,7 @@ public class LimitOrderBookTest extends BaseTest {
   }
 
   @Test
-  public void testBidTakesEmptyBook() {
+  public void testBidWontTakeEmptyBook() {
     final LimitOrderBook BOOK   = new LimitOrderBook();
     final TakeResult     RESULT = BOOK.add(newBid(10, 10));
 
@@ -307,6 +307,46 @@ public class LimitOrderBookTest extends BaseTest {
     assert RESULT.getTakeSize()      == 6;
     assert RESULT.getTakeValue()     == 10 * 6;
     assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneAskTakesTwoSmallerSizeBids() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(12, 4));
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(8, 20));
+    assert RESULT.getTakeSize()      == 5 + 4;
+    assert RESULT.getTakeValue()     == (10 * 5) + (12 * 4);
+    assert RESULT.getMakers().size() == 2;
+  }
+
+  @Test
+  public void testOneAskTakesTwoEqualSizeBids() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 13));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(12, 7));
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newAsk(8, 13 + 7));
+    assert RESULT.getTakeSize()      == 13 + 7;
+    assert RESULT.getTakeValue()     == (10 * 13) + (12 * 7);
+    assert RESULT.getMakers().size() == 2;
   }
 
 }
