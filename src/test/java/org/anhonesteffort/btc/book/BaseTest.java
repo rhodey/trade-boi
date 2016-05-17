@@ -29,12 +29,28 @@ public class BaseTest {
     return newAsk((nextOrderId++).toString(), price, size);
   }
 
+  protected MarketOrder newMarketAsk(String orderId, double size, double funds) {
+    return new MarketOrder(orderId, Order.Side.ASK, size, funds);
+  }
+
+  protected MarketOrder newMarketAsk(double size, double funds) {
+    return newMarketAsk((nextOrderId++).toString(), size, funds);
+  }
+
   protected Order newBid(String orderId, double price, double size) {
     return new Order(orderId, Order.Side.BID, price, size);
   }
 
   protected Order newBid(double price, double size) {
     return newBid((nextOrderId++).toString(), price, size);
+  }
+
+  protected MarketOrder newMarketBid(String orderId, double size, double funds) {
+    return new MarketOrder(orderId, Order.Side.BID, size, funds);
+  }
+
+  protected MarketOrder newMarketBid(double size, double funds) {
+    return newMarketBid((nextOrderId++).toString(), size, funds);
   }
 
 }

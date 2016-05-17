@@ -27,6 +27,10 @@ public class LimitTest extends BaseTest {
     return newBid(orderId, 10.20d, size);
   }
 
+  private MarketOrder newMarketOrder(String orderId, double size, double funds) {
+    return newMarketBid(orderId, size, funds);
+  }
+
   @Test
   public void testGettersAndAddRemoveClearVolume() {
     final Limit LIMIT = new Limit(10.20);
@@ -56,6 +60,16 @@ public class LimitTest extends BaseTest {
 
     assert TAKER1.getSizeRemaining() == 10;
     assert MAKERS1.size()            ==  0;
+  }
+
+  @Test
+  public void testMarketTakerWithNoMaker() {
+    final Limit       LIMIT   = new Limit(10.20);
+    final MarketOrder TAKER1  = newMarketOrder("00", 10, 20);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
+
+    assert TAKER1.getVolumeRemoved() == 0;
+    assert MAKERS1.size()            == 0;
   }
 
   @Test
