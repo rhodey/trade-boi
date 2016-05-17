@@ -148,6 +148,51 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
+  public void testPartialMarketSizeTake() {
+    final Limit LIMIT = new Limit(10.20);
+
+    LIMIT.add(newOrder("00", 10));
+
+    final MarketOrder TAKER1  = newMarketOrder("01", 8, -1);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
+
+    assert TAKER1.getVolumeRemoved()         == 8;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 2;
+    assert LIMIT.getVolume()                 == 2;
+  }
+
+  @Test
+  public void testPartialMarketFundsTake() {
+    final Limit LIMIT = new Limit(1);
+
+    LIMIT.add(newOrder("00", 10));
+
+    final MarketOrder TAKER1  = newMarketOrder("01", -1, 8);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
+
+    assert TAKER1.getVolumeRemoved()         == 8;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 2;
+    assert LIMIT.getVolume()                 == 2;
+  }
+
+  @Test
+  public void testPartialMarketSizeFundsTake() {
+    final Limit LIMIT = new Limit(1);
+
+    LIMIT.add(newOrder("00", 10));
+
+    final MarketOrder TAKER1  = newMarketOrder("01", 10, 8);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
+
+    assert TAKER1.getVolumeRemoved()         == 8;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 2;
+    assert LIMIT.getVolume()                 == 2;
+  }
+
+  @Test
   public void testOneFullTakeOnePartialTake() {
     final Limit LIMIT = new Limit(10.20);
 
