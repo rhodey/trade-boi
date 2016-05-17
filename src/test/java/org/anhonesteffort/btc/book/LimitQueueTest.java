@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.book;
 
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 public class LimitQueueTest {
@@ -100,6 +101,85 @@ public class LimitQueueTest {
     assert BEST_BID.get().getVolume() == 2;
     assert BIDS.removeOrder(5d, "03").isPresent();
 
+    assert !BIDS.peek().isPresent();
+  }
+
+  @Test
+  public void testRemoveAskLiquidity() {
+    final LimitQueue ASKS = new LimitQueue(Order.Side.ASK);
+          Order      BID  = newBid("00", 15, 5);
+
+    ASKS.addOrder(newAsk("01", 10, 1));
+    ASKS.addOrder(newAsk("02", 10, 2));
+    ASKS.addOrder(newAsk("03", 20, 2));
+    ASKS.addOrder(newAsk("04",  5, 2));
+
+    List<Order> MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert BID.getRemaining()           == 3;
+    assert MAKERS.size()                == 1;
+    assert MAKERS.get(0).getPrice()     == 5;
+    assert MAKERS.get(0).getRemaining() == 0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert BID.getRemaining()           ==  0;
+    assert MAKERS.size()                ==  2;
+    assert MAKERS.get(0).getPrice()     == 10;
+    assert MAKERS.get(0).getRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()     == 10;
+    assert MAKERS.get(0).getRemaining() ==  0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert MAKERS.size() == 0;
+
+    BID    = newBid("05", 20, 3);
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert BID.getRemaining()           ==  1;
+    assert MAKERS.size()                ==  1;
+    assert MAKERS.get(0).getPrice()     == 20;
+    assert MAKERS.get(0).getRemaining() ==  0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert MAKERS.size() == 0;
+    assert !ASKS.peek().isPresent();
+  }
+
+  @Test
+  public void testRemoveBidLiquidity() {
+    final LimitQueue BIDS = new LimitQueue(Order.Side.BID);
+          Order      ASK  = newAsk("00", 15, 5);
+
+    BIDS.addOrder(newBid("01", 10, 1));
+    BIDS.addOrder(newBid("02", 10, 2));
+    BIDS.addOrder(newBid("03", 20, 2));
+    BIDS.addOrder(newBid("04",  5, 2));
+
+    List<Order> MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getRemaining()           ==  3;
+    assert MAKERS.size()                ==  1;
+    assert MAKERS.get(0).getPrice()     == 20;
+    assert MAKERS.get(0).getRemaining() ==  0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getRemaining() == 3;
+    assert MAKERS.size()      == 0;
+
+    ASK    = newBid("05", 5, 5);
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getRemaining()           ==  2;
+    assert MAKERS.size()                ==  2;
+    assert MAKERS.get(0).getPrice()     == 10;
+    assert MAKERS.get(0).getRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()     == 10;
+    assert MAKERS.get(0).getRemaining() ==  0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getRemaining()           == 0;
+    assert MAKERS.size()                == 1;
+    assert MAKERS.get(0).getPrice()     == 5;
+    assert MAKERS.get(0).getRemaining() == 0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert MAKERS.size() == 0;
     assert !BIDS.peek().isPresent();
   }
 
