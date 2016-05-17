@@ -21,12 +21,12 @@ public class Order {
 
   public enum Side { ASK, BID }
 
-  private String orderId;
-  private Side   side;
-  private double price;
-  private double size;
-  private double sizeRemaining;
-  private double valueRemoved;
+  protected String orderId;
+  protected Side   side;
+  protected double price;
+  protected double size;
+  protected double sizeRemaining;
+  protected double valueRemoved;
 
   public Order(String orderId, Side side, double price, double size) {
     init(orderId, side, price, size);
@@ -69,7 +69,7 @@ public class Order {
     this.valueRemoved = 0;
   }
 
-  protected void subtractSize(double size) {
+  protected void subtract(double size, double price) {
     sizeRemaining -= size;
   }
 

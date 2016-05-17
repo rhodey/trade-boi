@@ -35,7 +35,7 @@ public class LimitOrderBook {
       next = bidLimits.takeLiquidityFromBestLimit(ask);
     }
 
-    if (ask.getSizeRemaining() > 0) {
+    if (ask.getSizeRemaining() > 0 && !(ask instanceof MarketOrder)) {
       askLimits.addOrder(ask);
     }
 
@@ -51,11 +51,19 @@ public class LimitOrderBook {
       next = askLimits.takeLiquidityFromBestLimit(bid);
     }
 
-    if (bid.getSizeRemaining() > 0) {
+    if (bid.getSizeRemaining() > 0 && !(bid instanceof MarketOrder)) {
       bidLimits.addOrder(bid);
     }
 
     return makers;
+  }
+
+  private TakeResult resultFor(Order taker, List<Order> makers, double takeSize) {
+    if (!(taker instanceof MarketOrder)) {
+      return new TakeResult(makers, (takeSize - taker.getSizeRemaining()));
+    } else {
+      return new TakeResult(makers, ((MarketOrder) taker).getVolumeRemoved());
+    }
   }
 
   public TakeResult add(Order taker) {
@@ -68,7 +76,7 @@ public class LimitOrderBook {
       makers = processBid(taker);
     }
 
-    return new TakeResult(makers, (takeSize - taker.getSizeRemaining()));
+    return resultFor(taker, makers, takeSize);
   }
 
   public Optional<Order> remove(Order.Side side, Double price, String orderId) {

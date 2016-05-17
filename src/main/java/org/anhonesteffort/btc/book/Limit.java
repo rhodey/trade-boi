@@ -60,10 +60,18 @@ public class Limit {
     return order;
   }
 
+  private double getTakeSize(Order taker) {
+    if (taker instanceof MarketOrder) {
+      return ((MarketOrder) taker).getSizeRemainingFor(price);
+    } else {
+      return taker.getSizeRemaining();
+    }
+  }
+
   private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
     Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
     if (maker.isPresent()) {
-      double volumeRemoved = maker.get().takeSize(taker.getSizeRemaining());
+      double volumeRemoved = maker.get().takeSize(getTakeSize(taker));
 
       if (maker.get().getSizeRemaining() <= 0) {
         orderMap.remove(maker.get().getOrderId());
@@ -71,7 +79,7 @@ public class Limit {
       }
 
       volume -= volumeRemoved;
-      taker.subtractSize(volumeRemoved);
+      taker.subtract(volumeRemoved, maker.get().getPrice());
     }
     return maker;
   }
@@ -80,7 +88,7 @@ public class Limit {
     List<Order>     makers = new LinkedList<>();
     Optional<Order> maker  = null;
 
-    while (taker.getSizeRemaining() > 0) {
+    while (getTakeSize(taker) > 0) {
       maker = takeLiquidityFromNextMaker(taker);
       if (maker.isPresent()) {
         makers.add(maker.get());
