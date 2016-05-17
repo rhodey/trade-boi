@@ -71,7 +71,7 @@ public class Limit {
       }
 
       volume -= volumeRemoved;
-      taker.takeSize(volumeRemoved);
+      taker.subtractSize(volumeRemoved);
     }
     return maker;
   }

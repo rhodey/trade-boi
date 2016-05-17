@@ -30,12 +30,21 @@ public class OrderTest {
     assert ORDER.getPrice()         == 10;
     assert ORDER.getSize()          == 20;
     assert ORDER.getSizeRemaining() == 20;
+    assert ORDER.getValueRemoved()  == 0;
 
     assert ORDER.takeSize(5)        == 5;
     assert ORDER.getSizeRemaining() == 15;
+    assert ORDER.getValueRemoved()  == 5 * ORDER.getPrice();
+
+    ORDER.clearValueRemoved();
+    assert ORDER.getValueRemoved() == 0;
 
     assert ORDER.takeSize(20)       == 15;
     assert ORDER.getSizeRemaining() == 0;
+    assert ORDER.getValueRemoved()  == 15 * ORDER.getPrice();
+
+    ORDER.clearValueRemoved();
+    assert ORDER.getValueRemoved() == 0;
   }
 
 }

@@ -26,6 +26,7 @@ public class Order {
   private double price;
   private double size;
   private double sizeRemaining;
+  private double valueRemoved;
 
   public Order(String orderId, Side side, double price, double size) {
     init(orderId, side, price, size);
@@ -37,6 +38,7 @@ public class Order {
     this.price         = price;
     this.size          = size;
     this.sizeRemaining = size;
+    this.valueRemoved  = 0;
   }
 
   public String getOrderId() {
@@ -59,9 +61,22 @@ public class Order {
     return sizeRemaining;
   }
 
+  public double getValueRemoved() {
+    return valueRemoved;
+  }
+
+  public void clearValueRemoved() {
+    this.valueRemoved = 0;
+  }
+
+  protected void subtractSize(double size) {
+    sizeRemaining -= size;
+  }
+
   public double takeSize(double size) {
-    double taken  = Math.min(size, sizeRemaining);
-    sizeRemaining = sizeRemaining - taken;
+    double taken   = Math.min(size, sizeRemaining);
+    sizeRemaining  = sizeRemaining - taken;
+    valueRemoved  += price * taken;
     return taken;
   }
 
