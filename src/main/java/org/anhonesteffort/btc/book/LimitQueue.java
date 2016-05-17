@@ -60,18 +60,18 @@ public class LimitQueue {
   }
 
   public Optional<Order> removeOrder(Double price, String orderId) {
+    Optional<Order> order = Optional.empty();
     Optional<Limit> limit = Optional.ofNullable(map.get(price));
-    if (limit.isPresent()) {
-      Optional<Order> order = limit.get().remove(orderId);
 
+    if (limit.isPresent()) {
+      order = limit.get().remove(orderId);
       if (order.isPresent() && limit.get().getVolume() <= 0) {
         map.remove(price);
         queue.remove(limit.get());
       }
-
-      return order;
     }
-    return Optional.empty();
+
+    return order;
   }
 
   private boolean isTaken(Limit maker, Order taker) {
