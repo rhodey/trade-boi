@@ -27,37 +27,35 @@ public class LimitOrderBook {
   private final LimitQueue bidLimits = new LimitQueue(Order.Side.BID);
 
   private List<Order> processAsk(Order ask) {
-    Optional<Limit> bestBid = bidLimits.peek();
-    List<Order>     makers  = null;
+    List<Order> makers = new LinkedList<>();
+    List<Order> next   = bidLimits.takeLiquidityFromBestLimit(ask);
 
-    if (bestBid.isPresent() && bestBid.get().getPrice() >= ask.getPrice()) {
-      makers = bestBid.get().takeLiquidity(ask);
+    while (ask.getRemaining() > 0 && !next.isEmpty()) {
+      makers.addAll(next);
+      next = bidLimits.takeLiquidityFromBestLimit(ask);
     }
 
     if (ask.getRemaining() > 0) {
-      // todo: keep going till no makers for price
       askLimits.addOrder(ask);
-      return makers;
-    } else {
-      return new LinkedList<>();
     }
+
+    return makers;
   }
 
   private List<Order> processBid(Order bid) {
-    Optional<Limit> bestAsk = askLimits.peek();
-    List<Order>     makers  = null;
+    List<Order> makers = new LinkedList<>();
+    List<Order> next   = askLimits.takeLiquidityFromBestLimit(bid);
 
-    if (bestAsk.isPresent() && bestAsk.get().getPrice() <= bid.getPrice()) {
-      makers = bestAsk.get().takeLiquidity(bid);
+    while (bid.getRemaining() > 0 && !next.isEmpty()) {
+      makers.addAll(next);
+      next = askLimits.takeLiquidityFromBestLimit(bid);
     }
 
     if (bid.getRemaining() > 0) {
-      // todo: keep going till no makers for price
       bidLimits.addOrder(bid);
-      return makers;
-    } else {
-      return new LinkedList<>();
     }
+
+    return makers;
   }
 
   public List<Order> add(Order order) {

@@ -19,6 +19,8 @@ package org.anhonesteffort.btc.book;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -26,10 +28,14 @@ import java.util.Queue;
 
 public class LimitQueue {
 
-  private final Map<Double, Limit> map = new HashMap<>();
+  private static final List<Order>        EMPTY = new LinkedList<>();
+  private        final Map<Double, Limit> map   = new HashMap<>();
+
   private final Queue<Limit> queue;
+  private final Order.Side   side;
 
   public LimitQueue(Order.Side side) {
+    this.side = side;
     if (side.equals(Order.Side.ASK)) {
       queue = new PriorityQueue<>(new AskSorter());
     } else {
@@ -55,7 +61,6 @@ public class LimitQueue {
 
   public Optional<Order> removeOrder(Double price, String orderId) {
     Optional<Limit> limit = Optional.ofNullable(map.get(price));
-
     if (limit.isPresent()) {
       Optional<Order> order = limit.get().remove(orderId);
 
@@ -66,8 +71,31 @@ public class LimitQueue {
 
       return order;
     }
-
     return Optional.empty();
+  }
+
+  private boolean isTaken(Limit maker, Order taker) {
+    if (this.side.equals(Order.Side.ASK)) {
+      return maker.getPrice() <= taker.getPrice();
+    } else {
+      return maker.getPrice() >= taker.getPrice();
+    }
+  }
+
+  public List<Order> takeLiquidityFromBestLimit(Order taker) {
+    Optional<Limit> maker = peek();
+    if (maker.isPresent() && isTaken(maker.get(), taker)) {
+      List<Order> makers = maker.get().takeLiquidity(taker);
+
+      if (maker.get().getVolume() <= 0) {
+        map.remove(maker.get().getPrice());
+        queue.remove();
+      }
+
+      return makers;
+    } else {
+      return EMPTY;
+    }
   }
 
   private static class AskSorter implements Comparator<Limit> {

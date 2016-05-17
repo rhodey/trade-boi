@@ -62,7 +62,6 @@ public class Limit {
 
   private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
     Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
-
     if (maker.isPresent()) {
       double volumeRemoved = maker.get().takeSize(taker.getRemaining());
 
@@ -74,7 +73,6 @@ public class Limit {
       volume -= volumeRemoved;
       taker.takeSize(volumeRemoved);
     }
-
     return maker;
   }
 
