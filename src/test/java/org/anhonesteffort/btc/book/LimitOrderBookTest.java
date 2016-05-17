@@ -34,7 +34,7 @@ public class LimitOrderBookTest extends BaseTest {
   }
 
   @Test
-  public void testAddRemoveBid() {
+  public void testAddRemoveClearBid() {
     final LimitOrderBook BOOK = new LimitOrderBook();
 
     BOOK.add(newBid("00", 10, 20));
@@ -63,6 +63,34 @@ public class LimitOrderBookTest extends BaseTest {
     assert RESULT.getTakeSize()  == 0;
     assert RESULT.getTakeValue() == 0;
     assert RESULT.getMakers().isEmpty();
+  }
+
+  @Test
+  public void testMarketAskWontTakeEmptyBook() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+    final MarketOrder    TAKER  = newMarketAsk("00", 10, 20);
+    final TakeResult     RESULT = BOOK.add(TAKER);
+
+    assert RESULT.getTakeSize()      == 0;
+    assert RESULT.getTakeValue()     == 0;
+    assert RESULT.getMakers().size() == 0;
+
+    assert !BOOK.remove(Order.Side.ASK, 10d, "00").isPresent();
+    assert !BOOK.remove(Order.Side.ASK, 20d, "00").isPresent();
+  }
+
+  @Test
+  public void testMarketBidWontTakeEmptyBook() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+    final MarketOrder    TAKER  = newMarketBid("00", 10, 20);
+    final TakeResult     RESULT = BOOK.add(TAKER);
+
+    assert RESULT.getTakeSize()      == 0;
+    assert RESULT.getTakeValue()     == 0;
+    assert RESULT.getMakers().size() == 0;
+
+    assert !BOOK.remove(Order.Side.BID, 10d, "00").isPresent();
+    assert !BOOK.remove(Order.Side.BID, 20d, "00").isPresent();
   }
 
   @Test
@@ -184,6 +212,96 @@ public class LimitOrderBookTest extends BaseTest {
     RESULT = BOOK.add(newBid(10, 2));
     assert RESULT.getTakeSize()      == 2;
     assert RESULT.getTakeValue()     == 10 * 2;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketSizeAskTakesOneSmallerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(10, -1));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketSizeAskTakesOneEqualSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(5, -1));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketSizeAskTakesOneLargerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(10, 8));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(5, -1));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketFundsAskTakesOneSmallerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(1, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(-1, 10));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketFundsAskTakesOneEqualSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(1, 5));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(-1, 5));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 5;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testOneMarketFundsAskTakesOneLargerSizeBid() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newBid(1, 10));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newMarketAsk(-1, 5));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 5;
     assert RESULT.getMakers().size() == 1;
   }
 
