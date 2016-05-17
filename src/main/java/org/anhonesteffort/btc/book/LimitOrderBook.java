@@ -58,12 +58,17 @@ public class LimitOrderBook {
     return makers;
   }
 
-  public List<Order> add(Order order) {
-    if (order.getSide().equals(Order.Side.ASK)) {
-      return processAsk(order);
+  public TakeResult add(Order taker) {
+    double      takeSize = taker.getSizeRemaining();
+    List<Order> makers   = null;
+
+    if (taker.getSide().equals(Order.Side.ASK)) {
+      makers = processAsk(taker);
     } else {
-      return processBid(order);
+      makers = processBid(taker);
     }
+
+    return new TakeResult(makers, (takeSize - taker.getSizeRemaining()));
   }
 
   public Optional<Order> remove(Order.Side side, Double price, String orderId) {
