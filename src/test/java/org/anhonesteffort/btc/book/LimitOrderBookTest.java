@@ -23,12 +23,40 @@ public class LimitOrderBookTest {
 
   private Integer nextOrderId = 0;
 
+  private Order newAsk(String orderId, double price, double size) {
+    return new Order(orderId, Order.Side.ASK, price, size);
+  }
+
   private Order newAsk(double price, double size) {
-    return new Order((nextOrderId++).toString(), Order.Side.ASK, price, size);
+    return newAsk((nextOrderId++).toString(), price, size);
+  }
+
+  private Order newBid(String orderId, double price, double size) {
+    return new Order(orderId, Order.Side.BID, price, size);
   }
 
   private Order newBid(double price, double size) {
-    return new Order((nextOrderId++).toString(), Order.Side.BID, price, size);
+    return newBid((nextOrderId++).toString(), price, size);
+  }
+
+  @Test
+  public void testAddRemoveAsk() {
+    final LimitOrderBook BOOK = new LimitOrderBook();
+
+    BOOK.add(newAsk("00", 10, 20));
+
+    assert BOOK.remove(Order.Side.ASK, 10d, "00").isPresent();
+    assert !BOOK.remove(Order.Side.ASK, 10d, "00").isPresent();
+  }
+
+  @Test
+  public void testAddRemoveBid() {
+    final LimitOrderBook BOOK = new LimitOrderBook();
+
+    BOOK.add(newBid("00", 10, 20));
+
+    assert BOOK.remove(Order.Side.BID, 10d, "00").isPresent();
+    assert !BOOK.remove(Order.Side.BID, 10d, "00").isPresent();
   }
 
   @Test
