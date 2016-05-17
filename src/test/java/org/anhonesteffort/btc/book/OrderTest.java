@@ -27,15 +27,15 @@ public class OrderTest {
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
-    assert ORDER.getPrice()     == 10;
-    assert ORDER.getSize()      == 20;
-    assert ORDER.getRemaining() == 20;
+    assert ORDER.getPrice()         == 10;
+    assert ORDER.getSize()          == 20;
+    assert ORDER.getSizeRemaining() == 20;
 
-    assert ORDER.takeSize(5)    == 5;
-    assert ORDER.getRemaining() == 15;
+    assert ORDER.takeSize(5)        == 5;
+    assert ORDER.getSizeRemaining() == 15;
 
-    assert ORDER.takeSize(20)   == 15;
-    assert ORDER.getRemaining() == 0;
+    assert ORDER.takeSize(20)       == 15;
+    assert ORDER.getSizeRemaining() == 0;
   }
 
 }

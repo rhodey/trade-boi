@@ -115,28 +115,28 @@ public class LimitQueueTest {
     ASKS.addOrder(newAsk("04",  5, 2));
 
     List<Order> MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
-    assert BID.getRemaining()           == 3;
-    assert MAKERS.size()                == 1;
-    assert MAKERS.get(0).getPrice()     == 5;
-    assert MAKERS.get(0).getRemaining() == 0;
+    assert BID.getSizeRemaining()           == 3;
+    assert MAKERS.size()                    == 1;
+    assert MAKERS.get(0).getPrice()         == 5;
+    assert MAKERS.get(0).getSizeRemaining() == 0;
 
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
-    assert BID.getRemaining()           ==  0;
-    assert MAKERS.size()                ==  2;
-    assert MAKERS.get(0).getPrice()     == 10;
-    assert MAKERS.get(0).getRemaining() ==  0;
-    assert MAKERS.get(0).getPrice()     == 10;
-    assert MAKERS.get(0).getRemaining() ==  0;
+    assert BID.getSizeRemaining()           ==  0;
+    assert MAKERS.size()                    ==  2;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
 
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert MAKERS.size() == 0;
 
     BID    = newBid("05", 20, 3);
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
-    assert BID.getRemaining()           ==  1;
-    assert MAKERS.size()                ==  1;
-    assert MAKERS.get(0).getPrice()     == 20;
-    assert MAKERS.get(0).getRemaining() ==  0;
+    assert BID.getSizeRemaining()           ==  1;
+    assert MAKERS.size()                    ==  1;
+    assert MAKERS.get(0).getPrice()         == 20;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
 
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert MAKERS.size() == 0;
@@ -154,29 +154,29 @@ public class LimitQueueTest {
     BIDS.addOrder(newBid("04",  5, 2));
 
     List<Order> MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
-    assert ASK.getRemaining()           ==  3;
-    assert MAKERS.size()                ==  1;
-    assert MAKERS.get(0).getPrice()     == 20;
-    assert MAKERS.get(0).getRemaining() ==  0;
+    assert ASK.getSizeRemaining()           ==  3;
+    assert MAKERS.size()                    ==  1;
+    assert MAKERS.get(0).getPrice()         == 20;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
 
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
-    assert ASK.getRemaining() == 3;
-    assert MAKERS.size()      == 0;
+    assert ASK.getSizeRemaining() == 3;
+    assert MAKERS.size()          == 0;
 
     ASK    = newBid("05", 5, 5);
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
-    assert ASK.getRemaining()           ==  2;
-    assert MAKERS.size()                ==  2;
-    assert MAKERS.get(0).getPrice()     == 10;
-    assert MAKERS.get(0).getRemaining() ==  0;
-    assert MAKERS.get(0).getPrice()     == 10;
-    assert MAKERS.get(0).getRemaining() ==  0;
+    assert ASK.getSizeRemaining()           ==  2;
+    assert MAKERS.size()                    ==  2;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
 
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
-    assert ASK.getRemaining()           == 0;
-    assert MAKERS.size()                == 1;
-    assert MAKERS.get(0).getPrice()     == 5;
-    assert MAKERS.get(0).getRemaining() == 0;
+    assert ASK.getSizeRemaining()           == 0;
+    assert MAKERS.size()                    == 1;
+    assert MAKERS.get(0).getPrice()         == 5;
+    assert MAKERS.get(0).getSizeRemaining() == 0;
 
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
     assert MAKERS.size() == 0;

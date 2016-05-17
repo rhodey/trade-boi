@@ -30,12 +30,12 @@ public class LimitOrderBook {
     List<Order> makers = new LinkedList<>();
     List<Order> next   = bidLimits.takeLiquidityFromBestLimit(ask);
 
-    while (ask.getRemaining() > 0 && !next.isEmpty()) {
+    while (ask.getSizeRemaining() > 0 && !next.isEmpty()) {
       makers.addAll(next);
       next = bidLimits.takeLiquidityFromBestLimit(ask);
     }
 
-    if (ask.getRemaining() > 0) {
+    if (ask.getSizeRemaining() > 0) {
       askLimits.addOrder(ask);
     }
 
@@ -46,12 +46,12 @@ public class LimitOrderBook {
     List<Order> makers = new LinkedList<>();
     List<Order> next   = askLimits.takeLiquidityFromBestLimit(bid);
 
-    while (bid.getRemaining() > 0 && !next.isEmpty()) {
+    while (bid.getSizeRemaining() > 0 && !next.isEmpty()) {
       makers.addAll(next);
       next = askLimits.takeLiquidityFromBestLimit(bid);
     }
 
-    if (bid.getRemaining() > 0) {
+    if (bid.getSizeRemaining() > 0) {
       bidLimits.addOrder(bid);
     }
 

@@ -25,18 +25,18 @@ public class Order {
   private Side   side;
   private double price;
   private double size;
-  private double remaining;
+  private double sizeRemaining;
 
   public Order(String orderId, Side side, double price, double size) {
     init(orderId, side, price, size);
   }
 
   public void init(String orderId, Side side, double price, double size) {
-    this.orderId   = orderId;
-    this.side      = side;
-    this.price     = price;
-    this.size      = size;
-    this.remaining = size;
+    this.orderId       = orderId;
+    this.side          = side;
+    this.price         = price;
+    this.size          = size;
+    this.sizeRemaining = size;
   }
 
   public String getOrderId() {
@@ -55,13 +55,13 @@ public class Order {
     return size;
   }
 
-  public double getRemaining() {
-    return remaining;
+  public double getSizeRemaining() {
+    return sizeRemaining;
   }
 
   public double takeSize(double size) {
-    double taken = Math.min(size, remaining);
-    remaining    = remaining - taken;
+    double taken  = Math.min(size, sizeRemaining);
+    sizeRemaining = sizeRemaining - taken;
     return taken;
   }
 

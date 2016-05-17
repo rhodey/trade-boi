@@ -48,14 +48,14 @@ public class Limit {
   public void add(Order order) {
     orderMap.put(order.getOrderId(), order);
     orderQueue.add(order);
-    volume += order.getRemaining();
+    volume += order.getSizeRemaining();
   }
 
   public Optional<Order> remove(String orderId) {
     Optional<Order> order = Optional.ofNullable(orderMap.remove(orderId));
     if (order.isPresent()) {
       orderQueue.remove(order.get());
-      volume -= order.get().getRemaining();
+      volume -= order.get().getSizeRemaining();
     }
     return order;
   }
@@ -63,9 +63,9 @@ public class Limit {
   private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
     Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
     if (maker.isPresent()) {
-      double volumeRemoved = maker.get().takeSize(taker.getRemaining());
+      double volumeRemoved = maker.get().takeSize(taker.getSizeRemaining());
 
-      if (maker.get().getRemaining() <= 0) {
+      if (maker.get().getSizeRemaining() <= 0) {
         orderMap.remove(maker.get().getOrderId());
         orderQueue.remove();
       }
@@ -80,7 +80,7 @@ public class Limit {
     List<Order>     makers = new LinkedList<>();
     Optional<Order> maker  = null;
 
-    while (taker.getRemaining() > 0) {
+    while (taker.getSizeRemaining() > 0) {
       maker = takeLiquidityFromNextMaker(taker);
       if (maker.isPresent()) {
         makers.add(maker.get());

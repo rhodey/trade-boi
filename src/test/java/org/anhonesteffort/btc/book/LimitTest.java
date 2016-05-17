@@ -51,8 +51,8 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("00", 10);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining() == 10;
-    assert MAKERS1.size()        == 0;
+    assert TAKER1.getSizeRemaining() == 10;
+    assert MAKERS1.size()            ==  0;
   }
 
   @Test
@@ -64,10 +64,10 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("01", 10);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining()         == 0;
-    assert MAKERS1.size()                == 1;
-    assert MAKERS1.get(0).getRemaining() == 0;
-    assert LIMIT.getVolume()             == 0;
+    assert TAKER1.getSizeRemaining()         == 0;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 0;
+    assert LIMIT.getVolume()                 == 0;
   }
 
   @Test
@@ -79,10 +79,10 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("01", 8);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining()         == 0;
-    assert MAKERS1.size()                == 1;
-    assert MAKERS1.get(0).getRemaining() == 2;
-    assert LIMIT.getVolume()             == 2;
+    assert TAKER1.getSizeRemaining()         == 0;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 2;
+    assert LIMIT.getVolume()                 == 2;
   }
 
   @Test
@@ -94,18 +94,18 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("01", 8);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining()         == 0;
-    assert MAKERS1.size()                == 1;
-    assert MAKERS1.get(0).getRemaining() == 2;
-    assert LIMIT.getVolume()             == 2;
+    assert TAKER1.getSizeRemaining()         == 0;
+    assert MAKERS1.size()                    == 1;
+    assert MAKERS1.get(0).getSizeRemaining() == 2;
+    assert LIMIT.getVolume()                 == 2;
 
     final Order       TAKER2  = newOrder("02", 4);
     final List<Order> MAKERS2 = LIMIT.takeLiquidity(TAKER2);
 
-    assert TAKER2.getRemaining()         == 2;
-    assert MAKERS2.size()                == 1;
-    assert MAKERS2.get(0).getRemaining() == 0;
-    assert LIMIT.getVolume()             == 0;
+    assert TAKER2.getSizeRemaining()         == 2;
+    assert MAKERS2.size()                    == 1;
+    assert MAKERS2.get(0).getSizeRemaining() == 0;
+    assert LIMIT.getVolume()                 == 0;
   }
 
   @Test
@@ -118,11 +118,11 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("02", 40);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining()         == 0;
-    assert MAKERS1.size()                == 2;
-    assert MAKERS1.get(0).getRemaining() == 0;
-    assert MAKERS1.get(1).getRemaining() == 0;
-    assert LIMIT.getVolume()             == 0;
+    assert TAKER1.getSizeRemaining()         == 0;
+    assert MAKERS1.size()                    == 2;
+    assert MAKERS1.get(0).getSizeRemaining() == 0;
+    assert MAKERS1.get(1).getSizeRemaining() == 0;
+    assert LIMIT.getVolume()                 == 0;
   }
 
   @Test
@@ -135,11 +135,11 @@ public class LimitTest {
     final Order       TAKER1  = newOrder("02", 30);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert TAKER1.getRemaining()         ==  0;
-    assert MAKERS1.size()                ==  2;
-    assert MAKERS1.get(0).getRemaining() ==  0;
-    assert MAKERS1.get(1).getRemaining() == 10;
-    assert LIMIT.getVolume()             == 10;
+    assert TAKER1.getSizeRemaining()         ==  0;
+    assert MAKERS1.size()                    ==  2;
+    assert MAKERS1.get(0).getSizeRemaining() ==  0;
+    assert MAKERS1.get(1).getSizeRemaining() == 10;
+    assert LIMIT.getVolume()                 == 10;
   }
 
 }
