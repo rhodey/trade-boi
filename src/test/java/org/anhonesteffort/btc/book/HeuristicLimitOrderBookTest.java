@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.book;
 
 import org.junit.Test;
 
-public class HeuristicOrderBookTest extends BaseTest {
+public class HeuristicLimitOrderBookTest extends BaseTest {
 
   @Test
   public void testEmptyBookSpread() {
