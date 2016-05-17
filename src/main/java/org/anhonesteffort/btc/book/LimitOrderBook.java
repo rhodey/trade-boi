@@ -45,6 +45,28 @@ public class LimitOrderBook {
     limit.add(ask);
   }
 
+  private void addBid(Order bid) {
+    Limit limit = bidLimitMap.get(bid.getPrice());
+
+    if (limit == null) {
+      limit = new Limit(bid.getPrice());
+      bidLimitMap.put(bid.getPrice(), limit);
+      bidLimitQueue.add(limit);
+    }
+
+    limit.add(bid);
+  }
+
+  private boolean removeAsk(Double price, String orderId) {
+    Limit limit = askLimitMap.get(price);
+    return limit != null && limit.remove(orderId).isPresent();
+  }
+
+  private boolean removeBid(Double price, String orderId) {
+    Limit limit = bidLimitMap.get(price);
+    return limit != null && limit.remove(orderId).isPresent();
+  }
+
   private List<Order> processAsk(Order ask) {
     Optional<Limit> bestBid = Optional.ofNullable(bidLimitQueue.peek());
     List<Order>     makers  = null;
@@ -62,19 +84,7 @@ public class LimitOrderBook {
     }
   }
 
-  private void addBid(Order bid) {
-    Limit limit = bidLimitMap.get(bid.getPrice());
-
-    if (limit == null) {
-      limit = new Limit(bid.getPrice());
-      bidLimitMap.put(bid.getPrice(), limit);
-      bidLimitQueue.add(limit);
-    }
-
-    limit.add(bid);
-  }
-
-  public List<Order> processBid(Order bid) {
+  private List<Order> processBid(Order bid) {
     Optional<Limit> bestAsk = Optional.ofNullable(askLimitQueue.peek());
     List<Order>     makers  = null;
 
@@ -91,11 +101,19 @@ public class LimitOrderBook {
     }
   }
 
-  public void add(Order order) {
+  public List<Order> add(Order order) {
     if (order.getSide().equals(Order.Side.ASK)) {
-      processAsk(order);
+      return processAsk(order);
     } else {
-      processBid(order);
+      return processBid(order);
+    }
+  }
+
+  public boolean remove(Order order) {
+    if (order.getSide().equals(Order.Side.ASK)) {
+      return removeAsk(order.getPrice(), order.getOrderId());
+    } else {
+      return removeBid(order.getPrice(), order.getOrderId());
     }
   }
 
