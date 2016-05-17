@@ -19,6 +19,8 @@ package org.anhonesteffort.btc.book;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -31,49 +33,61 @@ public class LimitOrderBook {
   private final Map<Double, Limit> askLimitMap   = new HashMap<>();
   private final Map<Double, Limit> bidLimitMap   = new HashMap<>();
 
-  private void addAsk(Order order) {
-    Limit limit = askLimitMap.get(order.getPrice());
+  private void addAsk(Order ask) {
+    Limit limit = askLimitMap.get(ask.getPrice());
 
     if (limit == null) {
-      limit = new Limit(order.getPrice());
-      askLimitMap.put(order.getPrice(), limit);
+      limit = new Limit(ask.getPrice());
+      askLimitMap.put(ask.getPrice(), limit);
       askLimitQueue.add(limit);
     }
 
-    limit.add(order);
+    limit.add(ask);
   }
 
-  private Limit.FillResult processAsk(Order ask) {
+  private List<Order> processAsk(Order ask) {
     Optional<Limit> bestBid = Optional.ofNullable(bidLimitQueue.peek());
+    List<Order>     makers  = null;
 
     if (bestBid.isPresent() && bestBid.get().getPrice() >= ask.getPrice()) {
-      return bestBid.get().fillVolume(ask.getSize());
-    } else {
+      makers = bestBid.get().takeLiquidity(ask);
+    }
+
+    if (ask.getRemaining() > 0) {
+      // todo: keep going till no makers for price
       addAsk(ask);
-      return Limit.FillResult.EMPTY;
+      return makers;
+    } else {
+      return new LinkedList<>();
     }
   }
 
-  private void addBid(Order order) {
-    Limit limit = bidLimitMap.get(order.getPrice());
+  private void addBid(Order bid) {
+    Limit limit = bidLimitMap.get(bid.getPrice());
 
     if (limit == null) {
-      limit = new Limit(order.getPrice());
-      bidLimitMap.put(order.getPrice(), limit);
+      limit = new Limit(bid.getPrice());
+      bidLimitMap.put(bid.getPrice(), limit);
       bidLimitQueue.add(limit);
     }
 
-    limit.add(order);
+    limit.add(bid);
   }
 
-  public Limit.FillResult processBid(Order bid) {
+  public List<Order> processBid(Order bid) {
     Optional<Limit> bestAsk = Optional.ofNullable(askLimitQueue.peek());
+    List<Order>     makers  = null;
 
     if (bestAsk.isPresent() && bestAsk.get().getPrice() <= bid.getPrice()) {
-      return bestAsk.get().fillVolume(bid.getSize());
-    } else {
+      makers = bestAsk.get().takeLiquidity(bid);
+    }
+
+    if (bid.getRemaining() > 0) {
+      // todo: keep going till no makers for price
       addBid(bid);
-      return Limit.FillResult.EMPTY;
+      return makers;
+    } else {
+      return new LinkedList<>();
     }
   }
 

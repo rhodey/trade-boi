@@ -60,71 +60,38 @@ public class Limit {
     return order;
   }
 
-  private VolumeResult removeVolume(double target) {
-    Optional<Order> next = Optional.ofNullable(orderQueue.peek());
+  private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
+    Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
 
-    if (!next.isPresent()) {
-      return new VolumeResult(next, 0);
-    } else {
-      double removed = next.get().takeSize(target);
+    if (maker.isPresent()) {
+      double volumeRemoved = maker.get().takeSize(taker.getRemaining());
 
-      if (next.get().getRemaining() <= 0) {
-        orderMap.remove(next.get().getOrderId());
+      if (maker.get().getRemaining() <= 0) {
+        orderMap.remove(maker.get().getOrderId());
         orderQueue.remove();
       }
 
-      volume -= removed;
-      return new VolumeResult(next, removed);
+      volume -= volumeRemoved;
+      taker.takeSize(volumeRemoved);
     }
+
+    return maker;
   }
 
-  public FillResult fillVolume(double targetVolume) {
-    List<Order>  fills        = new LinkedList<>();
-    double       filledVolume = 0;
-    VolumeResult result       = null;
+  public List<Order> takeLiquidity(Order taker) {
+    List<Order>     makers = new LinkedList<>();
+    Optional<Order> maker  = null;
 
-    while (targetVolume > 0) {
-      result        = removeVolume(targetVolume);
-      targetVolume -= result.volume;
-      filledVolume += result.volume;
-
-      if (result.order.isPresent()) {
-        fills.add(result.order.get());
+    while (taker.getRemaining() > 0) {
+      maker = takeLiquidityFromNextMaker(taker);
+      if (maker.isPresent()) {
+        makers.add(maker.get());
       } else {
         break;
       }
     }
 
-    return new FillResult(fills, filledVolume);
-  }
-
-  private static class VolumeResult {
-    private final Optional<Order> order;
-    private final double volume;
-
-    public VolumeResult(Optional<Order> order, double volume) {
-      this.order  = order;
-      this.volume = volume;
-    }
-  }
-
-  public static class FillResult {
-    public static final FillResult EMPTY = new FillResult(new LinkedList<>(), 0);
-    private final List<Order> fills;
-    private final double volume;
-
-    public FillResult(List<Order> fills, double volume) {
-      this.fills  = fills;
-      this.volume = volume;
-    }
-
-    public List<Order> getFills() {
-      return fills;
-    }
-
-    public double getVolume() {
-      return volume;
-    }
+    return makers;
   }
 
 }

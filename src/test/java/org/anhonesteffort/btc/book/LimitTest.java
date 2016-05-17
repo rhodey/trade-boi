@@ -19,6 +19,8 @@ package org.anhonesteffort.btc.book;
 
 import org.junit.Test;
 
+import java.util.List;
+
 public class LimitTest {
 
   private Order newOrder(String orderId, double size) {
@@ -26,7 +28,7 @@ public class LimitTest {
   }
 
   @Test
-  public void testAddRemoveVolume() {
+  public void testGettersAndAddRemoveVolume() {
     final Limit LIMIT = new Limit(10.20);
 
     assert LIMIT.getPrice()  == 10.20;
@@ -44,93 +46,100 @@ public class LimitTest {
   }
 
   @Test
-  public void testFillVolumeEmptyLimit() {
-    final Limit            LIMIT = new Limit(10.20);
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(10);
+  public void testTakerWithNoMaker() {
+    final Limit       LIMIT   = new Limit(10.20);
+    final Order       TAKER1  = newOrder("00", 10);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert FILL1.getVolume()       == 0;
-    assert FILL1.getFills().size() == 0;
+    assert TAKER1.getRemaining() == 10;
+    assert MAKERS1.size()        == 0;
   }
 
   @Test
-  public void testFillVolumeOneFullFill() {
+  public void testOneFullMakeOneFullTake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
 
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(10);
+    final Order       TAKER1  = newOrder("01", 10);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert FILL1.getVolume()                      == 10;
-    assert FILL1.getFills().size()                ==  1;
-    assert FILL1.getFills().get(0).getRemaining() ==  0;
-    assert LIMIT.getVolume()                      ==  0;
+    assert TAKER1.getRemaining()         == 0;
+    assert MAKERS1.size()                == 1;
+    assert MAKERS1.get(0).getRemaining() == 0;
+    assert LIMIT.getVolume()             == 0;
   }
 
   @Test
-  public void testFillVolumeOnePartialFill() {
+  public void testPartialTake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
 
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(8);
+    final Order       TAKER1  = newOrder("01", 8);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert FILL1.getVolume()                      == 8;
-    assert FILL1.getFills().size()                == 1;
-    assert FILL1.getFills().get(0).getRemaining() == 2;
-    assert LIMIT.getVolume()                      == 2;
+    assert TAKER1.getRemaining()         == 0;
+    assert MAKERS1.size()                == 1;
+    assert MAKERS1.get(0).getRemaining() == 2;
+    assert LIMIT.getVolume()             == 2;
   }
 
   @Test
-  public void testFillVolumeTwoPartialFills() {
+  public void testOneFullTakeOnePartialTake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
 
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(8);
+    final Order       TAKER1  = newOrder("01", 8);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert FILL1.getVolume()                      == 8;
-    assert FILL1.getFills().size()                == 1;
-    assert FILL1.getFills().get(0).getRemaining() == 2;
-    assert LIMIT.getVolume()                      == 2;
+    assert TAKER1.getRemaining()         == 0;
+    assert MAKERS1.size()                == 1;
+    assert MAKERS1.get(0).getRemaining() == 2;
+    assert LIMIT.getVolume()             == 2;
 
-    final Limit.FillResult FILL2 = LIMIT.fillVolume(4);
+    final Order       TAKER2  = newOrder("02", 4);
+    final List<Order> MAKERS2 = LIMIT.takeLiquidity(TAKER2);
 
-    assert FILL2.getVolume()                      == 2;
-    assert FILL2.getFills().size()                == 1;
-    assert FILL2.getFills().get(0).getRemaining() == 0;
-    assert LIMIT.getVolume()                      == 0;
+    assert TAKER2.getRemaining()         == 2;
+    assert MAKERS2.size()                == 1;
+    assert MAKERS2.get(0).getRemaining() == 0;
+    assert LIMIT.getVolume()             == 0;
   }
 
   @Test
-  public void testFillVolumeTwoFullFills() {
-    final Limit LIMIT = new Limit(10.20);
-
-    LIMIT.add(newOrder("00", 10));
-    LIMIT.add(newOrder("01", 30));
-
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(40);
-
-    assert FILL1.getVolume()                      == 40;
-    assert FILL1.getFills().size()                ==  2;
-    assert FILL1.getFills().get(0).getRemaining() ==  0;
-    assert FILL1.getFills().get(1).getRemaining() ==  0;
-    assert LIMIT.getVolume()                      ==  0;
-  }
-
-  @Test
-  public void testFillVolumeOneFullOnePartial() {
+  public void testTwoFullMakesOneFullTake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
     LIMIT.add(newOrder("01", 30));
 
-    final Limit.FillResult FILL1 = LIMIT.fillVolume(30);
+    final Order       TAKER1  = newOrder("02", 40);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
-    assert FILL1.getVolume()                      == 30;
-    assert FILL1.getFills().size()                ==  2;
-    assert FILL1.getFills().get(0).getRemaining() ==  0;
-    assert FILL1.getFills().get(1).getRemaining() == 10;
-    assert LIMIT.getVolume()                      == 10;
+    assert TAKER1.getRemaining()         == 0;
+    assert MAKERS1.size()                == 2;
+    assert MAKERS1.get(0).getRemaining() == 0;
+    assert MAKERS1.get(1).getRemaining() == 0;
+    assert LIMIT.getVolume()             == 0;
+  }
+
+  @Test
+  public void testOneFullMakeOnePartialMakeOneFullTake() {
+    final Limit LIMIT = new Limit(10.20);
+
+    LIMIT.add(newOrder("00", 10));
+    LIMIT.add(newOrder("01", 30));
+
+    final Order       TAKER1  = newOrder("02", 30);
+    final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
+
+    assert TAKER1.getRemaining()         ==  0;
+    assert MAKERS1.size()                ==  2;
+    assert MAKERS1.get(0).getRemaining() ==  0;
+    assert MAKERS1.get(1).getRemaining() == 10;
+    assert LIMIT.getVolume()             == 10;
   }
 
 }
