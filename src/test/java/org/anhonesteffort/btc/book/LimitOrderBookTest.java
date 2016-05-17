@@ -22,13 +22,15 @@ import org.junit.Test;
 public class LimitOrderBookTest extends BaseTest {
 
   @Test
-  public void testAddRemoveAsk() {
+  public void testAddRemoveClearAsk() {
     final LimitOrderBook BOOK = new LimitOrderBook();
 
     BOOK.add(newAsk("00", 10, 20));
+    BOOK.add(newAsk("01", 30, 40));
 
     assert BOOK.remove(Order.Side.ASK, 10d, "00").isPresent();
-    assert !BOOK.remove(Order.Side.ASK, 10d, "00").isPresent();
+    BOOK.clear();
+    assert !BOOK.remove(Order.Side.ASK, 30d, "01").isPresent();
   }
 
   @Test
@@ -36,9 +38,11 @@ public class LimitOrderBookTest extends BaseTest {
     final LimitOrderBook BOOK = new LimitOrderBook();
 
     BOOK.add(newBid("00", 10, 20));
+    BOOK.add(newBid("01", 30, 40));
 
     assert BOOK.remove(Order.Side.BID, 10d, "00").isPresent();
-    assert !BOOK.remove(Order.Side.BID, 10d, "00").isPresent();
+    BOOK.clear();
+    assert !BOOK.remove(Order.Side.BID, 30d, "01").isPresent();
   }
 
   @Test

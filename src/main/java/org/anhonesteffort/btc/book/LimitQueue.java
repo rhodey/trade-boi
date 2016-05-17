@@ -98,6 +98,11 @@ public class LimitQueue {
     }
   }
 
+  public void clear() {
+    map.clear();
+    while (!queue.isEmpty()) { queue.remove().clear(); }
+  }
+
   private static class AskSorter implements Comparator<Limit> {
     @Override
     public int compare(Limit ask1, Limit ask2) {

@@ -25,7 +25,7 @@ import java.util.Optional;
 public class LimitQueueTest extends BaseTest {
 
   @Test
-  public void testAddPeekRemoveAsks() {
+  public void testAddPeekRemoveClearAsks() {
     final LimitQueue ASKS = new LimitQueue(Order.Side.ASK);
 
     ASKS.addOrder(newAsk("00", 10, 1));
@@ -55,8 +55,9 @@ public class LimitQueueTest extends BaseTest {
     assert BEST_ASK.isPresent();
     assert BEST_ASK.get().getPrice()  == 10;
     assert BEST_ASK.get().getVolume() ==  1;
-    assert ASKS.removeOrder(10d, "00").isPresent();
 
+    ASKS.clear();
+    assert !ASKS.removeOrder(10d, "00").isPresent();
     assert !ASKS.peek().isPresent();
   }
 

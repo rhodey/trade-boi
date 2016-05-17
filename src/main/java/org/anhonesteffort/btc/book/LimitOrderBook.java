@@ -79,4 +79,9 @@ public class LimitOrderBook {
     }
   }
 
+  public void clear() {
+    askLimits.clear();
+    bidLimits.clear();
+  }
+
 }

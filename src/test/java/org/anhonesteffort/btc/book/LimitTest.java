@@ -28,7 +28,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testGettersAndAddRemoveVolume() {
+  public void testGettersAndAddRemoveClearVolume() {
     final Limit LIMIT = new Limit(10.20);
 
     assert LIMIT.getPrice()  == 10.20;
@@ -36,12 +36,15 @@ public class LimitTest extends BaseTest {
 
     LIMIT.add(newOrder("00", 10));
     assert LIMIT.getVolume() == 10;
+
     LIMIT.add(newOrder("01", 20));
     assert LIMIT.getVolume() == 30;
 
     LIMIT.remove("00");
     assert LIMIT.getVolume() == 20;
-    LIMIT.remove("01");
+
+    LIMIT.clear();
+    assert !LIMIT.remove("01").isPresent();
     assert LIMIT.getVolume() == 0;
   }
 

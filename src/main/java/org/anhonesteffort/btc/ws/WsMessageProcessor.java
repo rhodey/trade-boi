@@ -45,6 +45,7 @@ public class WsMessageProcessor implements EventHandler<Message> {
 
   private void process(Message message) {
     log.info("process -> " + market.getSequence(message));
+    // todo: publish to the order book ring buffer
   }
 
   private void rebuildOrderBook() throws InterruptedException, ExecutionException {
@@ -63,6 +64,7 @@ public class WsMessageProcessor implements EventHandler<Message> {
     }
 
     messageSeqLast = Optional.of(orderBook.getSequence());
+    // todo: publish RESET message to the order book ring buffer
   }
 
   public void checkSeqAndProcess(Message message) throws InterruptedException, ExecutionException {

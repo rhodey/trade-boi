@@ -92,4 +92,10 @@ public class Limit {
     return makers;
   }
 
+  public void clear() {
+    orderQueue.clear();
+    orderMap.clear();
+    volume = 0;
+  }
+
 }
