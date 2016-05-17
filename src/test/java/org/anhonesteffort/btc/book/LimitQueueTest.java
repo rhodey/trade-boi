@@ -176,4 +176,84 @@ public class LimitQueueTest extends BaseTest {
     assert !BIDS.peek().isPresent();
   }
 
+  @Test
+  public void testRemoveAskLiquidityWithMarketBids() {
+    final LimitQueue  ASKS = new LimitQueue(Order.Side.ASK);
+          MarketOrder BID  = newMarketBid(5, -1);
+
+    ASKS.addOrder(newAsk(10, 1));
+    ASKS.addOrder(newAsk(10, 2));
+    ASKS.addOrder(newAsk(20, 2));
+    ASKS.addOrder(newAsk(5, 2));
+
+    List<Order> MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+
+    assert BID.getVolumeRemoved()           == 2;
+    assert MAKERS.size()                    == 1;
+    assert MAKERS.get(0).getPrice()         == 5;
+    assert MAKERS.get(0).getSizeRemaining() == 0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert BID.getVolumeRemoved()           ==  5;
+    assert MAKERS.size()                    ==  2;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert MAKERS.size() == 0;
+
+    BID    = newMarketBid(3, -1);
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert BID.getVolumeRemoved()           ==  2;
+    assert MAKERS.size()                    ==  1;
+    assert MAKERS.get(0).getPrice()         == 20;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+
+    MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
+    assert MAKERS.size() == 0;
+    assert !ASKS.peek().isPresent();
+  }
+
+  @Test
+  public void testRemoveBidLiquidityWithMarketAsks() {
+    final LimitQueue  BIDS = new LimitQueue(Order.Side.BID);
+          MarketOrder ASK  = newMarketAsk(5, -1);
+
+    BIDS.addOrder(newBid(10, 1));
+    BIDS.addOrder(newBid(10, 2));
+    BIDS.addOrder(newBid(20, 2));
+    BIDS.addOrder(newBid(5, 2));
+
+    List<Order> MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+
+    assert ASK.getVolumeRemoved()           ==  2;
+    assert MAKERS.size()                    ==  1;
+    assert MAKERS.get(0).getPrice()         == 20;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getVolumeRemoved()           ==  5;
+    assert MAKERS.size()                    ==  2;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+    assert MAKERS.get(0).getPrice()         == 10;
+    assert MAKERS.get(0).getSizeRemaining() ==  0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert MAKERS.size() == 0;
+
+    ASK    = newMarketAsk(3, -1);
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert ASK.getVolumeRemoved()           == 2;
+    assert MAKERS.size()                    == 1;
+    assert MAKERS.get(0).getPrice()         == 5;
+    assert MAKERS.get(0).getSizeRemaining() == 0;
+
+    MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
+    assert MAKERS.size() == 0;
+    assert !BIDS.peek().isPresent();
+  }
+
 }

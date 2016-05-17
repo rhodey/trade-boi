@@ -75,7 +75,9 @@ public class LimitQueue {
   }
 
   private boolean isTaken(Limit maker, Order taker) {
-    if (this.side.equals(Order.Side.ASK)) {
+    if (taker instanceof MarketOrder) {
+      return true;
+    } else if (this.side.equals(Order.Side.ASK)) {
       return maker.getPrice() <= taker.getPrice();
     } else {
       return maker.getPrice() >= taker.getPrice();
