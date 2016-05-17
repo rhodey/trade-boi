@@ -236,4 +236,67 @@ public class LimitOrderBookTest {
     assert RESULT.getMakers().size() == 1;
   }
 
+  @Test
+  public void testTwoBidsTakesOneSmallerSizeAsk() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newAsk(10, 20));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(10, 5));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newBid(10, 25));
+    assert RESULT.getTakeSize()      == 15;
+    assert RESULT.getTakeValue()     == 10 * 15;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testTwoBidsTakesOneEqualSizeAsk() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newAsk(10, 20));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(10, 9));
+    assert RESULT.getTakeSize()      == 9;
+    assert RESULT.getTakeValue()     == 10 * 9;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newBid(10, 11));
+    assert RESULT.getTakeSize()      == 11;
+    assert RESULT.getTakeValue()     == 10 * 11;
+    assert RESULT.getMakers().size() == 1;
+  }
+
+  @Test
+  public void testTwoBidsTakesOneLargerSizeAsk() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+          TakeResult     RESULT = BOOK.add(newAsk(10, 30));
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    RESULT = BOOK.add(newBid(10, 5));
+    assert RESULT.getTakeSize()      == 5;
+    assert RESULT.getTakeValue()     == 10 * 5;
+    assert RESULT.getMakers().size() == 1;
+    RESULT.clearMakerValueRemoved();
+
+    RESULT = BOOK.add(newBid(10, 6));
+    assert RESULT.getTakeSize()      == 6;
+    assert RESULT.getTakeValue()     == 10 * 6;
+    assert RESULT.getMakers().size() == 1;
+  }
+
 }
