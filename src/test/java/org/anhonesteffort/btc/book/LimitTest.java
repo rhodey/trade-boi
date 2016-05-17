@@ -73,7 +73,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testOneFullMakeOneFullTake() {
+  public void testOneFullTakeOneFullMake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
@@ -88,7 +88,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testOneFullMakeOneFullMarketSizeTake() {
+  public void testOneFullMarketSizeTakeOneFullMake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
@@ -103,7 +103,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testOneFullMakeOneFullMarketFundsTake() {
+  public void testOneFullMarketFundsTakeOneFullMake() {
     final Limit LIMIT = new Limit(1);
 
     LIMIT.add(newOrder("00", 10));
@@ -118,7 +118,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testOneFullMakeOneFullMarketSizeFundsTake() {
+  public void testOneFullMarketSizeFundsTakeOneFullMake() {
     final Limit LIMIT = new Limit(1);
 
     LIMIT.add(newOrder("00", 12));
@@ -133,7 +133,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testPartialTake() {
+  public void testFullTakePartialMake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
@@ -148,7 +148,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testPartialMarketSizeTake() {
+  public void testFullMarketSizeTakePartialMake() {
     final Limit LIMIT = new Limit(10.20);
 
     LIMIT.add(newOrder("00", 10));
@@ -163,7 +163,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testPartialMarketFundsTake() {
+  public void testFullMarketFundsTakePartialMake() {
     final Limit LIMIT = new Limit(1);
 
     LIMIT.add(newOrder("00", 10));
@@ -178,7 +178,7 @@ public class LimitTest extends BaseTest {
   }
 
   @Test
-  public void testPartialMarketSizeFundsTake() {
+  public void testFullMarketSizeFundsTakePartialMake() {
     final Limit LIMIT = new Limit(1);
 
     LIMIT.add(newOrder("00", 10));
