@@ -99,12 +99,12 @@ public class LimitQueueTest extends BaseTest {
   @Test
   public void testRemoveAskLiquidity() {
     final LimitQueue ASKS = new LimitQueue(Order.Side.ASK);
-          Order      BID  = newBid("00", 15, 5);
+          Order      BID  = newBid(15, 5);
 
-    ASKS.addOrder(newAsk("01", 10, 1));
-    ASKS.addOrder(newAsk("02", 10, 2));
-    ASKS.addOrder(newAsk("03", 20, 2));
-    ASKS.addOrder(newAsk("04",  5, 2));
+    ASKS.addOrder(newAsk(10, 1));
+    ASKS.addOrder(newAsk(10, 2));
+    ASKS.addOrder(newAsk(20, 2));
+    ASKS.addOrder(newAsk(5, 2));
 
     List<Order> MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert BID.getSizeRemaining()           == 3;
@@ -123,7 +123,7 @@ public class LimitQueueTest extends BaseTest {
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert MAKERS.size() == 0;
 
-    BID    = newBid("05", 20, 3);
+    BID    = newBid(20, 3);
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert BID.getSizeRemaining()           ==  1;
     assert MAKERS.size()                    ==  1;
@@ -138,12 +138,12 @@ public class LimitQueueTest extends BaseTest {
   @Test
   public void testRemoveBidLiquidity() {
     final LimitQueue BIDS = new LimitQueue(Order.Side.BID);
-          Order      ASK  = newAsk("00", 15, 5);
+          Order      ASK  = newAsk(15, 5);
 
-    BIDS.addOrder(newBid("01", 10, 1));
-    BIDS.addOrder(newBid("02", 10, 2));
-    BIDS.addOrder(newBid("03", 20, 2));
-    BIDS.addOrder(newBid("04",  5, 2));
+    BIDS.addOrder(newBid(10, 1));
+    BIDS.addOrder(newBid(10, 2));
+    BIDS.addOrder(newBid(20, 2));
+    BIDS.addOrder(newBid(5, 2));
 
     List<Order> MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
     assert ASK.getSizeRemaining()           ==  3;
@@ -155,7 +155,7 @@ public class LimitQueueTest extends BaseTest {
     assert ASK.getSizeRemaining() == 3;
     assert MAKERS.size()          == 0;
 
-    ASK    = newBid("05", 5, 5);
+    ASK    = newBid(5, 5);
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
     assert ASK.getSizeRemaining()           ==  2;
     assert MAKERS.size()                    ==  2;

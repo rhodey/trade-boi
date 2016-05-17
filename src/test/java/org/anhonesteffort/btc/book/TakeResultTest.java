@@ -37,9 +37,9 @@ public class TakeResultTest extends BaseTest {
   @Test
   public void testAskMakers() {
     final List<Order> MAKERS = new LinkedList<>();
-    final Order       ASK0   = newAsk("00", 10, 1);
-    final Order       ASK1   = newAsk("01", 10, 3);
-    final Order       ASK2   = newAsk("02", 12, 2);
+    final Order       ASK0   = newAsk(10, 1);
+    final Order       ASK1   = newAsk(10, 3);
+    final Order       ASK2   = newAsk(12, 2);
 
     ASK0.takeSize(ASK0.getSize());
     ASK1.takeSize(ASK1.getSize());
@@ -67,9 +67,9 @@ public class TakeResultTest extends BaseTest {
   @Test
   public void testBidMakers() {
     final List<Order> MAKERS = new LinkedList<>();
-    final Order       BID0   = newBid("00", 12, 1);
-    final Order       BID1   = newBid("01", 10, 3);
-    final Order       BID2   = newBid("02", 10, 2);
+    final Order       BID0   = newBid(12, 1);
+    final Order       BID1   = newBid(10, 3);
+    final Order       BID2   = newBid(10, 2);
 
     BID0.takeSize(BID0.getSize());
     BID1.takeSize(BID1.getSize());
