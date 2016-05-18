@@ -78,7 +78,7 @@ public class WsOrderEventPublisher {
         } else if (receive.getOrderType(root).equals("market")) {
           event.initMarketRx(receive.getOrderId(root), side, receive.getSize(root), receive.getFunds(root));
         } else {
-          throw new WsException("rx message has invalid order_type");
+          throw new WsException("received message has invalid order_type");
         }
         break;
 
