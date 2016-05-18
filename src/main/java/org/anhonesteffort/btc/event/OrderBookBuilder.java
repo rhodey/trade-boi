@@ -64,10 +64,8 @@ public class OrderBookBuilder implements EventHandler<OrderEvent> {
 
       case LIMIT_DONE:
         Optional<Order> removed = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (removed.isPresent()) {
-          if (!rebuilding) { log.info("removed limit order " + removed.get().getOrderId()); }
-        } else {
-          throw new OrderEventException("done limit not found in order book");
+        if (removed.isPresent() && !rebuilding) {
+          log.info("removed limit order " + removed.get().getOrderId());
         }
         break;
 
