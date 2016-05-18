@@ -18,19 +18,44 @@
 package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.ws.WsException;
 
 public class OpenAccessor extends MarketAccessor {
 
-  public String getOrderId(JsonNode root) {
-    return root.get("order_id").textValue();
+  public String getOrderId(JsonNode root) throws WsException {
+    if (root.get("order_id") != null && root.get("order_id").isTextual()) {
+      return root.get("order_id").textValue();
+    } else {
+      throw new WsException("open message has invalid order_id");
+    }
   }
 
-  public double getPrice(JsonNode root) throws NumberFormatException {
-    return Double.parseDouble(root.get("price").textValue());
+  public double getPrice(JsonNode root) throws WsException {
+    if (root.get("price") != null && root.get("price").isTextual()) {
+      try {
+
+        return Double.parseDouble(root.get("price").textValue());
+
+      } catch (NumberFormatException e) {
+        throw new WsException("open message has invalid price", e);
+      }
+    } else {
+      throw new WsException("open message has invalid price");
+    }
   }
 
-  public double getRemainingSize(JsonNode root) throws NumberFormatException {
-    return Double.parseDouble(root.get("remaining_size").textValue());
+  public double getRemainingSize(JsonNode root) throws WsException {
+    if (root.get("remaining_size") != null && root.get("remaining_size").isTextual()) {
+      try {
+
+        return Double.parseDouble(root.get("remaining_size").textValue());
+
+      } catch (NumberFormatException e) {
+        throw new WsException("open message has invalid remaining_size", e);
+      }
+    } else {
+      throw new WsException("open message has invalid remaining_size");
+    }
   }
 
 }
