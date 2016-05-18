@@ -66,8 +66,6 @@ public class OrderPool {
   }
 
   public void returnAll() {
-    limitOrders.clear();
-    marketOrders.clear();
     removed.keySet().stream().map(removed::get).forEach(order -> {
       if (order instanceof MarketOrder) {
         marketOrders.add((MarketOrder) order);
