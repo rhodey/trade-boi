@@ -20,6 +20,7 @@ package org.anhonesteffort.btc.ws;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
+import org.anhonesteffort.btc.ws.message.MarketAccessor;
 import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,9 @@ public class WsMessageSorter {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageSorter.class);
 
+  private final MarketAccessor accessor = new MarketAccessor();
   private final WsOrderEventPublisher publisher;
-  private final HttpClientWrapper     http;
+  private final HttpClientWrapper http;
 
   private Optional<Long> messageSeqLast = Optional.empty();
 
@@ -56,29 +58,21 @@ public class WsMessageSorter {
   }
 
   public void sort(JsonNode root) throws WsException, InterruptedException, ExecutionException {
-    JsonNode type = root.get("type");
-    if (type == null || type.isNull()) {
-      throw new WsException("json root has null type tag");
-    }
-
-    switch (type.textValue()) {
+    String type = accessor.getType(root);
+    switch (type) {
       case Message.TYPE_RECEIVED:
       case Message.TYPE_MATCH:
       case Message.TYPE_OPEN:
       case Message.TYPE_DONE:
       case Message.TYPE_CHANGE:
-        if (root.get("sequence") == null || !root.get("sequence").isNumber()) {
-          throw new WsException("json root has invalid sequence tag");
-        } else {
-          checkSeqAndPublish(root, type.textValue(), root.get("sequence").longValue());
-        }
+        checkSeqAndPublish(root, type, accessor.getSequence(root));
         break;
 
       case Message.TYPE_ERROR:
         throw new WsException("received error message -> " + root.get("message"));
 
       default:
-        throw new WsException("json root has invalid type tag -> " + type.textValue());
+        throw new WsException("json root has invalid type tag -> " + type);
     }
   }
 

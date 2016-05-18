@@ -26,23 +26,23 @@ public class ChangeAccessor extends MarketAccessor {
   }
 
   public double getNewSize(JsonNode root) {
-    return doubleValueOrNeg(root, "new_size");
+    return doubleValueOrZero(root, "new_size");
   }
 
   public double getOldSize(JsonNode root) {
-    return doubleValueOrNeg(root, "old_size");
+    return doubleValueOrZero(root, "old_size");
   }
 
   public double getNewFunds(JsonNode root) {
-    return doubleValueOrNeg(root, "new_funds");
+    return doubleValueOrZero(root, "new_funds");
   }
 
   public double getOldFunds(JsonNode root) {
-    return doubleValueOrNeg(root, "old_funds");
+    return doubleValueOrZero(root, "old_funds");
   }
 
   public double getPrice(JsonNode root) {
-    return doubleValueOrNeg(root, "price");
+    return doubleValueOrZero(root, "price");
   }
 
 }

@@ -18,27 +18,60 @@
 package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.ws.WsException;
 
 public class MatchAccessor extends MarketAccessor {
 
-  public long getTradeId(JsonNode root) {
-    return root.get("trade_id").longValue();
+  public long getTradeId(JsonNode root) throws WsException {
+    if (root.get("trade_id") != null && root.get("trade_id").isNumber()) {
+      return root.get("trade_id").longValue();
+    } else {
+      throw new WsException("match message has invalid trade_id");
+    }
   }
 
-  public String getMakerOrderId(JsonNode root) {
-    return root.get("maker_order_id").textValue();
+  public String getMakerOrderId(JsonNode root) throws WsException {
+    if (root.get("maker_order_id") != null && root.get("maker_order_id").isTextual()) {
+      return root.get("maker_order_id").textValue();
+    } else {
+      throw new WsException("match message has invalid maker_order_id");
+    }
   }
 
-  public String getTakerOrderId(JsonNode root) {
-    return root.get("taker_order_id").textValue();
+  public String getTakerOrderId(JsonNode root) throws WsException {
+    if (root.get("taker_order_id") != null && root.get("taker_order_id").isTextual()) {
+      return root.get("taker_order_id").textValue();
+    } else {
+      throw new WsException("match message has invalid taker_order_id");
+    }
   }
 
-  public double getSize(JsonNode root) throws NumberFormatException {
-    return Double.parseDouble(root.get("size").textValue());
+  public double getSize(JsonNode root) throws WsException {
+    if (root.get("size") != null && root.get("size").isTextual()) {
+      try {
+
+        return Double.parseDouble(root.get("size").textValue());
+
+      } catch (NumberFormatException e) {
+        throw new WsException("math message has invalid size", e);
+      }
+    } else {
+      throw new WsException("match message has invalid size");
+    }
   }
 
-  public double getPrice(JsonNode root) throws NumberFormatException {
-    return Double.parseDouble(root.get("price").textValue());
+  public double getPrice(JsonNode root) throws WsException {
+    if (root.get("price") != null && root.get("price").isTextual()) {
+      try {
+
+        return Double.parseDouble(root.get("price").textValue());
+
+      } catch (NumberFormatException e) {
+        throw new WsException("math message has invalid price", e);
+      }
+    } else {
+      throw new WsException("match message has invalid price");
+    }
   }
 
 }

@@ -18,11 +18,20 @@
 package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.ws.WsException;
 
 public abstract class Accessor {
 
-  protected double doubleValueOrNeg(JsonNode root, String tag) {
-    return (root.get(tag) == null) ? -1 : root.get(tag).asDouble(-1);
+  protected double doubleValueOrZero(JsonNode root, String tag) {
+    return (root.get(tag) == null) ? 0 : root.get(tag).asDouble(0);
+  }
+
+  public String getType(JsonNode root) throws WsException {
+    if (root.get("type") != null && root.get("type").isTextual()) {
+      return root.get("type").textValue();
+    } else {
+      throw new WsException("message has invalid type");
+    }
   }
 
 }

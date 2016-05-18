@@ -57,12 +57,14 @@ public class WsOrderEventPublisher {
   }
 
   private Order.Side getSideOrThrow(JsonNode root) throws WsException {
-    if (base.getSide(root).equals("sell")) {
-      return Order.Side.ASK;
-    } else if (base.getSide(root).equals("buy")) {
-      return Order.Side.BID;
-    } else {
-      throw new WsException("message has invalid side");
+    String side = base.getSide(root);
+    switch (side) {
+      case "sell":
+        return Order.Side.ASK;
+      case "buy":
+        return Order.Side.BID;
+      default:
+        throw new WsException("message has invalid side -> " + side);
     }
   }
 

@@ -34,11 +34,11 @@ public class DoneAccessor extends MarketAccessor {
   }
 
   public double getPrice(JsonNode root) {
-    return doubleValueOrNeg(root, "price");
+    return doubleValueOrZero(root, "price");
   }
 
   public double getRemainingSize(JsonNode root) {
-    return doubleValueOrNeg(root, "remaining_size");
+    return doubleValueOrZero(root, "remaining_size");
   }
 
 }
