@@ -20,7 +20,7 @@ package org.anhonesteffort.btc.ws.message;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.ws.WsException;
 
-public class OpenAccessor extends MarketAccessor {
+public class OpenAccessor extends Accessor {
 
   public String getOrderId(JsonNode root) throws WsException {
     if (root.get("order_id") != null && root.get("order_id").isTextual()) {

@@ -20,7 +20,7 @@ package org.anhonesteffort.btc.ws.message;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.ws.WsException;
 
-public abstract class Accessor {
+public class Accessor {
 
   protected double doubleValueOrZero(JsonNode root, String tag) {
     return (root.get(tag) == null) ? 0 : root.get(tag).asDouble(0);
@@ -31,6 +31,38 @@ public abstract class Accessor {
       return root.get("type").textValue();
     } else {
       throw new WsException("message has invalid type");
+    }
+  }
+
+  public long getSequence(JsonNode root) throws WsException {
+    if (root.get("sequence") != null && root.get("sequence").isNumber()) {
+      return root.get("sequence").longValue();
+    } else {
+      throw new WsException("message has invalid sequence");
+    }
+  }
+
+  public String getTime(JsonNode root) throws WsException {
+    if (root.get("time") != null && root.get("time").isTextual()) {
+      return root.get("time").textValue();
+    } else {
+      throw new WsException("message has invalid time");
+    }
+  }
+
+  public String getProductId(JsonNode root) throws WsException {
+    if (root.get("product_id") != null && root.get("product_id").isTextual()) {
+      return root.get("product_id").textValue();
+    } else {
+      throw new WsException("message has invalid product_id");
+    }
+  }
+
+  public String getSide(JsonNode root) throws WsException {
+    if (root.get("side") != null && root.get("side").isTextual()) {
+      return root.get("side").textValue();
+    } else {
+      throw new WsException("message has invalid side");
     }
   }
 

@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ChangeAccessor extends MarketAccessor {
+public class ChangeAccessor extends Accessor {
 
   public String getOrderId(JsonNode root) {
     return root.get("order_id").textValue();

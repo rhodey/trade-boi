@@ -20,7 +20,7 @@ package org.anhonesteffort.btc.ws;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
-import org.anhonesteffort.btc.ws.message.MarketAccessor;
+import org.anhonesteffort.btc.ws.message.Accessor;
 import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class WsMessageSorter {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageSorter.class);
 
-  private final MarketAccessor accessor = new MarketAccessor();
+  private final Accessor accessor = new Accessor();
   private final WsOrderEventPublisher publisher;
   private final HttpClientWrapper http;
 

@@ -25,7 +25,7 @@ import org.anhonesteffort.btc.http.response.OrderBookResponse;
 import org.anhonesteffort.btc.http.response.OrderResponse;
 import org.anhonesteffort.btc.ws.message.ChangeAccessor;
 import org.anhonesteffort.btc.ws.message.DoneAccessor;
-import org.anhonesteffort.btc.ws.message.MarketAccessor;
+import org.anhonesteffort.btc.ws.message.Accessor;
 import org.anhonesteffort.btc.ws.message.MatchAccessor;
 import org.anhonesteffort.btc.ws.message.Message;
 import org.anhonesteffort.btc.ws.message.OpenAccessor;
@@ -33,7 +33,7 @@ import org.anhonesteffort.btc.ws.message.ReceivedAccessor;
 
 public class WsOrderEventPublisher {
 
-  private final MarketAccessor   base    = new MarketAccessor();
+  private final Accessor         base    = new Accessor();
   private final ReceivedAccessor receive = new ReceivedAccessor();
   private final MatchAccessor    match   = new MatchAccessor();
   private final OpenAccessor     open    = new OpenAccessor();
