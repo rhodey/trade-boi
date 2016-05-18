@@ -76,8 +76,8 @@ public class OrderEvent {
     init(Type.LIMIT_DONE, orderId, side, price, doneSize, 0, null, null, 0, 0, 0, 0);
   }
 
-  public void initMarketDone(String orderId, Order.Side side, double price, double doneSize) {
-    init(Type.MARKET_DONE, orderId, side, price, doneSize, 0, null, null, 0, 0, 0, 0);
+  public void initMarketDone(String orderId, Order.Side side) {
+    init(Type.MARKET_DONE, orderId, side, 0, 0, 0, null, null, 0, 0, 0, 0);
   }
 
   public void initMatch(String makerId, String takerId, Order.Side side, double price, double size) {
