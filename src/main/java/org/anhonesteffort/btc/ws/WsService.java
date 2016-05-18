@@ -23,12 +23,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import okhttp3.Request;
 import okhttp3.ws.WebSocketCall;
+import org.anhonesteffort.btc.OrderEvent;
 import org.anhonesteffort.btc.http.HttpClient;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.slf4j.Logger;
@@ -37,21 +39,20 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class WsService implements FutureCallback<Void>, ExceptionHandler<Message> {
+public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
 
   private static final Logger log         = LoggerFactory.getLogger(WsService.class);
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
 
-  private final MessageDecoder           decoder        = new MessageDecoder();
   private final HttpClientWrapper        http           = new HttpClientWrapper();
   private final SettableFuture<Void>     shutdownFuture = SettableFuture.create();
   private final ListeningExecutorService executor       = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
-  private final Disruptor<Message> wsDisruptor;
+  private final Disruptor<OrderEvent> wsDisruptor;
 
   public WsService(WaitStrategy waitStrategy, int bufferSize) {
     wsDisruptor = new Disruptor<>(
-        decoder, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
+        this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
     );
   }
 
@@ -60,12 +61,11 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<Message
   }
 
   public void start() {
-    WsMessageProcessor wsProcessor = new WsMessageProcessor(http);
-    WsMessageReceiver  wsReceiver  = new WsMessageReceiver(
-        wsDisruptor.getRingBuffer(), decoder, new WsSubscribeHelper(executor)
-    );
+    WsOrderEventPublisher publisher  = new WsOrderEventPublisher(wsDisruptor.getRingBuffer());
+    WsMessageSorter       sorter     = new WsMessageSorter(publisher, http);
+    WsMessageReceiver     wsReceiver = new WsMessageReceiver(new WsSubscribeHelper(executor), sorter);
 
-    wsDisruptor.handleEventsWith(wsProcessor);
+    // todo: wsDisruptor.handleEventsWith();
     wsDisruptor.setDefaultExceptionHandler(this);
     Futures.addCallback(wsReceiver.getErrorFuture(), this);
 
@@ -115,7 +115,7 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<Message
   }
 
   @Override
-  public void handleEventException(Throwable throwable, long sequence, Message message) {
+  public void handleEventException(Throwable throwable, long sequence, OrderEvent event) {
     if (shutdown(throwable)) {
       log.error("error processing disruptor event", throwable);
     }
@@ -126,6 +126,11 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<Message
     if (shutdown(throwable)) {
       log.error("error shutting down disruptor", throwable);
     }
+  }
+
+  @Override
+  public OrderEvent newInstance() {
+    return new OrderEvent();
   }
 
   private static class DisruptorThreadFactory implements ThreadFactory {
