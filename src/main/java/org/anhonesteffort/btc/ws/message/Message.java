@@ -24,9 +24,9 @@ import java.io.IOException;
 public class Message {
 
   public static final String TYPE_RECEIVED = "received";
+  public static final String TYPE_MATCH    = "match";
   public static final String TYPE_OPEN     = "open";
   public static final String TYPE_DONE     = "done";
-  public static final String TYPE_MATCH    = "match";
   public static final String TYPE_CHANGE   = "change";
   public static final String TYPE_ERROR    = "error";
 
