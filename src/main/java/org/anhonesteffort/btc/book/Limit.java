@@ -60,6 +60,19 @@ public class Limit {
     return order;
   }
 
+  public Optional<Order> reduce(String orderId, double size) {
+    Optional<Order> order = Optional.ofNullable(orderMap.get(orderId));
+    if (order.isPresent()) {
+      order.get().subtract(size, price);
+      volume -= size;
+      if (order.get().getSizeRemaining() <= 0) {
+        orderMap.remove(orderId);
+        orderQueue.remove(order.get());
+      }
+    }
+    return order;
+  }
+
   private double getTakeSize(Order taker) {
     if (taker instanceof MarketOrder) {
       return ((MarketOrder) taker).getSizeRemainingFor(price);

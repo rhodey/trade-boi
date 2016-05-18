@@ -87,6 +87,14 @@ public class LimitOrderBook {
     }
   }
 
+  public Optional<Order> reduce(Order.Side side, Double price, String orderId, double size) {
+    if (side.equals(Order.Side.ASK)) {
+      return askLimits.reduceOrder(price, orderId, size);
+    } else {
+      return bidLimits.reduceOrder(price, orderId, size);
+    }
+  }
+
   public void clear() {
     askLimits.clear();
     bidLimits.clear();

@@ -74,6 +74,21 @@ public class LimitQueue {
     return order;
   }
 
+  public Optional<Order> reduceOrder(Double price, String orderId, double size) {
+    Optional<Order> order = Optional.empty();
+    Optional<Limit> limit = Optional.ofNullable(map.get(price));
+
+    if (limit.isPresent()) {
+      order = limit.get().reduce(orderId, size);
+      if (order.isPresent() && limit.get().getVolume() <= 0) {
+        map.remove(price);
+        queue.remove(limit.get());
+      }
+    }
+
+    return order;
+  }
+
   private boolean isTaken(Limit maker, Order taker) {
     if (taker instanceof MarketOrder) {
       return true;
