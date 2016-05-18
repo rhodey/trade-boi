@@ -24,7 +24,6 @@ import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -42,7 +41,7 @@ public class WsMessageSorter {
     this.http      = http;
   }
 
-  private void checkSeqAndPublish(JsonNode root, String type, long sequence) throws InterruptedException, ExecutionException {
+  private void checkSeqAndPublish(JsonNode root, String type, long sequence) throws WsException, InterruptedException, ExecutionException {
     if (!messageSeqLast.isPresent() || sequence == (messageSeqLast.get() + 1)) {
       messageSeqLast = Optional.of(sequence);
       publisher.publishMessage(root, type);
@@ -56,10 +55,10 @@ public class WsMessageSorter {
     }
   }
 
-  public void sort(JsonNode root) throws IOException, WsException, InterruptedException, ExecutionException {
+  public void sort(JsonNode root) throws WsException, InterruptedException, ExecutionException {
     JsonNode type = root.get("type");
     if (type == null || type.isNull()) {
-      throw new IOException("json root has null type tag");
+      throw new WsException("json root has null type tag");
     }
 
     switch (type.textValue()) {
@@ -69,7 +68,7 @@ public class WsMessageSorter {
       case Message.TYPE_DONE:
       case Message.TYPE_CHANGE:
         if (root.get("sequence") == null || !root.get("sequence").isNumber()) {
-          throw new IOException("json root has invalid sequence tag");
+          throw new WsException("json root has invalid sequence tag");
         } else {
           checkSeqAndPublish(root, type.textValue(), root.get("sequence").longValue());
         }
@@ -79,7 +78,7 @@ public class WsMessageSorter {
         throw new WsException("received error message -> " + root.get("message"));
 
       default:
-        throw new IOException("json root has invalid type tag -> " + type.textValue());
+        throw new WsException("json root has invalid type tag -> " + type.textValue());
     }
   }
 
