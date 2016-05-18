@@ -32,7 +32,7 @@ public class Order {
     init(orderId, side, price, size);
   }
 
-  public void init(String orderId, Side side, double price, double size) {
+  protected void init(String orderId, Side side, double price, double size) {
     this.orderId       = orderId;
     this.side          = side;
     this.price         = price;

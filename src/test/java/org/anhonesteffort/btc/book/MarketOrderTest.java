@@ -23,7 +23,7 @@ public class MarketOrderTest {
 
   @Test
   public void testWithSize() {
-    final MarketOrder ORDER = MarketOrder.withSize("lol", Order.Side.BID, 100);
+    final MarketOrder ORDER = new MarketOrder("lol", Order.Side.BID, 100, -1);
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
@@ -52,7 +52,7 @@ public class MarketOrderTest {
 
   @Test
   public void testWithFunds() {
-    final MarketOrder ORDER = MarketOrder.withFunds("lol", Order.Side.BID, 100);
+    final MarketOrder ORDER = new MarketOrder("lol", Order.Side.BID, -1, 100);
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);

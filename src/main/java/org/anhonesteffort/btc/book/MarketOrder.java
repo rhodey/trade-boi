@@ -30,12 +30,11 @@ public class MarketOrder extends Order {
     volumeRemoved       = 0;
   }
 
-  public static MarketOrder withSize(String orderId, Side side, double size) {
-    return new MarketOrder(orderId, side, size, -1d);
-  }
-
-  public static MarketOrder withFunds(String orderId, Side side, double funds) {
-    return new MarketOrder(orderId, side, -1d, funds);
+  protected void initMarket(String orderId, Side side, double size, double funds) {
+    super.init(orderId, side, size, funds);
+    this.funds          = funds;
+    this.fundsRemaining = funds;
+    volumeRemoved       = 0;
   }
 
   public double getFunds() {
