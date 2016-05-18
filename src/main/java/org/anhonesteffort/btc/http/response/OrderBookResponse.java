@@ -22,6 +22,7 @@ import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpException;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -38,15 +39,15 @@ public class OrderBookResponse {
       throw new HttpException("json root has invalid sequence tag");
     }
 
-    JsonNode asks = root.path("asks");
-    JsonNode bids = root.path("bids");
+    Iterator<JsonNode> asks = root.path("asks").elements();
+    Iterator<JsonNode> bids = root.path("bids").elements();
 
-    if (asks.isArray() && bids.isArray()) {
-      while (asks.elements().hasNext()) {
-        this.asks.add(new OrderResponse(Order.Side.ASK, asks.elements().next()));
+    if (root.path("asks").isArray() && root.path("bids").isArray()) {
+      while (asks.hasNext()) {
+        this.asks.add(new OrderResponse(Order.Side.ASK, asks.next()));
       }
-      while (bids.elements().hasNext()) {
-        this.bids.add(new OrderResponse(Order.Side.BID, bids.elements().next()));
+      while (bids.hasNext()) {
+        this.bids.add(new OrderResponse(Order.Side.BID, bids.next()));
       }
     } else {
       throw new HttpException("json root has invalid asks and/or bids tag(s)");

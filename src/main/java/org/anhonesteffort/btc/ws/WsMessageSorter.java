@@ -43,7 +43,11 @@ public class WsMessageSorter {
   }
 
   private void checkSeqAndPublish(JsonNode root, String type, long sequence) throws WsException, InterruptedException, ExecutionException {
-    if (!messageSeqLast.isPresent() || sequence == (messageSeqLast.get() + 1)) {
+    if (!messageSeqLast.isPresent()) {
+      OrderBookResponse orderBook = http.geOrderBook().get();
+      messageSeqLast = Optional.of(orderBook.getSequence());
+      publisher.publishBook(orderBook);
+    } else if (sequence == (messageSeqLast.get() + 1)) {
       messageSeqLast = Optional.of(sequence);
       publisher.publishMessage(root, type);
     } else if (sequence > messageSeqLast.get()) {
@@ -51,8 +55,6 @@ public class WsMessageSorter {
       OrderBookResponse orderBook = http.geOrderBook().get();
       messageSeqLast = Optional.of(orderBook.getSequence());
       publisher.publishBook(orderBook);
-    } else {
-      log.warn("received duplicate sequence -> " + sequence + ", ignoring");
     }
   }
 

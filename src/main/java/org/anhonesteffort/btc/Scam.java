@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
-  private static final Integer WS_BUFFER_SIZE = 1024;
+  private static final Integer WS_BUFFER_SIZE = 262144;
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
