@@ -19,8 +19,8 @@ package org.anhonesteffort.btc.http.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.http.HttpException;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -31,22 +31,25 @@ public class OrderBookResponse {
   private final Queue<OrderResponse> bids = new PriorityQueue<>(new BidSorter());
   private final long sequence;
 
-  public OrderBookResponse(JsonNode root) throws IOException, NumberFormatException {
+  public OrderBookResponse(JsonNode root) throws HttpException {
     if (root.get("sequence") != null && root.get("sequence").isNumber()) {
       this.sequence = root.get("sequence").longValue();
     } else {
-      throw new IOException("json root has invalid sequence tag");
+      throw new HttpException("json root has invalid sequence tag");
     }
 
-    if (root.path("asks").isArray() && root.path("bids").isArray()) {
-      root.path("asks").elements().forEachRemaining(ask ->
-              asks.add(new OrderResponse(Order.Side.ASK, ask))
-      );
-      root.path("bids").elements().forEachRemaining(bid ->
-              bids.add(new OrderResponse(Order.Side.BID, bid))
-      );
+    JsonNode asks = root.path("asks");
+    JsonNode bids = root.path("bids");
+
+    if (asks.isArray() && bids.isArray()) {
+      while (asks.elements().hasNext()) {
+        this.asks.add(new OrderResponse(Order.Side.ASK, asks.elements().next()));
+      }
+      while (bids.elements().hasNext()) {
+        this.bids.add(new OrderResponse(Order.Side.BID, bids.elements().next()));
+      }
     } else {
-      throw new IOException("json root has invalid asks and/or bids tags");
+      throw new HttpException("json root has invalid asks and/or bids tag(s)");
     }
   }
 

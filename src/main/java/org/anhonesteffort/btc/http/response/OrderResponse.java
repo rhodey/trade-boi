@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.http.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.http.HttpException;
 
 public class OrderResponse {
 
@@ -27,11 +28,17 @@ public class OrderResponse {
   private final double price;
   private final double size;
 
-  public OrderResponse(Order.Side side, JsonNode node) throws NumberFormatException {
+  public OrderResponse(Order.Side side, JsonNode node) throws HttpException {
     this.side = side;
     orderId   = node.get(2).textValue();
-    price     = Double.parseDouble(node.get(0).textValue());
-    size      = Double.parseDouble(node.get(1).textValue());
+    try {
+
+      price = Double.parseDouble(node.get(0).textValue());
+      size  = Double.parseDouble(node.get(1).textValue());
+
+    } catch (NumberFormatException e) {
+      throw new HttpException("order price or size is invalid", e);
+    }
   }
 
   public Order.Side getSide() {

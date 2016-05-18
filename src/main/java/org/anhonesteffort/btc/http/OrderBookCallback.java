@@ -35,7 +35,7 @@ public class OrderBookCallback extends HttpCallback<OrderBookResponse> {
   }
 
   @Override
-  protected void set(Call call, Response response) throws IOException, NumberFormatException {
+  protected void set(Call call, Response response) throws IOException, HttpException {
     future.set(new OrderBookResponse(parser.root(response.body())));
   }
 
