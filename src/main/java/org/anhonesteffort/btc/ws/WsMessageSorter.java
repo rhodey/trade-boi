@@ -32,17 +32,17 @@ public class WsMessageSorter {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageSorter.class);
 
-  private final OrderEventPublisher publisher;
-  private final HttpClientWrapper   http;
+  private final WsOrderEventPublisher publisher;
+  private final HttpClientWrapper     http;
 
   private Optional<Long> messageSeqLast = Optional.empty();
 
-  public WsMessageSorter(OrderEventPublisher publisher, HttpClientWrapper http) {
+  public WsMessageSorter(WsOrderEventPublisher publisher, HttpClientWrapper http) {
     this.publisher = publisher;
     this.http      = http;
   }
 
-  public void checkSeqAndPublish(JsonNode root, String type, long sequence) throws InterruptedException, ExecutionException {
+  private void checkSeqAndPublish(JsonNode root, String type, long sequence) throws InterruptedException, ExecutionException {
     if (!messageSeqLast.isPresent() || sequence == (messageSeqLast.get() + 1)) {
       messageSeqLast = Optional.of(sequence);
       publisher.publish(root, type);

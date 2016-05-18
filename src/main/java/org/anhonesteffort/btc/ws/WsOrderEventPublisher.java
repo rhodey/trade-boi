@@ -15,26 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.ws.message;
+package org.anhonesteffort.btc.ws;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.lmax.disruptor.EventFactory;
-import okhttp3.ResponseBody;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
-import java.io.IOException;
+public class WsOrderEventPublisher {
 
-public class MessageDecoder implements EventFactory<Message> {
-
-  private final ObjectReader reader = new ObjectMapper().reader();
-
-  @Override
-  public Message newInstance() {
-    return new Message();
+  public void publish(JsonNode root, String type) {
+    // todo: convert to OrderEvent and publish to ring buffer
   }
 
-  public void decode(ResponseBody source, Message destination) throws IOException {
-    destination.init(reader.readTree(source.byteStream()));
+  public void publish(OrderBookResponse book) {
+    // todo: convert to LIMIT_OPEN OrderEvents and publish to ring buffer
   }
 
 }

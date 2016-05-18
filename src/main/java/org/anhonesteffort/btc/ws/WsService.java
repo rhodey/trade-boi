@@ -32,7 +32,6 @@ import okhttp3.ws.WebSocketCall;
 import org.anhonesteffort.btc.http.HttpClient;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.ws.message.Message;
-import org.anhonesteffort.btc.ws.message.MessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,18 +17,17 @@
 
 package org.anhonesteffort.btc.ws;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.lmax.disruptor.RingBuffer;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.ws.WebSocket;
 import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
-import org.anhonesteffort.btc.ws.message.Message;
-import org.anhonesteffort.btc.ws.message.MessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,18 +37,15 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageReceiver.class);
 
+  private final ObjectReader         reader      = new ObjectMapper().reader();
   private final SettableFuture<Void> errorFuture = SettableFuture.create();
-  private final RingBuffer<Message>  ringBuffer;
-  private final MessageDecoder       decoder;
-  private final WsSubscribeHelper    helper;
 
-  public WsMessageReceiver(RingBuffer<Message> ringBuffer,
-                           MessageDecoder      decoder,
-                           WsSubscribeHelper   helper)
-  {
-    this.ringBuffer = ringBuffer;
-    this.decoder    = decoder;
-    this.helper     = helper;
+  private final WsSubscribeHelper helper;
+  private final WsMessageSorter   sorter;
+
+  public WsMessageReceiver(WsSubscribeHelper helper, WsMessageSorter sorter) {
+    this.helper = helper;
+    this.sorter = sorter;
   }
 
   public ListenableFuture<Void> getErrorFuture() {
@@ -71,9 +67,7 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
   public void onMessage(ResponseBody body) {
     try {
 
-      long sequence = ringBuffer.next();
-      decoder.decode(body, ringBuffer.get(sequence));
-      ringBuffer.publish(sequence);
+      sorter.sort(reader.readTree(body.byteStream()));
 
     } catch (Throwable e) {
       errorFuture.setException(e);
