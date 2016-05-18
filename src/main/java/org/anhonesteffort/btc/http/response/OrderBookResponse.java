@@ -18,6 +18,7 @@
 package org.anhonesteffort.btc.http.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.book.Order;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -39,10 +40,10 @@ public class OrderBookResponse {
 
     if (root.path("asks").isArray() && root.path("bids").isArray()) {
       root.path("asks").elements().forEachRemaining(ask ->
-              asks.add(new OrderResponse(OrderResponse.Side.SELL, ask))
+              asks.add(new OrderResponse(Order.Side.ASK, ask))
       );
       root.path("bids").elements().forEachRemaining(bid ->
-              bids.add(new OrderResponse(OrderResponse.Side.BUY, bid))
+              bids.add(new OrderResponse(Order.Side.BID, bid))
       );
     } else {
       throw new IOException("json root has invalid asks and/or bids tags");

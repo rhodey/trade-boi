@@ -18,16 +18,42 @@
 package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.lmax.disruptor.RingBuffer;
+import org.anhonesteffort.btc.OrderEvent;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
+import org.anhonesteffort.btc.http.response.OrderResponse;
 
 public class WsOrderEventPublisher {
 
-  public void publish(JsonNode root, String type) {
+  private final RingBuffer<OrderEvent> ringBuffer;
+  private long currentSeq;
+
+  public WsOrderEventPublisher(RingBuffer<OrderEvent> ringBuffer) {
+    this.ringBuffer = ringBuffer;
+  }
+
+  private OrderEvent takeNextEvent() {
+    currentSeq = ringBuffer.next();
+    return ringBuffer.get(currentSeq);
+  }
+
+  private void publishCurrentEvent() {
+    ringBuffer.publish(currentSeq);
+  }
+
+  public void publishMessage(JsonNode root, String type) {
     // todo: convert to OrderEvent and publish to ring buffer
   }
 
-  public void publish(OrderBookResponse book) {
-    // todo: convert to LIMIT_OPEN OrderEvents and publish to ring buffer
+  private void publishBookOrder(OrderResponse order) {
+    OrderEvent event = takeNextEvent();
+    event.initLimitOpen(order.getOrderId(), order.getSide(), order.getPrice(), order.getSize());
+    publishCurrentEvent();
+  }
+
+  public void publishBook(OrderBookResponse book) {
+    book.getAsks().forEach(this::publishBookOrder);
+    book.getBids().forEach(this::publishBookOrder);
   }
 
 }

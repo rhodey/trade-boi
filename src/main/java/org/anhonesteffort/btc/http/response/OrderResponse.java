@@ -18,24 +18,23 @@
 package org.anhonesteffort.btc.http.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.book.Order;
 
 public class OrderResponse {
 
-  public enum Side { BUY, SELL }
-
-  private final Side   side;
+  private final Order.Side side;
   private final String orderId;
   private final double price;
   private final double size;
 
-  public OrderResponse(Side side, JsonNode node) throws NumberFormatException {
+  public OrderResponse(Order.Side side, JsonNode node) throws NumberFormatException {
     this.side = side;
     orderId   = node.get(2).textValue();
     price     = Double.parseDouble(node.get(0).textValue());
     size      = Double.parseDouble(node.get(1).textValue());
   }
 
-  public Side getSide() {
+  public Order.Side getSide() {
     return side;
   }
 
