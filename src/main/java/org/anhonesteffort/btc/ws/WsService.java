@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -48,10 +49,12 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
   private final SettableFuture<Void>     shutdownFuture = SettableFuture.create();
   private final ListeningExecutorService executor       = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
-  private final Disruptor<OrderEvent> wsDisruptor;
+  private final Disruptor<OrderEvent>      wsDisruptor;
+  private final EventHandler<OrderEvent>[] handlers;
 
-  public WsService(WaitStrategy waitStrategy, int bufferSize) {
-    wsDisruptor = new Disruptor<>(
+  public WsService(WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers) {
+    this.handlers = handlers;
+    wsDisruptor   = new Disruptor<>(
         this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
     );
   }
@@ -60,12 +63,13 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
     return shutdownFuture;
   }
 
+  @SuppressWarnings("unchecked")
   public void start() {
     WsOrderEventPublisher publisher  = new WsOrderEventPublisher(wsDisruptor.getRingBuffer());
     WsMessageSorter       sorter     = new WsMessageSorter(publisher, http);
     WsMessageReceiver     wsReceiver = new WsMessageReceiver(new WsSubscribeHelper(executor), sorter);
 
-    // todo: wsDisruptor.handleEventsWith();
+    wsDisruptor.handleEventsWith(handlers);
     wsDisruptor.setDefaultExceptionHandler(this);
     Futures.addCallback(wsReceiver.getErrorFuture(), this);
 

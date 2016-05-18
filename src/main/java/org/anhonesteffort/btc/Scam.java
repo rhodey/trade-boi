@@ -20,6 +20,7 @@ package org.anhonesteffort.btc;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +36,16 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
-  private final ShutdownProcedure shutdownProcedure;
-  private final WsService         wsService;
-
-  public Scam() {
-    this.wsService         = new WsService(new BlockingWaitStrategy(), WS_BUFFER_SIZE);
-    this.shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
-  }
+  private       ShutdownProcedure shutdownProcedure;
 
   @Override
+  @SuppressWarnings("unchecked")
   public void run() {
+    WsService wsService = new WsService(
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { new ScamHandler() }
+    );
+
+    shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
     Futures.addCallback(wsService.getShutdownFuture(), this);
     wsService.start();
   }
