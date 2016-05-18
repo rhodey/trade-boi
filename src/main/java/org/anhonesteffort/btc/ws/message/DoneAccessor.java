@@ -18,19 +18,32 @@
 package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.ws.WsException;
 
 public class DoneAccessor extends MarketAccessor {
 
-  public String getOrderType(JsonNode root) {
-    return root.get("order_type").textValue();
+  public String getOrderType(JsonNode root) throws WsException {
+    if (root.get("order_type") != null && root.get("order_type").isTextual()) {
+      return root.get("order_type").textValue();
+    } else {
+      throw new WsException("done message has invalid order_type");
+    }
   }
 
-  public String getOrderId(JsonNode root) {
-    return root.get("order_id").textValue();
+  public String getOrderId(JsonNode root) throws WsException {
+    if (root.get("order_id") != null && root.get("order_id").isTextual()) {
+      return root.get("order_id").textValue();
+    } else {
+      throw new WsException("done message has invalid order_id");
+    }
   }
 
-  public String getReason(JsonNode root) {
-    return root.get("reason").textValue();
+  public String getReason(JsonNode root) throws WsException {
+    if (root.get("reason") != null && root.get("reason").isTextual()) {
+      return root.get("reason").textValue();
+    } else {
+      throw new WsException("done message has invalid reason");
+    }
   }
 
   public double getPrice(JsonNode root) {
