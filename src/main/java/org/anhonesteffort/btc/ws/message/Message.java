@@ -17,10 +17,6 @@
 
 package org.anhonesteffort.btc.ws.message;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import java.io.IOException;
-
 public class Message {
 
   public static final String TYPE_RECEIVED = "received";
@@ -29,29 +25,5 @@ public class Message {
   public static final String TYPE_DONE     = "done";
   public static final String TYPE_CHANGE   = "change";
   public static final String TYPE_ERROR    = "error";
-
-  protected JsonNode root;
-  protected String   type;
-
-  protected Message() { }
-
-  protected void init(JsonNode root) throws IOException {
-    this.root = root;
-
-    if (root.get("type") != null && !root.get("type").isNull()) {
-      this.type = root.get("type").textValue();
-    } else {
-      throw new IOException("json root has invalid type tag");
-    }
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  @Override
-  public String toString() {
-    return "type: " + type;
-  }
 
 }

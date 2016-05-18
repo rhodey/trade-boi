@@ -17,26 +17,28 @@
 
 package org.anhonesteffort.btc.ws.message;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class ReceivedAccessor extends MarketAccessor {
 
-  public String getOrderType(Message message) {
-    return message.root.get("order_type").textValue();
+  public String getOrderType(JsonNode root) {
+    return root.get("order_type").textValue();
   }
 
-  public String getOrderId(Message message) {
-    return message.root.get("order_id").textValue();
+  public String getOrderId(JsonNode root) {
+    return root.get("order_id").textValue();
   }
 
-  public double getSize(Message message) {
-    return doubleValueOrNeg(message.root, "size");
+  public double getSize(JsonNode root) {
+    return doubleValueOrNeg(root, "size");
   }
 
-  public double getPrice(Message message) {
-    return doubleValueOrNeg(message.root, "price");
+  public double getPrice(JsonNode root) {
+    return doubleValueOrNeg(root, "price");
   }
 
-  public double getFunds(Message message) {
-    return doubleValueOrNeg(message.root, "funds");
+  public double getFunds(JsonNode root) {
+    return doubleValueOrNeg(root, "funds");
   }
 
 }

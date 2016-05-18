@@ -17,22 +17,24 @@
 
 package org.anhonesteffort.btc.ws.message;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class MarketAccessor extends Accessor {
 
-  public long getSequence(Message message) {
-    return message.root.get("sequence").longValue();
+  public long getSequence(JsonNode root) {
+    return root.get("sequence").longValue();
   }
 
-  public String getTime(Message message) {
-    return message.root.get("time").textValue();
+  public String getTime(JsonNode root) {
+    return root.get("time").textValue();
   }
 
-  public String getProductId(Message message) {
-    return message.root.get("product_id").textValue();
+  public String getProductId(JsonNode root) {
+    return root.get("product_id").textValue();
   }
 
-  public String getSide(Message message) {
-    return message.root.get("side").textValue();
+  public String getSide(JsonNode root) {
+    return root.get("side").textValue();
   }
 
 }
