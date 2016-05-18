@@ -36,8 +36,8 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE  = 262144;
-  private static final Integer ORDER_POOL_SIZE = 262144;
+  private static final Integer WS_BUFFER_SIZE  = 32768;
+  private static final Integer ORDER_POOL_SIZE = 32768;
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
