@@ -24,7 +24,8 @@ public class OrderEvent {
   public enum Type {
     LIMIT_RX, MARKET_RX, LIMIT_OPEN,
     LIMIT_DONE, MARKET_DONE, MATCH,
-    LIMIT_CHANGE, MARKET_CHANGE
+    LIMIT_CHANGE, MARKET_CHANGE,
+    REBUILD_START, REBUILD_END
   }
 
   private Type       type;
@@ -90,6 +91,14 @@ public class OrderEvent {
 
   public void initMarketChange(String orderId, Order.Side side, double oldSize, double newSize, double oldFunds, double newFunds) {
     init(Type.MARKET_CHANGE, orderId, side, 0, 0, 0, null, null, oldSize, newSize, oldFunds, newFunds);
+  }
+
+  public void initRebuildStart() {
+    init(Type.REBUILD_START, null, null, 0, 0, 0, null, null, 0, 0, 0, 0);
+  }
+
+  public void initRebuildEnd() {
+    init(Type.REBUILD_END, null, null, 0, 0, 0, null, null, 0, 0, 0, 0);
   }
 
   public Type getType() {

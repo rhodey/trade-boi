@@ -17,17 +17,14 @@
 
 package org.anhonesteffort.btc;
 
-import com.lmax.disruptor.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class OrderEventException extends Exception {
 
-public class ScamHandler implements EventHandler<OrderEvent> {
+  public OrderEventException(String message) {
+    super(message);
+  }
 
-  private static final Logger log = LoggerFactory.getLogger(ScamHandler.class);
-
-  @Override
-  public void onEvent(OrderEvent orderEvent, long sequence, boolean endOfBatch) {
-    log.info("received -> " + orderEvent.getType());
+  public OrderEventException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
+import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,11 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
+    HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
+    OrderBookBuilder        builder = new OrderBookBuilder(book);
+
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { new ScamHandler() }
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);

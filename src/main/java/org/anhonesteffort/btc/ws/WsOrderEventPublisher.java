@@ -122,8 +122,16 @@ public class WsOrderEventPublisher {
   }
 
   public void publishBook(OrderBookResponse book) {
+    OrderEvent event = takeNextEvent();
+    event.initRebuildStart();
+    publishCurrentEvent();
+
     book.getAsks().forEach(this::publishBookOrder);
     book.getBids().forEach(this::publishBookOrder);
+
+    event = takeNextEvent();
+    event.initRebuildEnd();
+    publishCurrentEvent();
   }
 
 }
