@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.event.OrderBookBuilder;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
@@ -34,7 +35,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
-  private static final Integer WS_BUFFER_SIZE = 262144;
+
+  private static final Integer WS_BUFFER_SIZE  = 262144;
+  private static final Integer ORDER_POOL_SIZE = 262144;
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
@@ -44,7 +47,8 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @SuppressWarnings("unchecked")
   public void run() {
     HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
-    OrderBookBuilder        builder = new OrderBookBuilder(book);
+    OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 1);
+    OrderBookBuilder        builder = new OrderBookBuilder(book, pool);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }

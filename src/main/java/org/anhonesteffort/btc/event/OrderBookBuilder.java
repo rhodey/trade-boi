@@ -17,46 +17,31 @@
 
 package org.anhonesteffort.btc.event;
 
-import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class OrderBookBuilder implements EventHandler<OrderEvent> {
+public class OrderBookBuilder extends PooledOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(OrderBookBuilder.class);
 
-  private final OrderFactory factory = new OrderFactory();
-  private final HeuristicLimitOrderBook book;
-  private boolean rebuilding = false;
-
-  public OrderBookBuilder(HeuristicLimitOrderBook book) {
-    this.book = book;
+  public OrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+    super(book, pool);
   }
 
   @Override
-  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException {
+  protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
-      case REBUILD_START:
-        book.clear();
-        rebuilding = true;
-        log.info("rebuilding order book");
-        break;
-
-      case REBUILD_END:
-        rebuilding = false;
-        log.info("order book rebuild complete");
-        break;
-
       case LIMIT_OPEN:
-        Order      order  = factory.createLimitOrder(event);
+        Order      order  = takePooledLimitOrder(event);
         TakeResult result = book.add(order);
         if (result.getTakeSize() <= 0) {
-          if (!rebuilding) { log.info("opened new limit order " + order.getOrderId()); }
+          if (!isRebuilding()) { log.info("opened new limit order " + order.getOrderId()); }
         } else {
           throw new OrderEventException("opened limit order took from the book");
         }
@@ -64,8 +49,9 @@ public class OrderBookBuilder implements EventHandler<OrderEvent> {
 
       case LIMIT_DONE:
         Optional<Order> removed = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (removed.isPresent() && !rebuilding) {
+        if (removed.isPresent()) {
           log.info("removed limit order " + removed.get().getOrderId());
+          returnPooledOrder(removed.get());
         }
         break;
 
@@ -74,6 +60,9 @@ public class OrderBookBuilder implements EventHandler<OrderEvent> {
         Optional<Order> changed = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
         if (changed.isPresent()) {
           log.info("!!! changed limit order " + event.getOrderId() + " by " + reduce + " !!!");
+          if (changed.get().getSizeRemaining() <= 0) {
+            returnPooledOrder(changed.get());
+          }
         } else {
           throw new OrderEventException("changed limit order not found in the book");
         }
