@@ -32,7 +32,7 @@ public class OrderBookResponse {
   private final long sequence;
 
   public OrderBookResponse(JsonNode root) throws IOException, NumberFormatException {
-    if (root.get("sequence") != null) {
+    if (root.get("sequence") != null && root.get("sequence").isNumber()) {
       this.sequence = root.get("sequence").longValue();
     } else {
       throw new IOException("json root has invalid sequence tag");
