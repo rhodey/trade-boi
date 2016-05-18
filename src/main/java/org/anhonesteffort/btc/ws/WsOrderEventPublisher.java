@@ -27,7 +27,6 @@ import org.anhonesteffort.btc.ws.message.ChangeAccessor;
 import org.anhonesteffort.btc.ws.message.DoneAccessor;
 import org.anhonesteffort.btc.ws.message.Accessor;
 import org.anhonesteffort.btc.ws.message.MatchAccessor;
-import org.anhonesteffort.btc.ws.message.Message;
 import org.anhonesteffort.btc.ws.message.OpenAccessor;
 import org.anhonesteffort.btc.ws.message.ReceivedAccessor;
 
@@ -73,7 +72,7 @@ public class WsOrderEventPublisher {
     OrderEvent event = takeNextEvent();
 
     switch (type) {
-      case Message.TYPE_RECEIVED:
+      case Accessor.TYPE_RECEIVED:
         if (receive.getOrderType(root).equals("limit")) {
           event.initLimitRx(receive.getOrderId(root), side, receive.getPrice(root), receive.getSize(root));
         } else if (receive.getOrderType(root).equals("market")) {
@@ -83,15 +82,15 @@ public class WsOrderEventPublisher {
         }
         break;
 
-      case Message.TYPE_MATCH:
+      case Accessor.TYPE_MATCH:
         event.initMatch(match.getMakerOrderId(root), match.getTakerOrderId(root), side, match.getPrice(root), match.getSize(root));
         break;
 
-      case Message.TYPE_OPEN:
+      case Accessor.TYPE_OPEN:
         event.initLimitOpen(open.getOrderId(root), side, open.getPrice(root), open.getRemainingSize(root));
         break;
 
-      case Message.TYPE_DONE:
+      case Accessor.TYPE_DONE:
         if (done.getOrderType(root).equals("limit")) {
           event.initLimitDone(done.getOrderId(root), side, done.getPrice(root), done.getRemainingSize(root));
         } else if (done.getOrderType(root).equals("market")) {
@@ -101,7 +100,7 @@ public class WsOrderEventPublisher {
         }
         break;
 
-      case Message.TYPE_CHANGE:
+      case Accessor.TYPE_CHANGE:
         if (change.getPrice(root) > 0) {
           event.initLimitChange(change.getOrderId(root), side, change.getPrice(root), change.getOldSize(root), change.getNewSize(root));
         } else {

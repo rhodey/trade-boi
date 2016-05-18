@@ -22,6 +22,13 @@ import org.anhonesteffort.btc.ws.WsException;
 
 public class Accessor {
 
+  public static final String TYPE_RECEIVED = "received";
+  public static final String TYPE_MATCH    = "match";
+  public static final String TYPE_OPEN     = "open";
+  public static final String TYPE_DONE     = "done";
+  public static final String TYPE_CHANGE   = "change";
+  public static final String TYPE_ERROR    = "error";
+
   protected double doubleValueOrZero(JsonNode root, String tag) {
     return (root.get(tag) == null) ? 0 : root.get(tag).asDouble(0);
   }

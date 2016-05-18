@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 import org.anhonesteffort.btc.ws.message.Accessor;
-import org.anhonesteffort.btc.ws.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +59,15 @@ public class WsMessageSorter {
   public void sort(JsonNode root) throws WsException, InterruptedException, ExecutionException {
     String type = accessor.getType(root);
     switch (type) {
-      case Message.TYPE_RECEIVED:
-      case Message.TYPE_MATCH:
-      case Message.TYPE_OPEN:
-      case Message.TYPE_DONE:
-      case Message.TYPE_CHANGE:
+      case Accessor.TYPE_RECEIVED:
+      case Accessor.TYPE_MATCH:
+      case Accessor.TYPE_OPEN:
+      case Accessor.TYPE_DONE:
+      case Accessor.TYPE_CHANGE:
         checkSeqAndPublish(root, type, accessor.getSequence(root));
         break;
 
-      case Message.TYPE_ERROR:
+      case Accessor.TYPE_ERROR:
         throw new WsException("received error message -> " + root.get("message"));
 
       default:
