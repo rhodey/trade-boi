@@ -26,12 +26,12 @@ public class OrderPool {
 
   private final Queue<Order>       limitOrders;
   private final Queue<MarketOrder> marketOrders;
-  private final Map<Long, Order>   removed;
+  private final Map<Long, Order>   taken;
 
   public OrderPool(int initLimitCapacity, int initMarketCapacity) {
     limitOrders  = new ArrayDeque<>(initLimitCapacity);
     marketOrders = new ArrayDeque<>(initMarketCapacity);
-    removed      = new HashMap<>(initLimitCapacity + initMarketCapacity);
+    taken        = new HashMap<>(initLimitCapacity + initMarketCapacity);
 
     long serial = 0;
     for (int i = 0; i < initLimitCapacity; i++) {
@@ -43,17 +43,17 @@ public class OrderPool {
   }
 
   public Order take(String orderId, Order.Side side, double price, double size) {
-    Order taken = limitOrders.remove();
-    taken.init(orderId, side, price, size);
-    removed.put(taken.serial, taken);
-    return taken;
+    Order take = limitOrders.remove();
+    take.init(orderId, side, price, size);
+    taken.put(take.serial, take);
+    return take;
   }
 
   public MarketOrder takeMarket(String orderId, Order.Side side, double size, double funds) {
-    MarketOrder taken = marketOrders.remove();
-    taken.initMarket(orderId, side, size, funds);
-    removed.put(taken.serial, taken);
-    return taken;
+    MarketOrder take = marketOrders.remove();
+    take.initMarket(orderId, side, size, funds);
+    taken.put(take.serial, take);
+    return take;
   }
 
   public void returnOrder(Order order) {
@@ -62,18 +62,18 @@ public class OrderPool {
     } else {
       limitOrders.add(order);
     }
-    removed.remove(order.serial);
+    taken.remove(order.serial);
   }
 
   public void returnAll() {
-    removed.keySet().stream().map(removed::get).forEach(order -> {
+    taken.keySet().stream().map(taken::get).forEach(order -> {
       if (order instanceof MarketOrder) {
         marketOrders.add((MarketOrder) order);
       } else {
         limitOrders.add(order);
       }
     });
-    removed.clear();
+    taken.clear();
   }
 
 }
