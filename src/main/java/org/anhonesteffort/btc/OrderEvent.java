@@ -88,7 +88,7 @@ public class OrderEvent {
     init(Type.LIMIT_CHANGE, orderId, side, price, 0, 0, null, null, oldSize, newSize, 0, 0);
   }
 
-  public void initMarkteChange(String orderId, Order.Side side, double oldSize, double newSize, double oldFunds, double newFunds) {
+  public void initMarketChange(String orderId, Order.Side side, double oldSize, double newSize, double oldFunds, double newFunds) {
     init(Type.MARKET_CHANGE, orderId, side, 0, 0, 0, null, null, oldSize, newSize, oldFunds, newFunds);
   }
 

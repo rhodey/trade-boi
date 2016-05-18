@@ -18,11 +18,16 @@
 package org.anhonesteffort.btc.ws.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.anhonesteffort.btc.ws.WsException;
 
 public class ChangeAccessor extends Accessor {
 
-  public String getOrderId(JsonNode root) {
-    return root.get("order_id").textValue();
+  public String getOrderId(JsonNode root) throws WsException {
+    if (root.get("order_id") != null && root.get("order_id").isTextual()) {
+      return root.get("order_id").textValue();
+    } else {
+      throw new WsException("change message has invalid order_id");
+    }
   }
 
   public double getNewSize(JsonNode root) {

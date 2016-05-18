@@ -105,7 +105,7 @@ public class WsOrderEventPublisher {
         if (change.getPrice(root) > 0) {
           event.initLimitChange(change.getOrderId(root), side, change.getPrice(root), change.getOldSize(root), change.getNewSize(root));
         } else {
-          event.initMarkteChange(change.getOrderId(root), side, change.getOldSize(root), change.getNewSize(root), change.getOldFunds(root), change.getNewFunds(root));
+          event.initMarketChange(change.getOrderId(root), side, change.getOldSize(root), change.getNewSize(root), change.getOldFunds(root), change.getNewFunds(root));
         }
         break;
 
