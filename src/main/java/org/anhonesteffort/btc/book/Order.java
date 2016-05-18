@@ -21,6 +21,7 @@ public class Order {
 
   public enum Side { ASK, BID }
 
+  protected final long serial;
   protected String orderId;
   protected Side   side;
   protected double price;
@@ -28,7 +29,8 @@ public class Order {
   protected double sizeRemaining;
   protected double valueRemoved;
 
-  public Order(String orderId, Side side, double price, double size) {
+  public Order(long serial, String orderId, Side side, double price, double size) {
+    this.serial = serial;
     init(orderId, side, price, size);
   }
 

@@ -18,31 +18,41 @@
 package org.anhonesteffort.btc.book;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
-import java.util.stream.IntStream;
 
 public class OrderPool {
 
   private final Queue<Order>       limitOrders;
   private final Queue<MarketOrder> marketOrders;
+  private final Map<Long, Order>   removed;
 
-  public OrderPool(int limitOrderCapacity, int marketOrderCapacity) {
-    limitOrders  = new ArrayDeque<>(limitOrderCapacity);
-    marketOrders = new ArrayDeque<>(marketOrderCapacity);
+  public OrderPool(int initLimitCapacity, int initMarketCapacity) {
+    limitOrders  = new ArrayDeque<>(initLimitCapacity);
+    marketOrders = new ArrayDeque<>(initMarketCapacity);
+    removed      = new HashMap<>(initLimitCapacity + initMarketCapacity);
 
-    IntStream.range(0, limitOrderCapacity).forEach(i -> limitOrders.add(new Order(null, null, -1, -1)));
-    IntStream.range(0, marketOrderCapacity).forEach(i -> marketOrders.add(new MarketOrder(null, null, -1, -1)));
+    long serial = 0;
+    for (int i = 0; i < initLimitCapacity; i++) {
+      limitOrders.add(new Order(serial++, null, null, -1, -1));
+    }
+    for (int i = 0; i < initMarketCapacity; i++) {
+      marketOrders.add(new MarketOrder(serial++, null, null, -1, -1));
+    }
   }
 
   public Order take(String orderId, Order.Side side, double price, double size) {
     Order taken = limitOrders.remove();
     taken.init(orderId, side, price, size);
+    removed.put(taken.serial, taken);
     return taken;
   }
 
   public MarketOrder takeMarket(String orderId, Order.Side side, double size, double funds) {
     MarketOrder taken = marketOrders.remove();
     taken.initMarket(orderId, side, size, funds);
+    removed.put(taken.serial, taken);
     return taken;
   }
 
@@ -52,6 +62,20 @@ public class OrderPool {
     } else {
       limitOrders.add(order);
     }
+    removed.remove(order.serial);
+  }
+
+  public void returnAll() {
+    limitOrders.clear();
+    marketOrders.clear();
+    removed.keySet().stream().map(removed::get).forEach(order -> {
+      if (order instanceof MarketOrder) {
+        marketOrders.add((MarketOrder) order);
+      } else {
+        limitOrders.add(order);
+      }
+    });
+    removed.clear();
   }
 
 }

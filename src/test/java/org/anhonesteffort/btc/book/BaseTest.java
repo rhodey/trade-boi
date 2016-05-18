@@ -20,9 +20,10 @@ package org.anhonesteffort.btc.book;
 public class BaseTest {
 
   private Integer nextOrderId = 0;
+  private long serial = 0;
 
   protected Order newAsk(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.ASK, price, size);
+    return new Order(serial++, orderId, Order.Side.ASK, price, size);
   }
 
   protected Order newAsk(double price, double size) {
@@ -30,7 +31,7 @@ public class BaseTest {
   }
 
   protected MarketOrder newMarketAsk(String orderId, double size, double funds) {
-    return new MarketOrder(orderId, Order.Side.ASK, size, funds);
+    return new MarketOrder(serial++, orderId, Order.Side.ASK, size, funds);
   }
 
   protected MarketOrder newMarketAsk(double size, double funds) {
@@ -38,7 +39,7 @@ public class BaseTest {
   }
 
   protected Order newBid(String orderId, double price, double size) {
-    return new Order(orderId, Order.Side.BID, price, size);
+    return new Order(serial++, orderId, Order.Side.BID, price, size);
   }
 
   protected Order newBid(double price, double size) {
@@ -46,7 +47,7 @@ public class BaseTest {
   }
 
   protected MarketOrder newMarketBid(String orderId, double size, double funds) {
-    return new MarketOrder(orderId, Order.Side.BID, size, funds);
+    return new MarketOrder(serial++, orderId, Order.Side.BID, size, funds);
   }
 
   protected MarketOrder newMarketBid(double size, double funds) {

@@ -64,7 +64,7 @@ public abstract class PooledOrderBookBuilder implements EventHandler<OrderEvent>
   public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException {
     switch (event.getType()) {
       case REBUILD_START:
-        book.clear();
+        book.clear(); // todo: init the pool
         rebuilding = true;
         onRebuildStart();
         break;

@@ -67,6 +67,7 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
   public void onMessage(ResponseBody body) {
     try {
 
+      // todo: test with diff streams
       sorter.sort(reader.readTree(body.byteStream()));
 
     } catch (Throwable e) {

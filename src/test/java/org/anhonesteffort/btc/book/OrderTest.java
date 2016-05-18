@@ -23,7 +23,7 @@ public class OrderTest {
 
   @Test
   public void test() {
-    final Order ORDER = new Order("lol", Order.Side.BID, 10, 20);
+    final Order ORDER = new Order(0, "lol", Order.Side.BID, 10, 20);
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
