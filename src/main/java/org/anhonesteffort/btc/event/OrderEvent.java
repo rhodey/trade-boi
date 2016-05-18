@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc;
+package org.anhonesteffort.btc.event;
 
 import org.anhonesteffort.btc.book.Order;
 

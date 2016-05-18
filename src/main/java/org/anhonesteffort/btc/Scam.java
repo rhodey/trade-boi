@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.event.OrderBookBuilder;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

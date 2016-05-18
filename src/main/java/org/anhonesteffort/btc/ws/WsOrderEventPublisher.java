@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lmax.disruptor.RingBuffer;
-import org.anhonesteffort.btc.OrderEvent;
+import org.anhonesteffort.btc.event.OrderEvent;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 import org.anhonesteffort.btc.http.response.OrderResponse;

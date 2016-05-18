@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc;
+package org.anhonesteffort.btc.event;
 
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
@@ -44,6 +44,15 @@ public class OrderBookBuilder implements EventHandler<OrderEvent> {
 
       case REBUILD_END:
         log.info("order book rebuild complete");
+        break;
+
+      case LIMIT_OPEN:
+        break;
+
+      case LIMIT_DONE:
+        break;
+
+      case LIMIT_CHANGE:
         break;
     }
 
