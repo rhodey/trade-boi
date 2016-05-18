@@ -17,12 +17,13 @@
 
 package org.anhonesteffort.btc.http;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
-import org.anhonesteffort.btc.http.response.ResponseParser;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,9 +31,9 @@ public class HttpClientWrapper {
 
   private static final String API_BASE = "https://api.exchange.coinbase.com";
 
-  private final OkHttpClient   client   = HttpClient.getInstance();
-  private final ResponseParser parser   = new ResponseParser();
-  private final AtomicBoolean  shutdown = new AtomicBoolean(false);
+  private final OkHttpClient  client   = HttpClient.getInstance();
+  private final ObjectReader  reader   = new ObjectMapper().reader();
+  private final AtomicBoolean shutdown = new AtomicBoolean(false);
 
   public void shutdown() {
     shutdown.set(true);
@@ -53,7 +54,7 @@ public class HttpClientWrapper {
     if (!setFailureIfShutdown(future)) {
       client.newCall(new Request.Builder().url(
           API_BASE + "/products/BTC-USD/book?level=3"
-      ).build()).enqueue(new OrderBookCallback(parser, future));
+      ).build()).enqueue(new OrderBookCallback(reader, future));
     }
 
     return future;
