@@ -70,7 +70,13 @@ public class OrderBookBuilder implements EventHandler<OrderEvent> {
         break;
 
       case LIMIT_CHANGE:
-        log.warn("!!! limit change, things might break !!!");
+        double          reduce  = event.getOldSize() - event.getNewSize();
+        Optional<Order> changed = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
+        if (changed.isPresent()) {
+          log.info("!!! changed limit order " + event.getOrderId() + " by " + reduce + " !!!");
+        } else {
+          throw new OrderEventException("changed limit order not found in the book");
+        }
         break;
     }
   }
