@@ -62,7 +62,7 @@ public class LimitQueueTest extends BaseTest {
   }
 
   @Test
-  public void testAddPeekRemoveBids() {
+  public void testAddPeekRemoveClearBids() {
     final LimitQueue BIDS = new LimitQueue(Order.Side.BID);
 
     BIDS.addOrder(newBid("00", 10, 1));
