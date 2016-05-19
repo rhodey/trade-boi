@@ -64,49 +64,44 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
-    if (event.getType().equals(OrderEvent.Type.MATCH)) {
-      Order      taker    = takePooledTakerOrder(event); // market bid order for 0.01btc at $0.0
-      TakeResult result   = book.add(taker);
+    if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 
-      if (result.getMakers().size() > 1) {
-        throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
-      } else if (!isEqual(result.getTakeSize(), taker.getSize())) {
+    Order      taker    = takePooledTakerOrder(event); // market bid order for 0.01btc at $0.0
+    TakeResult result   = book.add(taker);
 
-        log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
-        log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
+    if (!isEqual(result.getTakeSize(), event.getSize())) {
+      log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
+      log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
 
-        if (taker instanceof MarketOrder) {
+      if (taker instanceof MarketOrder) {
+        log.error("taker was market order");
+        Order      lol = new Order(9001, "lol wut", taker.getSide(), event.getPrice(), taker.getSize());
+        TakeResult wut = book.add(lol);
 
-          log.error("taker was market order");
-          Order      lol = new Order(9001, "lol wut", taker.getSide(), event.getPrice(), taker.getSize());
-          TakeResult wut = book.add(lol);
-
-          if (wut.getTakeSize() > 0) {
-            log.error("mock limit taker took " + wut.getTakeSize() + " from " + wut.getMakers().get(0).getOrderId());
-          } else {
-            log.error("mock limit taker did not take, as it should have");
-          }
-
+        if (wut.getTakeSize() > 0) {
+          log.error("mock limit taker took " + wut.getTakeSize() + " from " + wut.getMakers().get(0).getOrderId());
         } else {
-          Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
-          if (maker.isPresent()) {
-            log.error("maker is still on the book with remaining " + maker.get().getSizeRemaining());
-          } else {
-            log.error("maker was not on the book");
-          }
+          log.error("mock limit taker did not take, as it should have");
         }
-
-        throw new OrderEventException(
-            "take size for match event does not agree with our book " +
-                event.getSize() + " vs " + result.getTakeSize()
-        );
-      } else if (taker.getSizeRemaining() > 0) {
-        throw new OrderEventException("taker for match event was left on the book");
       } else {
-        onOrderMatched(taker, result);
-        returnPooledOrder(taker);
-        returnPooledOrders(result);
+        Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
+        if (maker.isPresent()) {
+          log.error("maker is still on the book with remaining " + maker.get().getSizeRemaining());
+        } else {
+          log.error("maker was not on the book");
+        }
       }
+
+      throw new OrderEventException(
+          "take size for match event does not agree with our book " +
+              event.getSize() + " vs " + result.getTakeSize()
+      );
+    } else if (taker.getSizeRemaining() > 0) {
+      throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
+    } else {
+      onOrderMatched(taker, result);
+      returnPooledOrder(taker);
+      returnPooledOrders(result);
     }
   }
 
