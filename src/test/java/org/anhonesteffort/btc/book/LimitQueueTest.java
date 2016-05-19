@@ -156,7 +156,7 @@ public class LimitQueueTest extends BaseTest {
     assert ASK.getSizeRemaining() == 3;
     assert MAKERS.size()          == 0;
 
-    ASK    = newBid(5, 5);
+    ASK    = newAsk(5, 5);
     MAKERS = BIDS.takeLiquidityFromBestLimit(ASK);
     assert ASK.getSizeRemaining()           ==  2;
     assert MAKERS.size()                    ==  2;

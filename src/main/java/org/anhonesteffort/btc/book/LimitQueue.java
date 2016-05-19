@@ -92,10 +92,10 @@ public class LimitQueue {
   private boolean isTaken(Limit maker, Order taker) {
     if (taker instanceof MarketOrder) {
       return ((MarketOrder) taker).getSizeRemainingFor(maker.getPrice()) > 0;
-    } else if (this.side.equals(Order.Side.ASK)) {
-      return maker.getPrice() <= taker.getPrice();
+    } else if (taker.getSide().equals(Order.Side.BID)) {
+      return taker.getPrice() >= maker.getPrice();
     } else {
-      return maker.getPrice() >= taker.getPrice();
+      return taker.getPrice() <= maker.getPrice();
     }
   }
 

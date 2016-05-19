@@ -66,7 +66,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     super.onEvent(event);
     if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 
-    Order      taker    = takePooledTakerOrder(event); // market bid order for 0.01btc at $0.0
+    Order      taker    = takePooledTakerOrder(event); // market BID order for 0.01btc at $0.0
     TakeResult result   = book.add(taker);
 
     if (!isEqual(result.getTakeSize(), event.getSize())) {
@@ -84,12 +84,14 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
           log.error("mock limit taker did not take, as it should have");
         }
       } else {
-        Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
-        if (maker.isPresent()) {
-          log.error("maker is still on the book with remaining " + maker.get().getSizeRemaining());
-        } else {
-          log.error("maker was not on the book");
-        }
+        log.error("taker was limit order");
+      }
+
+      Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
+      if (maker.isPresent()) {
+        log.error("match maker is still on the book with remaining " + maker.get().getSizeRemaining());
+      } else {
+        log.error("match maker was not on the book");
       }
 
       throw new OrderEventException(
