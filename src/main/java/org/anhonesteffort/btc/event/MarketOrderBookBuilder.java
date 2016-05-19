@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.event;
 
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
+import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,8 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     log.info("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
-  protected void onMarketOrderDone(OrderEvent event) {
-    log.info("market order done " + event.getOrderId());
+  protected void onMarketOrderDone(String orderId, Order.Side side) {
+    log.info("market order done " + orderId);
   }
 
   @Override
@@ -67,7 +68,7 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_DONE:
-        onMarketOrderDone(event);
+        onMarketOrderDone(event.getOrderId(), event.getSide());
         break;
     }
   }
