@@ -66,6 +66,14 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
     }
   }
 
+  protected MarketOrder takePooledMarketOrderChange(OrderEvent event) throws OrderEventException {
+    if (event.getNewSize() >= 0 || event.getNewFunds() >= 0) {
+      return pool.takeMarket(event.getOrderId(), event.getSide(), event.getNewSize(), event.getNewFunds());
+    } else {
+      throw new OrderEventException("change market order event has no new size or new funds");
+    }
+  }
+
   protected void returnPooledOrder(Order order) {
     pool.returnOrder(order);
   }

@@ -35,8 +35,8 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     log.info("received new market order " + order.getOrderId());
   }
 
-  protected void onMarketOrderChange(OrderEvent event) {
-    log.info("changed market order " + event.getOrderId());
+  protected void onMarketOrderChange(OrderEvent event, double sizeReduced, double fundsReduced) {
+    log.info("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
   protected void onMarketOrderDone(OrderEvent event) {
@@ -54,7 +54,16 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_CHANGE:
-        onMarketOrderChange(event);
+        if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
+          throw new OrderEventException("market order size and funds can only decrease");
+        }
+
+        double sizeReduced  = event.getOldSize()  - event.getNewSize();
+        double fundsReduced = event.getOldFunds() - event.getNewFunds();
+
+        MarketOrder marketChange = takePooledMarketOrderChange(event);
+        onMarketOrderChange(event, sizeReduced, fundsReduced);
+        returnPooledOrder(marketChange);
         break;
 
       case MARKET_DONE:

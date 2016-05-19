@@ -79,7 +79,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
 
       case LIMIT_CHANGE:
         if (event.getNewSize() >= event.getOldSize()) {
-          throw new OrderEventException("limit old size must be larger than new size");
+          throw new OrderEventException("limit order size can only decrease");
         }
 
         double          reducedBy   = event.getOldSize() - event.getNewSize();
