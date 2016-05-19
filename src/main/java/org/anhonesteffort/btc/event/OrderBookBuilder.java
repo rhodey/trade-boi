@@ -38,8 +38,12 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
     this.pool = pool;
   }
 
-  protected boolean doublesEqual(double one, double two) {
+  protected boolean isEqual(double one, double two) {
     return Math.abs(one - two) < 0.000000001d;
+  }
+
+  protected boolean isLessOrEqual(double one, double two) {
+    return one <= two || (one - two) < 0.000000001d;
   }
 
   protected boolean isRebuilding() {

@@ -70,7 +70,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
       if (result.getMakers().size() > 1) {
         throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
-      } else if (!doublesEqual(result.getTakeSize(), taker.getSize())) {
+      } else if (!isEqual(result.getTakeSize(), taker.getSize())) {
 
         log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
         log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
