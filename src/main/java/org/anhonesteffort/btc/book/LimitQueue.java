@@ -28,7 +28,7 @@ import java.util.Queue;
 
 public class LimitQueue {
 
-  private static final List<Order>        EMPTY = new LinkedList<>();
+  private static final List<Order>        EMPTY = new LinkedList<>(); // todo: ArrayDeque
   private        final Map<Double, Limit> map   = new HashMap<>();
 
   private final Queue<Limit> queue;

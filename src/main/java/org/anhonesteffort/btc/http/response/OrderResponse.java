@@ -57,9 +57,4 @@ public class OrderResponse {
     return size;
   }
 
-  @Override
-  public String toString() {
-    return "side: " + getSide() + ", price: " + getPrice() + ", size: " + getSize() + ", id: " + getOrderId();
-  }
-
 }

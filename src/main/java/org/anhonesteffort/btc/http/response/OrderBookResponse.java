@@ -28,8 +28,8 @@ import java.util.Queue;
 
 public class OrderBookResponse {
 
-  private final Queue<OrderResponse> asks = new PriorityQueue<>(new AskSorter());
-  private final Queue<OrderResponse> bids = new PriorityQueue<>(new BidSorter());
+  private final Queue<OrderResponse> asks = new PriorityQueue<>(new AskSorter()); // todo: ArrayDeque
+  private final Queue<OrderResponse> bids = new PriorityQueue<>(new BidSorter()); // todo: ArrayDeque
   private final long sequence;
 
   public OrderBookResponse(JsonNode root) throws HttpException {

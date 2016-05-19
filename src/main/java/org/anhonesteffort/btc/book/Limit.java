@@ -26,7 +26,7 @@ import java.util.Queue;
 
 public class Limit {
 
-  private final Queue<Order>       orderQueue = new LinkedList<>();
+  private final Queue<Order>       orderQueue = new LinkedList<>(); // todo: ArrayDeque
   private final Map<String, Order> orderMap   = new HashMap<>();
 
   private final double price;
