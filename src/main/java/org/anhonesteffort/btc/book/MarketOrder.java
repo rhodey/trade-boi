@@ -24,14 +24,14 @@ public class MarketOrder extends Order {
   private double volumeRemoved;
 
   public MarketOrder(long serial, String orderId, Side side, double size, double funds) {
-    super(serial, orderId, side, -1, size);
+    super(serial, orderId, side, 0, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0;
   }
 
   protected void initMarket(String orderId, Side side, double size, double funds) {
-    super.init(orderId, side, -1, size);
+    super.init(orderId, side, 0, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0;

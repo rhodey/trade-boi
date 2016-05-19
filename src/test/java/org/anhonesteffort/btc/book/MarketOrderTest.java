@@ -27,7 +27,7 @@ public class MarketOrderTest {
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
-    assert ORDER.getPrice()          <   0;
+    assert ORDER.getPrice()         ==   0;
     assert ORDER.getSize()          == 100;
     assert ORDER.getSizeRemaining() == 100;
     assert ORDER.getValueRemoved()  ==   0;
@@ -56,7 +56,7 @@ public class MarketOrderTest {
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
-    assert ORDER.getPrice()          < 0;
+    assert ORDER.getPrice()         == 0;
     assert ORDER.getSize()           < 0;
     assert ORDER.getSizeRemaining()  < 0;
     assert ORDER.getValueRemoved()  == 0;
@@ -85,7 +85,7 @@ public class MarketOrderTest {
 
     assert ORDER.getOrderId().equals("lol");
     assert ORDER.getSide().equals(Order.Side.BID);
-    assert ORDER.getPrice()          <   0;
+    assert ORDER.getPrice()         ==   0;
     assert ORDER.getSize()          == 100;
     assert ORDER.getSizeRemaining() == 100;
     assert ORDER.getValueRemoved()  ==   0;
