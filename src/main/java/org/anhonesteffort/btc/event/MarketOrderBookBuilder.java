@@ -39,8 +39,8 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     log.info("changed market order " + event.getOrderId());
   }
 
-  protected void onMarketOrderRemoved(OrderEvent event) {
-    log.info("removed market order " + event.getOrderId());
+  protected void onMarketOrderDone(OrderEvent event) {
+    log.info("market order done " + event.getOrderId());
   }
 
   @Override
@@ -58,7 +58,7 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_DONE:
-        onMarketOrderRemoved(event);
+        onMarketOrderDone(event);
         break;
     }
   }
