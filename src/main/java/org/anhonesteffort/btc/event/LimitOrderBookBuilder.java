@@ -46,8 +46,12 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     log.info("!!! changed limit order " + order.getOrderId() + " by " + size + " !!!");
   }
 
-  protected void onLimitOrderRemoved(Order order) {
-    log.info("removed limit order " + order.getOrderId());
+  protected void onLimitOrderCanceled(Order order) {
+    log.info("canceled limit order " + order.getOrderId());
+  }
+
+  protected void onLimitOrderFilled(Order order) {
+    log.info("filled limit order " + order.getOrderId());
   }
 
   @Override
@@ -85,7 +89,11 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
         if (limitDone.isPresent()) {
-          onLimitOrderRemoved(limitDone.get());
+          if (limitDone.get().getSize() > 0) {
+            onLimitOrderCanceled(limitDone.get());
+          } else {
+            onLimitOrderFilled(limitDone.get());
+          }
           returnPooledOrder(limitDone.get());
         }
         break;
