@@ -28,14 +28,10 @@ import java.util.Queue;
 
 public class LimitQueue {
 
-  private static final List<Order>        EMPTY = new LinkedList<>(); // todo: ArrayDeque
-  private        final Map<Double, Limit> map   = new HashMap<>();
-
+  private final Map<Double, Limit> map = new HashMap<>();
   private final Queue<Limit> queue;
-  private final Order.Side   side;
 
   public LimitQueue(Order.Side side) {
-    this.side = side;
     if (side.equals(Order.Side.ASK)) {
       queue = new PriorityQueue<>(new AskSorter());
     } else {
@@ -111,7 +107,7 @@ public class LimitQueue {
 
       return makers;
     } else {
-      return EMPTY;
+      return new LinkedList<>();
     }
   }
 

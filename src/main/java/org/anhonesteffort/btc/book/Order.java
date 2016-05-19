@@ -77,7 +77,7 @@ public class Order {
 
   public double takeSize(double size) {
     double taken   = Math.min(size, sizeRemaining);
-    sizeRemaining  = sizeRemaining - taken;
+    sizeRemaining -= taken;
     valueRemoved  += price * taken;
     return taken;
   }
