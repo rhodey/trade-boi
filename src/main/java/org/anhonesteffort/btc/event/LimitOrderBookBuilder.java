@@ -34,6 +34,10 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     super(book, pool);
   }
 
+  protected void onLimitOrderReceived(Order order) {
+    log.info("received new limit order " + order.getOrderId());
+  }
+
   protected void onLimitOrderOpened(Order order) {
     log.info("opened new limit order " + order.getOrderId());
   }
@@ -49,31 +53,37 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
+      case LIMIT_RX:
+        Order limitRx = takePooledLimitOrder(event);
+        onLimitOrderReceived(limitRx);
+        returnPooledOrder(limitRx);
+        break;
+
       case LIMIT_OPEN:
-        Order      order  = takePooledLimitOrder(event);
-        TakeResult result = book.add(order);
+        Order      limitOpen = takePooledLimitOrder(event);
+        TakeResult result    = book.add(limitOpen);
         if (result.getTakeSize() <= 0) {
-          if (!isRebuilding()) { onLimitOrderOpened(order); }
+          if (!isRebuilding()) { onLimitOrderOpened(limitOpen); }
         } else {
           throw new OrderEventException("opened limit order took from the book");
         }
         break;
 
       case LIMIT_DONE:
-        Optional<Order> removed = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (removed.isPresent()) {
-          onLimitOrderRemoved(removed.get());
-          returnPooledOrder(removed.get());
+        Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
+        if (limitDone.isPresent()) {
+          onLimitOrderRemoved(limitDone.get());
+          returnPooledOrder(limitDone.get());
         }
         break;
 
       case LIMIT_CHANGE:
-        double          reduce  = event.getOldSize() - event.getNewSize();
-        Optional<Order> changed = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
-        if (changed.isPresent()) {
-          onLimitOrderReduced(changed.get(), reduce);
-          if (changed.get().getSizeRemaining() <= 0) {
-            returnPooledOrder(changed.get());
+        double          reduce      = event.getOldSize() - event.getNewSize();
+        Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
+        if (limitChange.isPresent()) {
+          onLimitOrderReduced(limitChange.get(), reduce);
+          if (limitChange.get().getSizeRemaining() <= 0) {
+            returnPooledOrder(limitChange.get());
           }
         } else {
           throw new OrderEventException("changed limit order not found in the book");
