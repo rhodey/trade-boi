@@ -37,8 +37,8 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE  = 32768;
-  private static final Integer ORDER_POOL_SIZE = 32768;
+  private static final Integer WS_BUFFER_SIZE  = 16384;
+  private static final Integer ORDER_POOL_SIZE = 16384;
 
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
@@ -48,7 +48,7 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @SuppressWarnings("unchecked")
   public void run() {
     HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
-    OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 1);
+    OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 64);
     OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool);
 
     WsService wsService = new WsService(
