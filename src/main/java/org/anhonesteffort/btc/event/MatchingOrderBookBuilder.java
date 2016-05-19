@@ -75,7 +75,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
       if (taker instanceof MarketOrder) {
         log.error("taker was market order");
-        Order      mockOrder  = new Order(9001, "lol wut", taker.getSide(), event.getPrice(), event.getSize());
+        Order      mockOrder  = new Order(9001l, "lol wut", taker.getSide(), event.getPrice(), event.getSize());
         TakeResult mockResult = book.add(mockOrder);
 
         if (mockResult.getTakeSize() > 0) {
