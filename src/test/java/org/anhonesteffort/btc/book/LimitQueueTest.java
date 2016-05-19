@@ -92,8 +92,9 @@ public class LimitQueueTest extends BaseTest {
     assert BEST_BID.isPresent();
     assert BEST_BID.get().getPrice()  == 5;
     assert BEST_BID.get().getVolume() == 2;
-    assert BIDS.removeOrder(5d, "03").isPresent();
 
+    BIDS.clear();
+    assert !BIDS.removeOrder(5d, "03").isPresent();
     assert !BIDS.peek().isPresent();
   }
 
