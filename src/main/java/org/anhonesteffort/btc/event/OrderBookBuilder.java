@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.event;
 
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
@@ -46,6 +47,14 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
       return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
       throw new OrderEventException("open limit order event has invalid price or size");
+    }
+  }
+
+  protected MarketOrder takePooledMarketOrder(OrderEvent event) throws OrderEventException {
+    if (event.getSize() > 0 || event.getFunds() > 0) {
+      return pool.takeMarket(event.getOrderId(), event.getSide(), event.getSize(), event.getFunds());
+    } else {
+      throw new OrderEventException("market order event has no size or funds");
     }
   }
 

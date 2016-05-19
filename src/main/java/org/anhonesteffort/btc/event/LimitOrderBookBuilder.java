@@ -42,12 +42,12 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     log.info("opened new limit order " + order.getOrderId());
   }
 
-  protected void onLimitOrderRemoved(Order order) {
-    log.info("removed limit order " + order.getOrderId());
-  }
-
   protected void onLimitOrderReduced(Order order, double size) {
     log.info("!!! changed limit order " + order.getOrderId() + " by " + size + " !!!");
+  }
+
+  protected void onLimitOrderRemoved(Order order) {
+    log.info("removed limit order " + order.getOrderId());
   }
 
   @Override
@@ -69,14 +69,6 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         }
         break;
 
-      case LIMIT_DONE:
-        Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (limitDone.isPresent()) {
-          onLimitOrderRemoved(limitDone.get());
-          returnPooledOrder(limitDone.get());
-        }
-        break;
-
       case LIMIT_CHANGE:
         double          reduce      = event.getOldSize() - event.getNewSize();
         Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
@@ -87,6 +79,14 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
           }
         } else {
           throw new OrderEventException("changed limit order not found in the book");
+        }
+        break;
+
+      case LIMIT_DONE:
+        Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
+        if (limitDone.isPresent()) {
+          onLimitOrderRemoved(limitDone.get());
+          returnPooledOrder(limitDone.get());
         }
         break;
     }

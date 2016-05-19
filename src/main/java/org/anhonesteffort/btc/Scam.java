@@ -23,7 +23,8 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.event.LimitOrderBookBuilder;
+import org.anhonesteffort.btc.event.MarketOrderBookBuilder;
+import org.anhonesteffort.btc.event.OrderBookBuilder;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class Scam implements Runnable, FutureCallback<Void> {
   public void run() {
     HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
     OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 1);
-    LimitOrderBookBuilder   builder = new LimitOrderBookBuilder(book, pool);
+    OrderBookBuilder        builder = new MarketOrderBookBuilder(book, pool);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }
