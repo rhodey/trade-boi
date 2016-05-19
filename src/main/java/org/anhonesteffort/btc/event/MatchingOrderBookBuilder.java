@@ -58,7 +58,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
     if (event.getType().equals(OrderEvent.Type.MATCH)) {
-      Order      taker    = takePooledTakerOrder(event);
+      Order      taker    = takePooledTakerOrder(event); // market ask order for 0.05 at 448.66
       TakeResult result   = book.add(taker);
 
       if (result.getMakers().size() > 1) {
@@ -67,9 +67,9 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
         if (result.getTakeSize() <= 0) {
           Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
           if (maker.isPresent()) {
-            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + " at " + event.getPrice() + " , but it is still open on the book at " + maker.get().getPrice());
+            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + "'d at " + event.getPrice() + " , but it is still open on the book at " + maker.get().getSide() + " " + maker.get().getPrice() + " with " + maker.get().getSizeRemaining() + " remaining");
           } else {
-            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + ", but it was not open on the book");
+            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + "'d, but it was not open on the book");
           }
         }
         throw new OrderEventException(
