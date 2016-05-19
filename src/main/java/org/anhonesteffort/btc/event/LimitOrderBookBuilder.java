@@ -63,7 +63,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         Order      limitOpen = takePooledLimitOrder(event);
         TakeResult result    = book.add(limitOpen);
         if (result.getTakeSize() > 0) {
-          throw new OrderEventException("opened limit order took from the book");
+          throw new OrderEventException("opened limit order took " + result.getTakeSize() + " from the book");
         } else if (!isRebuilding()) {
           onLimitOrderOpened(limitOpen);
         }
