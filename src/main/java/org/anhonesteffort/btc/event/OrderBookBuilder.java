@@ -46,6 +46,10 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
     return one <= two || (one - two) < 0.000000001d;
   }
 
+  protected boolean isGreaterOrEqual(double one, double two) {
+    return one >= two || (two - one) < 0.000000001d;
+  }
+
   protected boolean isRebuilding() {
     return rebuilding;
   }
