@@ -31,7 +31,7 @@ public class MarketOrder extends Order {
   }
 
   protected void initMarket(String orderId, Side side, double size, double funds) {
-    super.init(orderId, side, size, funds);
+    super.init(orderId, side, -1, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0;

@@ -40,13 +40,13 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
         if (!activeMarketOrders.contains(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), 0); // todo: is 0 funds limiting our takes?
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), -1);
         }
       } else {
         if (!activeMarketOrders.contains(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), 0); // todo: is 0 funds limiting our takes?
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), -1);
         }
       }
     } else {
