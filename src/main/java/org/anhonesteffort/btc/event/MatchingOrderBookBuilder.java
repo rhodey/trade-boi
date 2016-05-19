@@ -40,12 +40,8 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
         return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
       }
     } else {
-      throw new OrderEventException("match order event has invalid taker price or size");
+      throw new OrderEventException("match event has invalid taker price or size");
     }
-  }
-
-  protected void onOrderMatched(Order taker, TakeResult result) {
-    log.info("matched order " + taker.getOrderId() + " for size " + result.getTakeSize());
   }
 
   @Override
@@ -68,6 +64,10 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
         returnPooledOrders(result);
       }
     }
+  }
+
+  protected void onOrderMatched(Order taker, TakeResult result) {
+    log.info("matched order " + taker.getOrderId() + " for size " + result.getTakeSize());
   }
 
 }
