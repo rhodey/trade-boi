@@ -22,6 +22,7 @@ import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
+import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
   private static final Logger log = LoggerFactory.getLogger(OrderBookBuilder.class);
 
   protected final HeuristicLimitOrderBook book;
-  private final OrderPool pool;
+  protected final OrderPool pool;
   private boolean rebuilding = false;
 
   public OrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
@@ -76,6 +77,12 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
 
   protected void returnPooledOrder(Order order) {
     pool.returnOrder(order);
+  }
+
+  protected void returnPooledOrders(TakeResult result) {
+    result.getMakers().stream()
+                      .filter(maker -> maker.getSizeRemaining() <= 0)
+                      .forEach(this::returnPooledOrder);
   }
 
   protected void onRebuildStart() { log.info("rebuilding order book"); }
