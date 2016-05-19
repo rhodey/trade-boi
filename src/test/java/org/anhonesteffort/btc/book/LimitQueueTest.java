@@ -208,6 +208,7 @@ public class LimitQueueTest extends BaseTest {
     BID    = newMarketBid(3, -1);
     MAKERS = ASKS.takeLiquidityFromBestLimit(BID);
     assert BID.getVolumeRemoved()           ==  2;
+    assert BID.getSizeRemaining()           ==  1;
     assert MAKERS.size()                    ==  1;
     assert MAKERS.get(0).getPrice()         == 20;
     assert MAKERS.get(0).getSizeRemaining() ==  0;
