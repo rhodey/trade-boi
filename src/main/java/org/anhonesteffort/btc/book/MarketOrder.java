@@ -23,7 +23,7 @@ public class MarketOrder extends Order {
   private double fundsRemaining;
   private double volumeRemoved;
 
-  public MarketOrder(long serial, String orderId, Side side, double size, double funds) {
+  public MarketOrder(Long serial, String orderId, Side side, double size, double funds) {
     super(serial, orderId, side, 0, size);
     this.funds          = funds;
     this.fundsRemaining = funds;

@@ -33,7 +33,7 @@ public class OrderPool {
     marketOrders = new ArrayDeque<>(initMarketCapacity);
     taken        = new HashMap<>(initLimitCapacity + initMarketCapacity);
 
-    long serial = 0;
+    Long serial = 0l;
     for (int i = 0; i < initLimitCapacity; i++) {
       limitOrders.add(new Order(serial++, null, null, -1, -1));
     }
