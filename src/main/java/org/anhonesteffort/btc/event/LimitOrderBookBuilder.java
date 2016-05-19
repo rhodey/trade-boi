@@ -38,12 +38,16 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     log.info("received new limit order " + order.getOrderId());
   }
 
+  protected void onReceivedLimitOrderReduced(Order order, double reducedBy) {
+    log.info("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+  }
+
   protected void onLimitOrderOpened(Order order) {
     log.info("opened new limit order " + order.getOrderId());
   }
 
-  protected void onLimitOrderReduced(Order order, double size) {
-    log.info("!!! changed limit order " + order.getOrderId() + " by " + size + " !!!");
+  protected void onOpenLimitOrderReduced(Order order, double reducedBy) {
+    log.info("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
   protected void onLimitOrderCanceled(Order order) {
@@ -74,15 +78,21 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         break;
 
       case LIMIT_CHANGE:
-        double          reduce      = event.getOldSize() - event.getNewSize();
-        Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reduce);
+        if (event.getNewSize() >= event.getOldSize()) {
+          throw new OrderEventException("limit old size must be larger than new size");
+        }
+
+        double          reducedBy   = event.getOldSize() - event.getNewSize();
+        Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
         if (limitChange.isPresent()) {
-          onLimitOrderReduced(limitChange.get(), reduce);
+          onOpenLimitOrderReduced(limitChange.get(), reducedBy);
           if (limitChange.get().getSizeRemaining() <= 0) {
             returnPooledOrder(limitChange.get());
           }
         } else {
-          throw new OrderEventException("changed limit order not found in the book");
+          Order rxLimitChange = takePooledLimitOrderChange(event);
+          onReceivedLimitOrderReduced(rxLimitChange, reducedBy);
+          returnPooledOrder(rxLimitChange);
         }
         break;
 
