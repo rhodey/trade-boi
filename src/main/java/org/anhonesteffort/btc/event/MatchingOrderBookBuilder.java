@@ -51,10 +51,17 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
       Order      taker    = takePooledTakerOrder(event);
       TakeResult result   = book.add(taker);
 
-      if (result.getTakeSize() != taker.getSize()) {
+      if (result.getTakeSize() > 0) {
+        log.info("matched taker -> " + taker.getOrderId() + " with maker -> " + result.getMakers().get(0).getOrderId());
+        log.info("match event says maker was -> " + event.getMakerId());
+      }
+
+      if (result.getMakers().size() > 1) {
+        throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
+      } else if (result.getTakeSize() != taker.getSize()) {
         throw new OrderEventException(
             "take size for match event does not agree with our book " +
-                taker.getSize() + " vs " + result.getTakeSize()
+                event.getSize() + " vs " + result.getTakeSize()
         );
       } else if (taker.getSizeRemaining() > 0) {
         throw new OrderEventException("taker for match event was left on the book");
