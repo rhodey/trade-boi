@@ -99,9 +99,11 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
         if (limitDone.isPresent()) {
-          if (limitDone.get().getSize() > 0) {
+          if (limitDone.get().getSizeRemaining() > 0) {
+            // todo: check limitDone.get().getSizeRemaining() against event.getSize()
             onLimitOrderCanceled(limitDone.get());
           } else {
+            // todo: should never happen once we implement matching
             onLimitOrderFilled(limitDone.get());
           }
           returnPooledOrder(limitDone.get());
