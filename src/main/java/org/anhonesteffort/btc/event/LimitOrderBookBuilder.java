@@ -90,14 +90,15 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
 
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (limitDone.isPresent()) {
-          if (limitDone.get().getSizeRemaining() > 0) {
-            // todo: check limitDone.get().getSizeRemaining() against event.getSize()
-            onLimitOrderCanceled(limitDone.get());
-          } else {
-            // todo: should never happen once we implement matching
-            onLimitOrderFilled(limitDone.get());
-          }
+        if (limitDone.isPresent() && event.getSize() == 0) {
+          throw new OrderEventException("order for filled order event was still open on the book");
+        } else if (limitDone.isPresent() && limitDone.get().getSizeRemaining() != event.getSize()) {
+          throw new OrderEventException(
+              "order for cancel order event disagrees about size remaining " +
+                  event.getSize() + " vs " + limitDone.get().getSizeRemaining()
+          );
+        } else if (limitDone.isPresent()) {
+          onLimitOrderCanceled(limitDone.get());
           returnPooledOrder(limitDone.get());
         }
         break;
@@ -122,10 +123,6 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
 
   protected void onLimitOrderCanceled(Order order) {
     log.info("canceled limit order " + order.getOrderId());
-  }
-
-  protected void onLimitOrderFilled(Order order) {
-    log.info("filled limit order " + order.getOrderId());
   }
 
 }
