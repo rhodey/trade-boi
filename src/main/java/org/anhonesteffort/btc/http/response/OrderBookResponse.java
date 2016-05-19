@@ -21,15 +21,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpException;
 
-import java.util.Comparator;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class OrderBookResponse {
 
-  private final Queue<OrderResponse> asks = new PriorityQueue<>(new AskSorter()); // todo: ArrayDeque
-  private final Queue<OrderResponse> bids = new PriorityQueue<>(new BidSorter()); // todo: ArrayDeque
+  private final Queue<OrderResponse> asks = new ArrayDeque<>(500);
+  private final Queue<OrderResponse> bids = new ArrayDeque<>(500);
   private final long sequence;
 
   public OrderBookResponse(JsonNode root) throws HttpException {
@@ -64,32 +63,6 @@ public class OrderBookResponse {
 
   public Queue<OrderResponse> getBids() {
     return bids;
-  }
-
-  private static class AskSorter implements Comparator<OrderResponse> {
-    @Override
-    public int compare(OrderResponse ask1, OrderResponse ask2) {
-      if (ask1.getPrice() < ask2.getPrice()) {
-        return -1;
-      } else if (ask1.getPrice() == ask2.getPrice()) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }
-  }
-
-  private static class BidSorter implements Comparator<OrderResponse> {
-    @Override
-    public int compare(OrderResponse bid1, OrderResponse bid2) {
-      if (bid1.getPrice() > bid2.getPrice()) {
-        return -1;
-      } else if (bid1.getPrice() == bid2.getPrice()) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }
   }
 
 }
