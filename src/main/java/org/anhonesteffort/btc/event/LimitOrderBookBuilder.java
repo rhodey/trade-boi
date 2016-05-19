@@ -38,7 +38,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     if (event.getPrice() > 0 && event.getSize() > 0) {
       return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
-      throw new OrderEventException("rx/open limit order event has invalid price or size");
+      throw new OrderEventException("limit order rx/open event has invalid price or size");
     }
   }
 
@@ -46,7 +46,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     if (change.getPrice() > 0 && change.getNewSize() >= 0) {
       return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
     } else {
-      throw new OrderEventException("change limit order event has invalid price or new size");
+      throw new OrderEventException("limit order change event has invalid price or new size");
     }
   }
 

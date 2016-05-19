@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.event;
 
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
-import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
@@ -41,22 +40,6 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
 
   protected boolean isRebuilding() {
     return rebuilding;
-  }
-
-  protected MarketOrder takePooledMarketOrder(OrderEvent event) throws OrderEventException {
-    if (event.getSize() > 0 || event.getFunds() > 0) {
-      return pool.takeMarket(event.getOrderId(), event.getSide(), event.getSize(), event.getFunds());
-    } else {
-      throw new OrderEventException("market order event has no size or funds");
-    }
-  }
-
-  protected MarketOrder takePooledMarketOrderChange(OrderEvent event) throws OrderEventException {
-    if (event.getNewSize() >= 0 || event.getNewFunds() >= 0) {
-      return pool.takeMarket(event.getOrderId(), event.getSide(), event.getNewSize(), event.getNewFunds());
-    } else {
-      throw new OrderEventException("change market order event has no new size or new funds");
-    }
   }
 
   protected void returnPooledOrder(Order order) {

@@ -32,16 +32,20 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     super(book, pool);
   }
 
-  protected void onMarketOrderReceived(MarketOrder order) {
-    log.info("received new market order " + order.getOrderId());
+  protected MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
+    if (marketRx.getSize() > 0 || marketRx.getFunds() > 0) {
+      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
+    } else {
+      throw new OrderEventException("market order rx event has no size or funds");
+    }
   }
 
-  protected void onMarketOrderChange(OrderEvent event, double sizeReduced, double fundsReduced) {
-    log.info("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
-  }
-
-  protected void onMarketOrderDone(String orderId, Order.Side side) {
-    log.info("market order done " + orderId);
+  protected MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
+    if (change.getNewSize() >= 0 || change.getNewFunds() >= 0) {
+      return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
+    } else {
+      throw new OrderEventException("market order change event has no new size or new funds");
+    }
   }
 
   @Override
@@ -71,6 +75,18 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         onMarketOrderDone(event.getOrderId(), event.getSide());
         break;
     }
+  }
+
+  protected void onMarketOrderReceived(MarketOrder order) {
+    log.info("received new market order " + order.getOrderId());
+  }
+
+  protected void onMarketOrderChange(OrderEvent event, double sizeReduced, double fundsReduced) {
+    log.info("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
+  }
+
+  protected void onMarketOrderDone(String orderId, Order.Side side) {
+    log.info("market order done " + orderId);
   }
 
 }
