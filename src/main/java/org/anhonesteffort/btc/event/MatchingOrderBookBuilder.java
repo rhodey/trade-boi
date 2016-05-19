@@ -58,7 +58,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
       if (result.getMakers().size() > 1) {
         throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
-      } else if (result.getTakeSize() != taker.getSize()) {
+      } else if (!doublesEqual(result.getTakeSize(), taker.getSize())) {
         throw new OrderEventException(
             "take size for match event does not agree with our book " +
                 event.getSize() + " vs " + result.getTakeSize()
