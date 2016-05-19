@@ -38,6 +38,9 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
         1. pull order taker_order_id from collection
         2. add taker to the order book
         3. make sure take result agrees with MATCH event
+
+      ^^ this can't work because taker order may be IOC or FOK ^^
+      ^^ and our order book can only simulate GTC              ^^
     */
   }
 
