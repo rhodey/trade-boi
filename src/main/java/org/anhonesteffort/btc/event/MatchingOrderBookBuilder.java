@@ -24,6 +24,8 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
@@ -35,9 +37,17 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
   protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0 && match.getSize() > 0) {
       if (match.getSide().equals(Order.Side.ASK)) {
-        return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
+        if (!activeMarketOrders.contains(match.getTakerId())) {
+          return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
+        } else {
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), 0); // todo: is 0 funds limiting our takes?
+        }
       } else {
-        return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
+        if (!activeMarketOrders.contains(match.getTakerId())) {
+          return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
+        } else {
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), 0); // todo: is 0 funds limiting our takes?
+        }
       }
     } else {
       throw new OrderEventException("match event has invalid taker price or size");
@@ -51,14 +61,17 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
       Order      taker    = takePooledTakerOrder(event);
       TakeResult result   = book.add(taker);
 
-      if (result.getTakeSize() > 0) {
-        log.info("matched taker -> " + taker.getOrderId() + " with maker -> " + result.getMakers().get(0).getOrderId());
-        log.info("match event says maker was -> " + event.getMakerId());
-      }
-
       if (result.getMakers().size() > 1) {
         throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
       } else if (!doublesEqual(result.getTakeSize(), taker.getSize())) {
+        if (result.getTakeSize() <= 0) {
+          Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
+          if (maker.isPresent()) {
+            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + " at " + event.getPrice() + " , but it is still open on the book at " + maker.get().getPrice());
+          } else {
+            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + ", but it was not open on the book");
+          }
+        }
         throw new OrderEventException(
             "take size for match event does not agree with our book " +
                 event.getSize() + " vs " + result.getTakeSize()

@@ -24,9 +24,13 @@ import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MarketOrderBookBuilder.class);
+  protected final Set<String> activeMarketOrders = new HashSet<>();
 
   public MarketOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
     super(book, pool);
@@ -77,16 +81,24 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     }
   }
 
-  protected void onMarketOrderReceived(MarketOrder order) {
-    log.info("received new market order " + order.getOrderId());
+  protected void onMarketOrderReceived(MarketOrder order) throws OrderEventException {
+    if (!activeMarketOrders.add(order.getOrderId())) {
+      throw new OrderEventException("market order " + order.getOrderId() + " already in the active set");
+    } else {
+      log.info("received new market order " + order.getOrderId());
+    }
   }
 
   protected void onMarketOrderChange(OrderEvent event, double sizeReduced, double fundsReduced) {
-    log.info("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
+    log.warn("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
-  protected void onMarketOrderDone(String orderId, Order.Side side) {
-    log.info("market order done " + orderId);
+  protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
+    if (!activeMarketOrders.remove(orderId)) {
+      throw new OrderEventException("market order " + orderId + " was never in the active set");
+    } else {
+      log.info("market order done " + orderId);
+    }
   }
 
 }

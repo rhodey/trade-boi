@@ -110,7 +110,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
   }
 
   protected void onReceivedLimitOrderReduced(Order order, double reducedBy) {
-    log.info("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+    log.warn("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
   protected void onLimitOrderOpened(Order order) {
