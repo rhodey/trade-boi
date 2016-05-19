@@ -32,12 +32,12 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     super(book, pool);
   }
 
-  protected Order takePooledTakerOrder(OrderEvent event) throws OrderEventException {
-    if (event.getPrice() > 0 && event.getSize() > 0) {
-      if (event.getSide().equals(Order.Side.ASK)) {
-        return pool.take(event.getTakerId(), Order.Side.BID, event.getPrice(), event.getSize());
+  protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
+    if (match.getPrice() > 0 && match.getSize() > 0) {
+      if (match.getSide().equals(Order.Side.ASK)) {
+        return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
       } else {
-        return pool.take(event.getTakerId(), Order.Side.ASK, event.getPrice(), event.getSize());
+        return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
       }
     } else {
       throw new OrderEventException("match order event has invalid taker price or size");
