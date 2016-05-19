@@ -18,6 +18,7 @@
 package org.anhonesteffort.btc.event;
 
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
@@ -54,24 +55,47 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     }
   }
 
+  /*
+  1. received market bid order for size 1 with funds -1 and price 0
+  2. limit ask order for size 1 price 10 is on the book
+  3. adding market bid to book does not take limit ask
+   */
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
     if (event.getType().equals(OrderEvent.Type.MATCH)) {
-      Order      taker    = takePooledTakerOrder(event); // market ask order for 0.05 at 448.66
+      Order      taker    = takePooledTakerOrder(event); // market bid order for 0.01btc at $0.0
       TakeResult result   = book.add(taker);
 
       if (result.getMakers().size() > 1) {
         throw new OrderEventException("match event took " + result.getMakers().size() + " makers from the book");
       } else if (!doublesEqual(result.getTakeSize(), taker.getSize())) {
-        if (result.getTakeSize() <= 0) {
+
+        log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
+        log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
+
+        if (taker instanceof MarketOrder) {
+
+          log.error("taker was market order");
+          Order      lol = new Order(9001, "lol wut", taker.getSide(), event.getPrice(), taker.getSize());
+          TakeResult wut = book.add(lol);
+
+          if (wut.getTakeSize() > 0) {
+            log.error("mock limit taker took " + wut.getTakeSize() + " from " + wut.getMakers().get(0).getOrderId());
+          } else {
+            log.error("mock limit taker did not take, as it should have");
+          }
+
+        } else {
           Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
           if (maker.isPresent()) {
-            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + "'d at " + event.getPrice() + " , but it is still open on the book at " + maker.get().getSide() + " " + maker.get().getPrice() + " with " + maker.get().getSizeRemaining() + " remaining");
+            log.error("maker is still on the book with remaining " + maker.get().getSizeRemaining());
           } else {
-            log.error("match event says " + event.getMakerId() + " was " + taker.getSide() + "'d, but it was not open on the book");
+            log.error("maker was not on the book");
           }
         }
+
         throw new OrderEventException(
             "take size for match event does not agree with our book " +
                 event.getSize() + " vs " + result.getTakeSize()

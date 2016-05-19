@@ -91,7 +91,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
         if (limitDone.isPresent() && event.getSize() <= 0) {
-          throw new OrderEventException("order for filled order event was still open on the book");
+          throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
         } else if (limitDone.isPresent() && !doublesEqual(limitDone.get().getSizeRemaining(), event.getSize())) {
           throw new OrderEventException(
               "order for cancel order event disagrees about size remaining " +
