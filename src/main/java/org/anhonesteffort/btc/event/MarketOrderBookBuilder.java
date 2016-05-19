@@ -33,7 +33,9 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
   }
 
   protected MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
-    if (marketRx.getSize() > 0 || marketRx.getFunds() > 0) {
+    if (marketRx.getSize() < 0 || marketRx.getFunds() < 0) {
+      throw new OrderEventException("market order rx event was parsed incorrectly");
+    } else if (marketRx.getSize() > 0 || marketRx.getFunds() > 0) {
       return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
@@ -41,11 +43,7 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
   }
 
   protected MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    if (change.getNewSize() >= 0 || change.getNewFunds() >= 0) {
-      return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
-    } else {
-      throw new OrderEventException("market order change event has no new size or new funds");
-    }
+    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
   }
 
   @Override
@@ -59,7 +57,9 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_CHANGE:
-        if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
+        if (event.getNewSize() < 0 || event.getNewFunds() < 0) {
+          throw new OrderEventException("market order change event was parsed incorrectly");
+        } else if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
           throw new OrderEventException("market order size and funds can only decrease");
         }
 
