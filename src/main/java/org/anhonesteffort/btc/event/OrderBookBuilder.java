@@ -43,22 +43,6 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
     return rebuilding;
   }
 
-  protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
-    if (event.getPrice() > 0 && event.getSize() > 0) {
-      return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
-    } else {
-      throw new OrderEventException("open limit order event has invalid price or size");
-    }
-  }
-
-  protected Order takePooledLimitOrderChange(OrderEvent event) throws OrderEventException {
-    if (event.getPrice() > 0 && event.getNewSize() >= 0) {
-      return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getNewSize());
-    } else {
-      throw new OrderEventException("change limit order event has invalid price or new size");
-    }
-  }
-
   protected MarketOrder takePooledMarketOrder(OrderEvent event) throws OrderEventException {
     if (event.getSize() > 0 || event.getFunds() > 0) {
       return pool.takeMarket(event.getOrderId(), event.getSide(), event.getSize(), event.getFunds());
@@ -85,9 +69,6 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
                       .forEach(this::returnPooledOrder);
   }
 
-  protected void onRebuildStart() { log.info("rebuilding order book"); }
-  protected void onRebuildEnd()   { log.info("order book rebuild complete"); }
-
   protected abstract void onEvent(OrderEvent event) throws OrderEventException;
 
   @Override
@@ -109,5 +90,8 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
         onEvent(event);
     }
   }
+
+  protected void onRebuildStart() { log.info("rebuilding order book"); }
+  protected void onRebuildEnd()   { log.info("order book rebuild complete"); }
 
 }

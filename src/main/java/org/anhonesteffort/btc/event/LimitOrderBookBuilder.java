@@ -34,28 +34,20 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
     super(book, pool);
   }
 
-  protected void onLimitOrderReceived(Order order) {
-    log.info("received new limit order " + order.getOrderId());
+  protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
+    if (event.getPrice() > 0 && event.getSize() > 0) {
+      return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
+    } else {
+      throw new OrderEventException("rx/open limit order event has invalid price or size");
+    }
   }
 
-  protected void onReceivedLimitOrderReduced(Order order, double reducedBy) {
-    log.info("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
-  }
-
-  protected void onLimitOrderOpened(Order order) {
-    log.info("opened new limit order " + order.getOrderId());
-  }
-
-  protected void onOpenLimitOrderReduced(Order order, double reducedBy) {
-    log.info("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
-  }
-
-  protected void onLimitOrderCanceled(Order order) {
-    log.info("canceled limit order " + order.getOrderId());
-  }
-
-  protected void onLimitOrderFilled(Order order) {
-    log.info("filled limit order " + order.getOrderId());
+  protected Order takePooledLimitOrderChange(OrderEvent change) throws OrderEventException {
+    if (change.getPrice() > 0 && change.getNewSize() >= 0) {
+      return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
+    } else {
+      throw new OrderEventException("change limit order event has invalid price or new size");
+    }
   }
 
   @Override
@@ -110,6 +102,30 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         }
         break;
     }
+  }
+
+  protected void onLimitOrderReceived(Order order) {
+    log.info("received new limit order " + order.getOrderId());
+  }
+
+  protected void onReceivedLimitOrderReduced(Order order, double reducedBy) {
+    log.info("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+  }
+
+  protected void onLimitOrderOpened(Order order) {
+    log.info("opened new limit order " + order.getOrderId());
+  }
+
+  protected void onOpenLimitOrderReduced(Order order, double reducedBy) {
+    log.info("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+  }
+
+  protected void onLimitOrderCanceled(Order order) {
+    log.info("canceled limit order " + order.getOrderId());
+  }
+
+  protected void onLimitOrderFilled(Order order) {
+    log.info("filled limit order " + order.getOrderId());
   }
 
 }
