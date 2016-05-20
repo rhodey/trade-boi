@@ -25,6 +25,8 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
@@ -53,6 +55,11 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     }
   }
 
+  /*
+    taker market ask
+    maker limit bid
+   */
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
@@ -62,11 +69,22 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     TakeResult result   = book.add(taker);
 
     if (!isEqual(result.getTakeSize(), event.getSize())) {
-      if (taker instanceof MarketOrder) { log.error("taker was market order"); }
-      else                              { log.error("taker was limit order");  }
-
       log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
       log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
+
+      if (taker instanceof MarketOrder) {
+        log.error("taker was market order");
+        Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
+
+        if (maker.isPresent()) {
+          log.error("maker was in our book on " + maker.get().getSide() + " at " + maker.get().getPrice() + " with " + maker.get().getSizeRemaining());
+        } else {
+          log.error("maker was not in our book");
+        }
+
+      } else {
+        log.error("taker was limit order");
+      }
 
       throw new OrderEventException(
           "take size for match event does not agree with our book " +

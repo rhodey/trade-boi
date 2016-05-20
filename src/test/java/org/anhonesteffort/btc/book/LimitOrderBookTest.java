@@ -305,6 +305,61 @@ public class LimitOrderBookTest extends BaseTest {
     assert RESULT.getMakers().size() == 1;
   }
 
+  /*
+  taker market BID for 0.01367561btc
+  maker limit ASK for 0.01367561btc at 438.75usd
+
+   */
+  @Test
+  public void testThisShitAgain() {
+    final LimitOrderBook BOOK   = new LimitOrderBook();
+    final Order          MAKER  = newAsk(438.75, 0.01367561);
+    final MarketOrder    TAKER  = newMarketBid(0.01367561, -1);
+          TakeResult     RESULT = BOOK.add(MAKER);
+
+    assert TAKER.getSide().equals(Order.Side.BID);
+    assert TAKER.getPrice()                  == 0;
+    assert TAKER.getSize()                   == 0.01367561;
+    assert TAKER.getSizeRemaining()          == 0.01367561;
+    assert TAKER.getValueRemoved()           == 0;
+    assert TAKER.getFunds()                  == -1;
+    assert TAKER.getFundsRemaining()         == -1;
+    assert TAKER.getSizeRemainingFor(438.75) == 0.01367561;
+    assert TAKER.getVolumeRemoved()          == 0;
+
+    assert RESULT.getTakeSize()  == 0;
+    assert RESULT.getTakeValue() == 0;
+    assert RESULT.getMakers().isEmpty();
+
+    assert MAKER.getSide().equals(Order.Side.ASK);
+    assert MAKER.getPrice()         == 438.75;
+    assert MAKER.getSize()          == 0.01367561;
+    assert MAKER.getSizeRemaining() == 0.01367561;
+    assert MAKER.getValueRemoved()  == 0;
+
+
+    RESULT = BOOK.add(TAKER);
+    assert RESULT.getTakeSize()      == 0.01367561;
+    assert RESULT.getTakeValue()     == (438.75 * 0.01367561);
+    assert RESULT.getMakers().size() == 1;
+
+    assert MAKER.getSide().equals(Order.Side.ASK);
+    assert MAKER.getPrice()         == 438.75;
+    assert MAKER.getSize()          == 0.01367561;
+    assert MAKER.getSizeRemaining() == 0;
+    assert MAKER.getValueRemoved()  == (438.75 * 0.01367561);
+
+    assert TAKER.getSide().equals(Order.Side.BID);
+    assert TAKER.getPrice()                  == 0;
+    assert TAKER.getSize()                   == 0.01367561;
+    assert TAKER.getSizeRemaining()          == 0;
+    assert TAKER.getValueRemoved()           == 0;
+    assert TAKER.getFunds()                  == -1;
+    assert TAKER.getFundsRemaining()         <  0;
+    assert TAKER.getSizeRemainingFor(438.75) == 0;
+    assert TAKER.getVolumeRemoved()          == 0.01367561;
+  }
+
   @Test
   public void testOneMarketSizeBidTakesOneEqualSizeAsk() {
     final LimitOrderBook BOOK   = new LimitOrderBook();

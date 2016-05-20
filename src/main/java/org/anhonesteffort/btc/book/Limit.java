@@ -54,7 +54,7 @@ public class Limit {
   public Optional<Order> remove(String orderId) {
     Optional<Order> order = Optional.ofNullable(orderMap.remove(orderId));
     if (order.isPresent()) {
-      orderQueue.remove(order.get());
+      if (!orderQueue.remove(order.get())) { throw new IllegalStateException("f12"); }
       volume -= order.get().getSizeRemaining();
     }
     return order;
@@ -67,7 +67,7 @@ public class Limit {
       volume -= size;
       if (order.get().getSizeRemaining() <= 0) {
         orderMap.remove(orderId);
-        orderQueue.remove(order.get());
+        if (!orderQueue.remove(order.get())) { throw new IllegalStateException("f12"); }
       }
     }
     return order;

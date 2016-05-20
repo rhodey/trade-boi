@@ -59,11 +59,11 @@ public class MarketOrder extends Order {
   public double getSizeRemainingFor(double price) {
     double fundsTakeSize = fundsRemaining / price;
 
-    if (funds >= 0 && size >= 0) {
+    if (funds > 0 && size > 0) {
       return Math.min(fundsTakeSize, sizeRemaining);
-    } else if (funds >= 0) {
+    } else if (funds > 0) {
       return fundsTakeSize;
-    } else if (size >= 0) {
+    } else if (size > 0) {
       return sizeRemaining;
     } else {
       return 0;
