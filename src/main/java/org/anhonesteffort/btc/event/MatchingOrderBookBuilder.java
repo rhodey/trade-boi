@@ -25,8 +25,6 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
 public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
@@ -55,55 +53,39 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     }
   }
 
-  /*
-  1. received market bid order for size 1 with funds -1 and price 0
-  2. limit ask order for size 1 price 10 is on the book
-  3. adding market bid to book does not take limit ask
-   */
-
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
     if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 
-    Order      taker    = takePooledTakerOrder(event); // market BID order for 0.01btc at $0.0
+    Order      taker    = takePooledTakerOrder(event);
     TakeResult result   = book.add(taker);
 
     if (!isEqual(result.getTakeSize(), event.getSize())) {
+      if (taker instanceof MarketOrder) { log.error("taker was market order"); }
+      else                              { log.error("taker was limit order");  }
+
       log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
       log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
-
-      if (taker instanceof MarketOrder) {
-        log.error("taker was market order");
-        Order      mockOrder  = new Order(9001l, "lol wut", taker.getSide(), event.getPrice(), event.getSize());
-        TakeResult mockResult = book.add(mockOrder);
-
-        if (mockResult.getTakeSize() > 0) {
-          log.error("mock limit taker took " + mockResult.getTakeSize() + " from " + mockResult.getMakers().get(0).getOrderId());
-        } else {
-          log.error("mock limit taker did not take, as it should have");
-        }
-      } else {
-        log.error("taker was limit order");
-      }
-
-      Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
-      if (maker.isPresent()) {
-        log.error("match maker is still on the book with remaining " + maker.get().getSizeRemaining());
-      } else {
-        log.error("match maker was not on the book");
-      }
 
       throw new OrderEventException(
           "take size for match event does not agree with our book " +
               event.getSize() + " vs " + result.getTakeSize()
       );
-    } else if (taker.getSizeRemaining() > 0) {
-      throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
-    } else {
+    } else if (taker.getSizeRemaining() <= 0) {
       onOrderMatched(taker, result);
       returnPooledOrder(taker);
       returnPooledOrders(result);
+    } else if (isEqual(taker.getSizeRemaining(), 0)) {
+      if (book.remove(taker.getSide(), event.getPrice(), taker.getOrderId()).isPresent()) {
+        onOrderMatched(taker, result);
+        returnPooledOrder(taker);
+        returnPooledOrders(result);
+      } else {
+        throw new OrderEventException("taker for match event has size remaining but not found in book");
+      }
+    } else {
+      throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
     }
   }
 
