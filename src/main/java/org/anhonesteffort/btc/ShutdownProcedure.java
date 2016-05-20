@@ -57,7 +57,7 @@ public class ShutdownProcedure implements Runnable {
     @Override
     public Void call() throws InterruptedException {
       // todo: close all open orders
-      Thread.sleep(5000);
+      Thread.sleep(1000);
       return null;
     }
 
