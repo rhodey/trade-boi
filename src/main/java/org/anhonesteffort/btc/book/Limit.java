@@ -46,6 +46,10 @@ public class Limit {
     return volume;
   }
 
+  public Optional<Order> peek() {
+    return Optional.ofNullable(orderQueue.peek());
+  }
+
   public void add(Order order) {
     orderMap.put(order.getOrderId(), order);
     orderQueue.add(order);
@@ -89,7 +93,7 @@ public class Limit {
 
       if (maker.get().getSizeRemaining() <= 0) {
         orderMap.remove(maker.get().getOrderId());
-        orderQueue.remove();
+        if (!orderQueue.remove().equals(maker.get())) { throw new IllegalStateException("f12"); }
       }
 
       volume -= volumeRemoved;

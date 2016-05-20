@@ -25,8 +25,6 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
 public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
@@ -69,21 +67,21 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     TakeResult result   = book.add(taker);
 
     if (!isEqual(result.getTakeSize(), event.getSize())) {
-      log.error("taker order side " + taker.getSide() + ", price " + taker.getPrice() + ", size " + taker.getSize() + ", remaining " + taker.getSizeRemaining());
-      log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
+      log.error("taker order " + taker.getOrderId() + " side " + taker.getSide() + " price " + taker.getPrice() + " size " + taker.getSize());
+      log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + event.getPrice() + " size " + event.getSize());
 
       if (taker instanceof MarketOrder) {
         log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(event.getPrice()));
-        Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
 
-        if (maker.isPresent()) {
-          log.error("maker was in our book on " + maker.get().getSide() + " at " + maker.get().getPrice() + " with " + maker.get().getSizeRemaining());
+        if (taker.getSide().equals(Order.Side.BID)) {
+          Order bestAsk = book.getAskLimits().peek().get().peek().get();
+          log.error("best maker ask on the book is " + bestAsk.getOrderId() + " side " + bestAsk.getSide() + " price " + bestAsk.getPrice() + " size " + bestAsk.getSizeRemaining());
         } else {
-          log.error("maker was not in our book");
+          Order bestBid = book.getBidLimits().peek().get().peek().get();
+          log.error("best maker bid on the book is " + bestBid.getOrderId() + " side " + bestBid.getSide() + " price " + bestBid.getPrice() + " size " + bestBid.getSizeRemaining());
         }
-
       } else {
-        log.error("taker was limit order");
+        log.error("taker was limit order with remaining " + taker.getSizeRemaining());
       }
 
       throw new OrderEventException(

@@ -100,4 +100,12 @@ public class LimitOrderBook {
     bidLimits.clear();
   }
 
+  public LimitQueue getAskLimits() {
+    return askLimits;
+  }
+
+  public LimitQueue getBidLimits() {
+    return bidLimits;
+  }
+
 }
