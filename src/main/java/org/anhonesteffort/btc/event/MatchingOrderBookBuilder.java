@@ -73,7 +73,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
       log.error("maker order side " + event.getSide() + ", price " + event.getPrice() + ", size " + event.getSize());
 
       if (taker instanceof MarketOrder) {
-        log.error("taker was market order");
+        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(event.getPrice()));
         Optional<Order> maker = book.remove(event.getSide(), event.getPrice(), event.getMakerId());
 
         if (maker.isPresent()) {

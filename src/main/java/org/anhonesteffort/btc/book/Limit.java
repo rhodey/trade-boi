@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc.book;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.Queue;
 
 public class Limit {
 
-  private final Queue<Order>       orderQueue = new LinkedList<>(); // todo: ArrayDeque
+  private final Queue<Order>       orderQueue = new ArrayDeque<>(12);
   private final Map<String, Order> orderMap   = new HashMap<>();
 
   private final double price;
