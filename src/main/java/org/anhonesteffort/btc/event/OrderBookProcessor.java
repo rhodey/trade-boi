@@ -33,6 +33,7 @@ public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
   protected final OrderPool pool;
 
   private boolean rebuilding = false;
+  private long    nsTimeSum  = 0l;
 
   public OrderBookProcessor(LimitOrderBook book, OrderPool pool) {
     this.book = book;
@@ -72,6 +73,13 @@ public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
 
       default:
         onEvent(event);
+    }
+
+    if ((sequence % 50l) == 0l) {
+      log.info("avg latency -> " + (nsTimeSum / 50d) + "ns");
+      nsTimeSum = System.nanoTime() - event.getNsTime();
+    } else {
+      nsTimeSum += System.nanoTime() - event.getNsTime();
     }
   }
 
