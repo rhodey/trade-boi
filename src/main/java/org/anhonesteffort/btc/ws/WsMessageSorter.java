@@ -47,7 +47,7 @@ public class WsMessageSorter {
       OrderBookResponse orderBook = http.geOrderBook().get();
       messageSeqLast = Optional.of(orderBook.getSequence());
       publisher.publishBook(orderBook);
-    } else if (sequence == (messageSeqLast.get() + 1)) {
+    } else if (sequence == (messageSeqLast.get() + 1l)) {
       messageSeqLast = Optional.of(sequence);
       publisher.publishMessage(root, type);
     } else if (sequence > messageSeqLast.get()) {

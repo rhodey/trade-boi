@@ -101,7 +101,7 @@ public class WsOrderEventPublisher {
         break;
 
       case Accessor.TYPE_CHANGE:
-        if (change.getPrice(root) > 0) {
+        if (change.getPrice(root) > 0f) {
           event.initLimitChange(change.getOrderId(root), side, change.getPrice(root), change.getOldSize(root), change.getNewSize(root));
         } else {
           event.initMarketChange(change.getOrderId(root), side, change.getOldSize(root), change.getNewSize(root), change.getOldFunds(root), change.getNewFunds(root));
