@@ -22,7 +22,6 @@ import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
-import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +29,8 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
 
-  public MatchingOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool, LongCaster caster) {
-    super(book, pool, caster);
+  public MatchingOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+    super(book, pool);
   }
 
   protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
