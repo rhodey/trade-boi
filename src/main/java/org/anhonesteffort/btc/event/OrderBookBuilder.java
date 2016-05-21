@@ -42,7 +42,7 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
     this.caster = caster;
   }
 
-  protected long toLong(double value) {
+  protected long toLong(float value) {
     return caster.fromFloat(value);
   }
 
