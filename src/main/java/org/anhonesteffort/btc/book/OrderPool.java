@@ -42,14 +42,14 @@ public class OrderPool {
     }
   }
 
-  public Order take(String orderId, Order.Side side, double price, double size) {
+  public Order take(String orderId, Order.Side side, long price, long size) {
     Order take = limitOrders.remove();
     take.init(orderId, side, price, size);
     taken.put(take.serial, take);
     return take;
   }
 
-  public MarketOrder takeMarket(String orderId, Order.Side side, double size, double funds) {
+  public MarketOrder takeMarket(String orderId, Order.Side side, long size, long funds) {
     MarketOrder take = marketOrders.remove();
     take.initMarket(orderId, side, size, funds);
     taken.put(take.serial, take);
