@@ -22,24 +22,24 @@ import java.util.List;
 public class TakeResult {
 
   private final List<Order> makers;
-  private final double      takeSize;
-  private final double      takeValue;
+  private final long takeSize;
+  private final long takeValue;
 
-  public TakeResult(List<Order> makers, double takeSize) {
+  public TakeResult(List<Order> makers, long takeSize) {
     this.makers    = makers;
     this.takeSize  = takeSize;
-    this.takeValue = makers.stream().mapToDouble(Order::getValueRemoved).sum();
+    this.takeValue = makers.stream().mapToLong(Order::getValueRemoved).sum();
   }
 
   public List<Order> getMakers() {
     return makers;
   }
 
-  public double getTakeSize() {
+  public long getTakeSize() {
     return takeSize;
   }
 
-  public double getTakeValue() {
+  public long getTakeValue() {
     return takeValue;
   }
 
