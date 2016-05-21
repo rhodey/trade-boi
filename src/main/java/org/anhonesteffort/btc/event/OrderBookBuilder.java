@@ -56,7 +56,7 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
 
   protected void returnPooledOrders(TakeResult result) {
     result.getMakers().stream()
-                      .filter(maker -> maker.getSizeRemaining() <= 0)
+                      .filter(maker -> maker.getSizeRemaining() <= 0l)
                       .forEach(this::returnPooledOrder);
   }
 
