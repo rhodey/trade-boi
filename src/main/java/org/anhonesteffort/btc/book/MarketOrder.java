@@ -19,45 +19,45 @@ package org.anhonesteffort.btc.book;
 
 public class MarketOrder extends Order {
 
-  private double funds;
-  private double fundsRemaining;
-  private double volumeRemoved;
+  private long funds;
+  private long fundsRemaining;
+  private long volumeRemoved;
 
-  public MarketOrder(Long serial, String orderId, Side side, double size, double funds) {
+  public MarketOrder(Long serial, String orderId, Side side, long size, long funds) {
     super(serial, orderId, side, 0, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0;
   }
 
-  protected void initMarket(String orderId, Side side, double size, double funds) {
+  protected void initMarket(String orderId, Side side, long size, long funds) {
     super.init(orderId, side, 0, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0;
   }
 
-  public double getFunds() {
+  public long getFunds() {
     return funds;
   }
 
-  public double getFundsRemaining() {
+  public long getFundsRemaining() {
     return fundsRemaining;
   }
 
-  public double getVolumeRemoved() {
+  public long getVolumeRemoved() {
     return volumeRemoved;
   }
 
   @Override
-  protected void subtract(double size, double price) {
+  protected void subtract(long size, long price) {
     super.subtract(size, price);
     fundsRemaining -= (price * size);
     volumeRemoved  += size;
   }
 
-  public double getSizeRemainingFor(double price) {
-    double fundsTakeSize = fundsRemaining / price;
+  public long getSizeRemainingFor(long price) {
+    long fundsTakeSize = fundsRemaining / price;
 
     if (funds > 0 && size > 0) {
       return Math.min(fundsTakeSize, sizeRemaining);

@@ -20,21 +20,21 @@ package org.anhonesteffort.btc.book;
 public class Order {
 
   public enum Side { ASK, BID }
-
   protected final Long serial;
+
   protected String orderId;
   protected Side   side;
-  protected double price;
-  protected double size;
-  protected double sizeRemaining;
-  protected double valueRemoved;
+  protected long   price;
+  protected long   size;
+  protected long   sizeRemaining;
+  protected long   valueRemoved;
 
-  public Order(Long serial, String orderId, Side side, double price, double size) {
+  public Order(Long serial, String orderId, Side side, long price, long size) {
     this.serial = serial;
     init(orderId, side, price, size);
   }
 
-  protected void init(String orderId, Side side, double price, double size) {
+  protected void init(String orderId, Side side, long price, long size) {
     this.orderId       = orderId;
     this.side          = side;
     this.price         = price;
@@ -51,19 +51,19 @@ public class Order {
     return side;
   }
 
-  public double getPrice() {
+  public long getPrice() {
     return price;
   }
 
-  public double getSize() {
+  public long getSize() {
     return size;
   }
 
-  public double getSizeRemaining() {
+  public long getSizeRemaining() {
     return sizeRemaining;
   }
 
-  public double getValueRemoved() {
+  public long getValueRemoved() {
     return valueRemoved;
   }
 
@@ -71,12 +71,12 @@ public class Order {
     this.valueRemoved = 0;
   }
 
-  protected void subtract(double size, double price) {
+  protected void subtract(long size, long price) {
     sizeRemaining -= size;
   }
 
-  public double takeSize(double size) {
-    double taken   = Math.min(size, sizeRemaining);
+  public long takeSize(long size) {
+    long taken     = Math.min(size, sizeRemaining);
     sizeRemaining -= taken;
     valueRemoved  += price * taken;
     return taken;
