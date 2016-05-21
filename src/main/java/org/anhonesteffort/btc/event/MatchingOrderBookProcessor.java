@@ -78,7 +78,7 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
   }
 
   protected void onOrderMatched(Order taker, TakeResult result) {
-    log.info("matched order " + taker.getOrderId() + " for size " + result.getTakeSize());
+    log.debug("matched order " + taker.getOrderId() + " for size " + result.getTakeSize());
   }
 
 }

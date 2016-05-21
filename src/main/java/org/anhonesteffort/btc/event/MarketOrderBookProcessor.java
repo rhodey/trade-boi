@@ -85,7 +85,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
     if (!activeMarketOrders.add(order.getOrderId())) {
       throw new OrderEventException("market order " + order.getOrderId() + " already in the active set");
     } else {
-      log.info("received new market order " + order.getOrderId());
+      log.debug("received new market order " + order.getOrderId());
     }
   }
 
@@ -97,7 +97,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
     if (!activeMarketOrders.remove(orderId)) {
       throw new OrderEventException("market order " + orderId + " was never in the active set");
     } else {
-      log.info("market order done " + orderId);
+      log.debug("market order done " + orderId);
     }
   }
 

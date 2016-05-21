@@ -110,7 +110,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
   }
 
   protected void onLimitOrderReceived(Order order) {
-    log.info("received new limit order " + order.getOrderId());
+    log.debug("received new limit order " + order.getOrderId());
   }
 
   protected void onReceivedLimitOrderReduced(Order order, long reducedBy) {
@@ -118,15 +118,15 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
   }
 
   protected void onLimitOrderOpened(Order order) {
-    log.info("opened new limit order " + order.getOrderId());
+    log.debug("opened new limit order " + order.getOrderId());
   }
 
   protected void onOpenLimitOrderReduced(Order order, long reducedBy) {
-    log.info("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+    log.warn("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
   protected void onLimitOrderCanceled(Order order) {
-    log.info("canceled limit order " + order.getOrderId());
+    log.debug("canceled limit order " + order.getOrderId());
   }
 
 }
