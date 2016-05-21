@@ -30,11 +30,11 @@ public class OpenAccessor extends Accessor {
     }
   }
 
-  public double getPrice(JsonNode root) throws WsException {
+  public float getPrice(JsonNode root) throws WsException {
     if (root.get("price") != null && root.get("price").isTextual()) {
       try {
 
-        return Double.parseDouble(root.get("price").textValue());
+        return Float.parseFloat(root.get("price").textValue());
 
       } catch (NumberFormatException e) {
         throw new WsException("open message has invalid price", e);
@@ -44,11 +44,11 @@ public class OpenAccessor extends Accessor {
     }
   }
 
-  public double getRemainingSize(JsonNode root) throws WsException {
+  public float getRemainingSize(JsonNode root) throws WsException {
     if (root.get("remaining_size") != null && root.get("remaining_size").isTextual()) {
       try {
 
-        return Double.parseDouble(root.get("remaining_size").textValue());
+        return Float.parseFloat(root.get("remaining_size").textValue());
 
       } catch (NumberFormatException e) {
         throw new WsException("open message has invalid remaining_size", e);

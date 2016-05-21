@@ -38,16 +38,16 @@ public class ReceivedAccessor extends Accessor {
     }
   }
 
-  public double getSize(JsonNode root) {
-    return doubleValueOrZero(root, "size");
+  public float getSize(JsonNode root) {
+    return floatValueOrZero(root, "size");
   }
 
-  public double getPrice(JsonNode root) {
-    return doubleValueOrZero(root, "price");
+  public float getPrice(JsonNode root) {
+    return floatValueOrZero(root, "price");
   }
 
-  public double getFunds(JsonNode root) {
-    return doubleValueOrZero(root, "funds");
+  public float getFunds(JsonNode root) {
+    return floatValueOrZero(root, "funds");
   }
 
 }

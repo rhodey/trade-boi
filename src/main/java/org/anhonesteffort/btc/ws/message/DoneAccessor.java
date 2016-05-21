@@ -46,12 +46,12 @@ public class DoneAccessor extends Accessor {
     }
   }
 
-  public double getPrice(JsonNode root) {
-    return doubleValueOrZero(root, "price");
+  public float getPrice(JsonNode root) {
+    return floatValueOrZero(root, "price");
   }
 
-  public double getRemainingSize(JsonNode root) {
-    return doubleValueOrZero(root, "remaining_size");
+  public float getRemainingSize(JsonNode root) {
+    return floatValueOrZero(root, "remaining_size");
   }
 
 }

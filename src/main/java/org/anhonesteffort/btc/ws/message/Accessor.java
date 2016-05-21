@@ -29,8 +29,8 @@ public class Accessor {
   public static final String TYPE_CHANGE   = "change";
   public static final String TYPE_ERROR    = "error";
 
-  protected double doubleValueOrZero(JsonNode root, String tag) {
-    return (root.get(tag) == null) ? 0 : root.get(tag).asDouble(0);
+  protected float floatValueOrZero(JsonNode root, String tag) {
+    return (root.get(tag) == null) ? 0f : (float) root.get(tag).asDouble(0);
   }
 
   public String getType(JsonNode root) throws WsException {
