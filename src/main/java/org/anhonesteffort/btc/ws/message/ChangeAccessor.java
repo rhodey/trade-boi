@@ -30,24 +30,24 @@ public class ChangeAccessor extends Accessor {
     }
   }
 
-  public float getNewSize(JsonNode root) {
-    return floatValueOrZero(root, "new_size");
+  public double getNewSize(JsonNode root) {
+    return doubleValueOrZero(root, "new_size");
   }
 
-  public float getOldSize(JsonNode root) {
-    return floatValueOrZero(root, "old_size");
+  public double getOldSize(JsonNode root) {
+    return doubleValueOrZero(root, "old_size");
   }
 
-  public float getNewFunds(JsonNode root) {
-    return floatValueOrZero(root, "new_funds");
+  public double getNewFunds(JsonNode root) {
+    return doubleValueOrZero(root, "new_funds");
   }
 
-  public float getOldFunds(JsonNode root) {
-    return floatValueOrZero(root, "old_funds");
+  public double getOldFunds(JsonNode root) {
+    return doubleValueOrZero(root, "old_funds");
   }
 
-  public float getPrice(JsonNode root) {
-    return floatValueOrZero(root, "price");
+  public double getPrice(JsonNode root) {
+    return doubleValueOrZero(root, "price");
   }
 
 }

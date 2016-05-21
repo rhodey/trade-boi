@@ -46,11 +46,11 @@ public class MatchAccessor extends Accessor {
     }
   }
 
-  public float getSize(JsonNode root) throws WsException {
+  public double getSize(JsonNode root) throws WsException {
     if (root.get("size") != null && root.get("size").isTextual()) {
       try {
 
-        return Float.parseFloat(root.get("size").textValue());
+        return Double.parseDouble(root.get("size").textValue());
 
       } catch (NumberFormatException e) {
         throw new WsException("math message has invalid size", e);
@@ -60,11 +60,11 @@ public class MatchAccessor extends Accessor {
     }
   }
 
-  public float getPrice(JsonNode root) throws WsException {
+  public double getPrice(JsonNode root) throws WsException {
     if (root.get("price") != null && root.get("price").isTextual()) {
       try {
 
-        return Float.parseFloat(root.get("price").textValue());
+        return Double.parseDouble(root.get("price").textValue());
 
       } catch (NumberFormatException e) {
         throw new WsException("math message has invalid price", e);
