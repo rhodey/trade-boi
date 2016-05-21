@@ -31,21 +31,21 @@ public class OrderEvent {
   private Type       type;
   private String     orderId;
   private Order.Side side;
-  private double     price;
-  private double     size;
-  private double     funds;
+  private float      price;
+  private float      size;
+  private float      funds;
   private String     makerId;
   private String     takerId;
-  private double     oldSize;
-  private double     newSize;
-  private double     oldFunds;
-  private double     newFunds;
+  private float      oldSize;
+  private float      newSize;
+  private float      oldFunds;
+  private float      newFunds;
 
   // F12
   private void init(
       Type type, String orderId, Order.Side side,
-      double price, double size, double funds, String makerId, String takerId,
-      double oldSize, double newSize, double oldFunds, double newFunds
+      float price, float size, float funds, String makerId, String takerId,
+      float oldSize, float newSize, float oldFunds, float newFunds
   ) {
     this.type     = type;
     this.orderId  = orderId;
@@ -61,44 +61,44 @@ public class OrderEvent {
     this.newFunds = newFunds;
   }
 
-  public void initLimitRx(String orderId, Order.Side side, double price, double size) {
-    init(Type.LIMIT_RX, orderId, side, price, size, -1d, null, null, -1d, -1d, -1d, -1d);
+  public void initLimitRx(String orderId, Order.Side side, float price, float size) {
+    init(Type.LIMIT_RX, orderId, side, price, size, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
-  public void initMarketRx(String orderId, Order.Side side, double size, double funds) {
-    init(Type.MARKET_RX, orderId, side, -1d, size, funds, null, null, -1d, -1d, -1d, -1d);
+  public void initMarketRx(String orderId, Order.Side side, float size, float funds) {
+    init(Type.MARKET_RX, orderId, side, -1f, size, funds, null, null, -1f, -1f, -1f, -1f);
   }
 
-  public void initLimitOpen(String orderId, Order.Side side, double price, double openSize) {
-    init(Type.LIMIT_OPEN, orderId, side, price, openSize, -1d, null, null, -1d, -1d, -1d, -1d);
+  public void initLimitOpen(String orderId, Order.Side side, float price, float openSize) {
+    init(Type.LIMIT_OPEN, orderId, side, price, openSize, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
-  public void initLimitDone(String orderId, Order.Side side, double price, double doneSize) {
-    init(Type.LIMIT_DONE, orderId, side, price, doneSize, -1d, null, null, -1d, -1d, -1d, -1d);
+  public void initLimitDone(String orderId, Order.Side side, float price, float doneSize) {
+    init(Type.LIMIT_DONE, orderId, side, price, doneSize, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
   public void initMarketDone(String orderId, Order.Side side) {
-    init(Type.MARKET_DONE, orderId, side, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
+    init(Type.MARKET_DONE, orderId, side, -1f, -1f, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
-  public void initMatch(String makerId, String takerId, Order.Side side, double price, double size) {
-    init(Type.MATCH, null, side, price, size, -1d, makerId, takerId, -1d, -1d, -1d, -1d);
+  public void initMatch(String makerId, String takerId, Order.Side side, float price, float size) {
+    init(Type.MATCH, null, side, price, size, -1f, makerId, takerId, -1f, -1f, -1f, -1f);
   }
 
-  public void initLimitChange(String orderId, Order.Side side, double price, double oldSize, double newSize) {
-    init(Type.LIMIT_CHANGE, orderId, side, price, -1d , -1d, null, null, oldSize, newSize, -1d, -1d);
+  public void initLimitChange(String orderId, Order.Side side, float price, float oldSize, float newSize) {
+    init(Type.LIMIT_CHANGE, orderId, side, price, -1f , -1f, null, null, oldSize, newSize, -1f, -1f);
   }
 
-  public void initMarketChange(String orderId, Order.Side side, double oldSize, double newSize, double oldFunds, double newFunds) {
-    init(Type.MARKET_CHANGE, orderId, side, -1d, -1d, -1d, null, null, oldSize, newSize, oldFunds, newFunds);
+  public void initMarketChange(String orderId, Order.Side side, float oldSize, float newSize, float oldFunds, float newFunds) {
+    init(Type.MARKET_CHANGE, orderId, side, -1f, -1f, -1f, null, null, oldSize, newSize, oldFunds, newFunds);
   }
 
   public void initRebuildStart() {
-    init(Type.REBUILD_START, null, null, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
+    init(Type.REBUILD_START, null, null, -1f, -1f, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
   public void initRebuildEnd() {
-    init(Type.REBUILD_END, null, null, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
+    init(Type.REBUILD_END, null, null, -1f, -1f, -1f, null, null, -1f, -1f, -1f, -1f);
   }
 
   public Type getType() {
@@ -113,15 +113,15 @@ public class OrderEvent {
     return side;
   }
 
-  public double getPrice() {
+  public float getPrice() {
     return price;
   }
 
-  public double getSize() {
+  public float getSize() {
     return size;
   }
 
-  public double getFunds() {
+  public float getFunds() {
     return funds;
   }
 
@@ -133,19 +133,19 @@ public class OrderEvent {
     return takerId;
   }
 
-  public double getOldSize() {
+  public float getOldSize() {
     return oldSize;
   }
 
-  public double getNewSize() {
+  public float getNewSize() {
     return newSize;
   }
 
-  public double getOldFunds() {
+  public float getOldFunds() {
     return oldFunds;
   }
 
-  public double getNewFunds() {
+  public float getNewFunds() {
     return newFunds;
   }
 
