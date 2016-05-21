@@ -25,16 +25,16 @@ public class OrderResponse {
 
   private final Order.Side side;
   private final String orderId;
-  private final float price;
-  private final float size;
+  private final double price;
+  private final double size;
 
   public OrderResponse(Order.Side side, JsonNode node) throws HttpException {
     this.side = side;
     orderId   = node.get(2).textValue();
     try {
 
-      price = Float.parseFloat(node.get(0).textValue());
-      size  = Float.parseFloat(node.get(1).textValue());
+      price = Double.parseDouble(node.get(0).textValue());
+      size  = Double.parseDouble(node.get(1).textValue());
 
     } catch (NumberFormatException e) {
       throw new HttpException("order price or size is invalid", e);
@@ -49,11 +49,11 @@ public class OrderResponse {
     return orderId;
   }
 
-  public float getPrice() {
+  public double getPrice() {
     return price;
   }
 
-  public float getSize() {
+  public double getSize() {
     return size;
   }
 
