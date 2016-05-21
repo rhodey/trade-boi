@@ -58,7 +58,7 @@ public class LimitOrderBook {
     return makers;
   }
 
-  private TakeResult resultFor(Order taker, List<Order> makers, double takeSize) {
+  private TakeResult resultFor(Order taker, List<Order> makers, long takeSize) {
     if (!(taker instanceof MarketOrder)) {
       return new TakeResult(makers, (takeSize - taker.getSizeRemaining()));
     } else {
@@ -67,7 +67,7 @@ public class LimitOrderBook {
   }
 
   public TakeResult add(Order taker) {
-    double      takeSize = taker.getSizeRemaining();
+    long        takeSize = taker.getSizeRemaining();
     List<Order> makers   = null;
 
     if (taker.getSide().equals(Order.Side.ASK)) {
@@ -79,7 +79,7 @@ public class LimitOrderBook {
     return resultFor(taker, makers, takeSize);
   }
 
-  public Optional<Order> remove(Order.Side side, Double price, String orderId) {
+  public Optional<Order> remove(Order.Side side, Long price, String orderId) {
     if (side.equals(Order.Side.ASK)) {
       return askLimits.removeOrder(price, orderId);
     } else {
@@ -87,7 +87,7 @@ public class LimitOrderBook {
     }
   }
 
-  public Optional<Order> reduce(Order.Side side, Double price, String orderId, double size) {
+  public Optional<Order> reduce(Order.Side side, Long price, String orderId, long size) {
     if (side.equals(Order.Side.ASK)) {
       return askLimits.reduceOrder(price, orderId, size);
     } else {
