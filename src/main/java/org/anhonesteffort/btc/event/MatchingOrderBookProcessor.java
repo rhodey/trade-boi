@@ -18,7 +18,6 @@
 package org.anhonesteffort.btc.event;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
@@ -64,12 +63,6 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
     if (result.getTakeSize() != event.getSize()) {
       log.error("taker order " + taker.getOrderId() + " side " + taker.getSide() + " price " + taker.getPrice() + " size " + taker.getSize());
       log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + event.getPrice() + " size " + event.getSize());
-
-      if (taker instanceof MarketOrder) {
-        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(event.getPrice()));
-      } else {
-        log.error("taker was limit order with remaining " + taker.getSizeRemaining());
-      }
 
       throw new OrderEventException(
           "take size for match event does not agree with our book " +

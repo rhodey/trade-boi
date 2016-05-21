@@ -90,8 +90,12 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
 
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (limitDone.isPresent() && event.getSize() <= 0l && limitDone.get().getSizeRemaining() > 0l) {
-          throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
+        if (limitDone.isPresent() && event.getSize() <= 0l) {
+          if (limitDone.get().getSizeRemaining() > 1l) {
+            throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
+          } else {
+            log.warn("order for filled order event was hardly open on the book, ignoring");
+          }
         } else if (limitDone.isPresent() && limitDone.get().getSizeRemaining() != event.getSize()) {
           throw new OrderEventException(
               "order for cancel order event disagrees about size remaining " +
