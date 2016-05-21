@@ -43,7 +43,7 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
   }
 
   protected long toLong(double value) {
-    return caster.fromDouble(value);
+    return caster.fromFloat(value);
   }
 
   protected boolean isRebuilding() {

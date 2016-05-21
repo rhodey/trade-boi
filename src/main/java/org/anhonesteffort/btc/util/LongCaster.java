@@ -19,17 +19,17 @@ package org.anhonesteffort.btc.util;
 
 public class LongCaster {
 
-  private final double precision;
+  private final float precision;
 
-  public LongCaster(double precision) {
+  public LongCaster(float precision) {
     this.precision = precision;
   }
 
-  public long fromDouble(double value) {
+  public long fromFloat(float value) {
     return (long) (value / precision);
   }
 
-  public double toDouble(long value) {
+  public float toFloat(long value) {
     return value * precision;
   }
 
