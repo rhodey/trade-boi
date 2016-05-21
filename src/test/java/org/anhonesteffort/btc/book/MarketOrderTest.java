@@ -32,22 +32,22 @@ public class MarketOrderTest {
     assert ORDER.getSizeRemaining() == 100;
     assert ORDER.getValueRemoved()  ==   0;
 
-    assert ORDER.getFunds()                  <   0;
-    assert ORDER.getFundsRemaining()         <   0;
-    assert ORDER.getVolumeRemoved()         ==   0;
-    assert ORDER.getSizeRemainingFor(1.337) == 100;
+    assert ORDER.getFunds()                 <   0;
+    assert ORDER.getFundsRemaining()        <   0;
+    assert ORDER.getVolumeRemoved()        ==   0;
+    assert ORDER.getSizeRemainingFor(1337) == 100;
 
-    ORDER.subtract(75, 1.337);
+    ORDER.subtract(75, 1337);
 
-    assert ORDER.getVolumeRemoved()         == 75;
-    assert ORDER.getSizeRemainingFor(1.337) == 25;
+    assert ORDER.getVolumeRemoved()        == 75;
+    assert ORDER.getSizeRemainingFor(1337) == 25;
 
-    ORDER.subtract(25, 31.337);
+    ORDER.subtract(25, 31337);
 
-    assert ORDER.getVolumeRemoved()          == 100;
-    assert ORDER.getSizeRemainingFor(31.337) ==   0;
-    assert ORDER.getSizeRemaining()          ==   0;
-    assert ORDER.getValueRemoved()           ==   0;
+    assert ORDER.getVolumeRemoved()         == 100;
+    assert ORDER.getSizeRemainingFor(31337) ==   0;
+    assert ORDER.getSizeRemaining()         ==   0;
+    assert ORDER.getValueRemoved()          ==   0;
   }
 
   @Test
@@ -90,16 +90,16 @@ public class MarketOrderTest {
     assert ORDER.getSizeRemaining() == 100;
     assert ORDER.getValueRemoved()  ==   0;
 
-    assert ORDER.getFunds()               ==  50;
-    assert ORDER.getFundsRemaining()      ==  50;
-    assert ORDER.getVolumeRemoved()       ==   0;
-    assert ORDER.getSizeRemainingFor(1)   ==  50;
-    assert ORDER.getSizeRemainingFor(0.5) == 100;
+    assert ORDER.getFunds()             ==  50;
+    assert ORDER.getFundsRemaining()    ==  50;
+    assert ORDER.getVolumeRemoved()     ==   0;
+    assert ORDER.getSizeRemainingFor(1) ==  50;
+    assert ORDER.getSizeRemainingFor(5) == 100;
 
-    ORDER.subtract(50, 0.5);
+    ORDER.subtract(50, 5);
 
-    assert ORDER.getVolumeRemoved()       == 50;
-    assert ORDER.getSizeRemainingFor(0.5) == 50;
+    assert ORDER.getVolumeRemoved()     == 50;
+    assert ORDER.getSizeRemainingFor(5) == 50;
 
     ORDER.subtract(25, 1);
 
