@@ -41,14 +41,14 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     if (marketRx.getSize() < 0 || marketRx.getFunds() < 0) {
       throw new OrderEventException("market order rx event was parsed incorrectly");
     } else if (marketRx.getSize() > 0 || marketRx.getFunds() > 0) {
-      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
+      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), toLong(marketRx.getSize()), toLong(marketRx.getFunds()));
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
     }
   }
 
   protected MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
+    return pool.takeMarket(change.getOrderId(), change.getSide(), toLong(change.getNewSize()), toLong(change.getNewFunds()));
   }
 
   @Override
@@ -68,8 +68,8 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
           throw new OrderEventException("market order size and funds can only decrease");
         }
 
-        double sizeReduced  = event.getOldSize()  - event.getNewSize();
-        double fundsReduced = event.getOldFunds() - event.getNewFunds();
+        long sizeReduced  = toLong(event.getOldSize()  - event.getNewSize());
+        long fundsReduced = toLong(event.getOldFunds() - event.getNewFunds());
 
         MarketOrder marketChange = takePooledMarketOrderChange(event);
         onMarketOrderChange(event, sizeReduced, fundsReduced);
@@ -90,7 +90,7 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
     }
   }
 
-  protected void onMarketOrderChange(OrderEvent event, double sizeReduced, double fundsReduced) {
+  protected void onMarketOrderChange(OrderEvent event, long sizeReduced, long fundsReduced) {
     log.warn("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
