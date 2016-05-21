@@ -38,26 +38,21 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     if (match.getPrice() > 0 && match.getSize() > 0) {
       if (match.getSide().equals(Order.Side.ASK)) {
         if (!activeMarketOrders.contains(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
+          return pool.take(match.getTakerId(), Order.Side.BID, toLong(match.getPrice()), toLong(match.getSize()));
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), -1);
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, toLong(match.getSize()), -1l);
         }
       } else {
         if (!activeMarketOrders.contains(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
+          return pool.take(match.getTakerId(), Order.Side.ASK, toLong(match.getPrice()), toLong(match.getSize()));
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), -1);
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, toLong(match.getSize()), -1l);
         }
       }
     } else {
       throw new OrderEventException("match event has invalid taker price or size");
     }
   }
-
-  /*
-    taker market ask
-    maker limit bid
-   */
 
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
@@ -67,42 +62,26 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     Order      taker    = takePooledTakerOrder(event);
     TakeResult result   = book.add(taker);
 
-    if (!isEqual(result.getTakeSize(), event.getSize())) {
+    if (result.getTakeSize() != toLong(event.getSize())) {
       log.error("taker order " + taker.getOrderId() + " side " + taker.getSide() + " price " + taker.getPrice() + " size " + taker.getSize());
-      log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + event.getPrice() + " size " + event.getSize());
+      log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + toLong(event.getPrice()) + " size " + toLong(event.getSize()));
 
       if (taker instanceof MarketOrder) {
-        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(event.getPrice()));
-
-        if (taker.getSide().equals(Order.Side.BID)) {
-          Order bestAsk = book.getAskLimits().peek().get().peek().get();
-          log.error("best maker ask on the book is " + bestAsk.getOrderId() + " side " + bestAsk.getSide() + " price " + bestAsk.getPrice() + " size " + bestAsk.getSizeRemaining());
-        } else {
-          Order bestBid = book.getBidLimits().peek().get().peek().get();
-          log.error("best maker bid on the book is " + bestBid.getOrderId() + " side " + bestBid.getSide() + " price " + bestBid.getPrice() + " size " + bestBid.getSizeRemaining());
-        }
+        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(toLong(event.getPrice())));
       } else {
         log.error("taker was limit order with remaining " + taker.getSizeRemaining());
       }
 
       throw new OrderEventException(
           "take size for match event does not agree with our book " +
-              event.getSize() + " vs " + result.getTakeSize()
+              toLong(event.getSize()) + " vs " + result.getTakeSize()
       );
-    } else if (taker.getSizeRemaining() <= 0) {
+    } else if (taker.getSizeRemaining() > 0) {
+      throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
+    } else {
       onOrderMatched(taker, result);
       returnPooledOrder(taker);
       returnPooledOrders(result);
-    } else if (isEqual(taker.getSizeRemaining(), 0)) {
-      if (book.remove(taker.getSide(), event.getPrice(), taker.getOrderId()).isPresent()) {
-        onOrderMatched(taker, result);
-        returnPooledOrder(taker);
-        returnPooledOrders(result);
-      } else {
-        throw new OrderEventException("taker for match event has size remaining but not found in book");
-      }
-    } else {
-      throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
     }
   }
 
