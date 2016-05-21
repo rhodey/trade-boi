@@ -35,7 +35,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
   }
 
   protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
-    if (match.getPrice() > 0 && match.getSize() > 0) {
+    if (match.getPrice() > 0d && match.getSize() > 0d) {
       if (match.getSide().equals(Order.Side.ASK)) {
         if (!activeMarketOrders.contains(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.BID, toLong(match.getPrice()), toLong(match.getSize()));
@@ -76,7 +76,7 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
           "take size for match event does not agree with our book " +
               toLong(event.getSize()) + " vs " + result.getTakeSize()
       );
-    } else if (taker.getSizeRemaining() > 0) {
+    } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
     } else {
       onOrderMatched(taker, result);
