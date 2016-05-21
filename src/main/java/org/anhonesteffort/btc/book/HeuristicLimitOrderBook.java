@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class HeuristicLimitOrderBook extends LimitOrderBook {
 
-  public Optional<Double> getSpread() {
+  public Optional<Long> getSpread() {
     Optional<Limit> bestAsk = askLimits.peek();
     Optional<Limit> bestBid = bidLimits.peek();
 
