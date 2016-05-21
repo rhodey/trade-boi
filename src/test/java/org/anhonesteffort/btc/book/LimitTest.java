@@ -23,19 +23,19 @@ import java.util.List;
 
 public class LimitTest extends BaseTest {
 
-  private Order newOrder(String orderId, double size) {
-    return newBid(orderId, 10.20d, size);
+  private Order newOrder(String orderId, long size) {
+    return newBid(orderId, 1020, size);
   }
 
-  private MarketOrder newMarketOrder(String orderId, double size, double funds) {
+  private MarketOrder newMarketOrder(String orderId, long size, long funds) {
     return newMarketBid(orderId, size, funds);
   }
 
   @Test
   public void testGettersAndAddRemoveClearVolume() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
-    assert LIMIT.getPrice()  == 10.20;
+    assert LIMIT.getPrice()  == 1020;
     assert LIMIT.getVolume() == 0;
 
     LIMIT.add(newOrder("00", 10));
@@ -54,7 +54,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testTakerWithNoMaker() {
-    final Limit       LIMIT   = new Limit(10.20);
+    final Limit       LIMIT   = new Limit(1020);
     final Order       TAKER1  = newOrder("00", 10);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
@@ -64,7 +64,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testMarketTakerWithNoMaker() {
-    final Limit       LIMIT   = new Limit(10.20);
+    final Limit       LIMIT   = new Limit(1020);
     final MarketOrder TAKER1  = newMarketOrder("00", 10, 20);
     final List<Order> MAKERS1 = LIMIT.takeLiquidity(TAKER1);
 
@@ -74,7 +74,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testOneFullTakeOneFullMake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
 
@@ -89,7 +89,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testOneFullMarketSizeTakeOneFullMake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
 
@@ -134,7 +134,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testFullTakePartialMake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
 
@@ -149,7 +149,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testFullMarketSizeTakePartialMake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
 
@@ -194,7 +194,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testOneFullTakeOnePartialTake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
 
@@ -217,7 +217,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testTwoFullMakesOneFullTake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
     LIMIT.add(newOrder("01", 30));
@@ -234,7 +234,7 @@ public class LimitTest extends BaseTest {
 
   @Test
   public void testOneFullMakeOnePartialMakeOneFullTake() {
-    final Limit LIMIT = new Limit(10.20);
+    final Limit LIMIT = new Limit(1020);
 
     LIMIT.add(newOrder("00", 10));
     LIMIT.add(newOrder("01", 30));
