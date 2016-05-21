@@ -27,13 +27,13 @@ import java.util.Queue;
 
 public class Limit {
 
-  private final Queue<Order>       orderQueue = new ArrayDeque<>(12); // todo: size from constructor
-  private final Map<String, Order> orderMap   = new HashMap<>();
-
+  private final Map<String, Order> orderMap = new HashMap<>();
+  private final Queue<Order> orderQueue;
   private final long price;
-  private       long volume;
+  private long volume;
 
-  public Limit(long price) {
+  public Limit(long price, int initSize) {
+    orderQueue  = new ArrayDeque<>(initSize);
     this.price  = price;
     this.volume = 0l;
   }

@@ -26,7 +26,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testAddPeekRemoveClearAsks() {
-    final LimitQueue ASKS = new LimitQueue(Order.Side.ASK);
+    final LimitQueue ASKS = new LimitQueue(Order.Side.ASK, 10);
 
     ASKS.addOrder(newAsk("00", 10, 1));
     ASKS.addOrder(newAsk("01", 10, 2));
@@ -63,7 +63,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testAddPeekRemoveClearBids() {
-    final LimitQueue BIDS = new LimitQueue(Order.Side.BID);
+    final LimitQueue BIDS = new LimitQueue(Order.Side.BID, 10);
 
     BIDS.addOrder(newBid("00", 10, 1));
     BIDS.addOrder(newBid("01", 10, 2));
@@ -100,7 +100,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testRemoveAskLiquidity() {
-    final LimitQueue ASKS = new LimitQueue(Order.Side.ASK);
+    final LimitQueue ASKS = new LimitQueue(Order.Side.ASK, 10);
           Order      BID  = newBid(15, 5);
 
     ASKS.addOrder(newAsk(10, 1));
@@ -139,7 +139,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testRemoveBidLiquidity() {
-    final LimitQueue BIDS = new LimitQueue(Order.Side.BID);
+    final LimitQueue BIDS = new LimitQueue(Order.Side.BID, 10);
           Order      ASK  = newAsk(15, 5);
 
     BIDS.addOrder(newBid(10, 1));
@@ -179,7 +179,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testRemoveAskLiquidityWithMarketBids() {
-    final LimitQueue  ASKS = new LimitQueue(Order.Side.ASK);
+    final LimitQueue  ASKS = new LimitQueue(Order.Side.ASK, 10);
           MarketOrder BID  = newMarketBid(5, -1);
 
     ASKS.addOrder(newAsk(10, 1));
@@ -220,7 +220,7 @@ public class LimitQueueTest extends BaseTest {
 
   @Test
   public void testRemoveBidLiquidityWithMarketAsks() {
-    final LimitQueue  BIDS = new LimitQueue(Order.Side.BID);
+    final LimitQueue  BIDS = new LimitQueue(Order.Side.BID, 10);
           MarketOrder ASK  = newMarketAsk(5, -1);
 
     BIDS.addOrder(newBid(10, 1));

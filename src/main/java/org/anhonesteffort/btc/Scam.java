@@ -49,7 +49,7 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @SuppressWarnings("unchecked")
   public void run() {
     LongCaster         caster    = new LongCaster(0.000000000001d);
-    LimitOrderBook     book      = new LimitOrderBook();
+    LimitOrderBook     book      = new LimitOrderBook(16);
     OrderPool          pool      = new OrderPool(ORDER_POOL_SIZE, 64);
     OrderBookProcessor processor = new MatchingOrderBookProcessor(book, pool);
 

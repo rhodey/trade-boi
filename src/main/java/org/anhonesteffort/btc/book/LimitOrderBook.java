@@ -23,8 +23,13 @@ import java.util.Optional;
 
 public class LimitOrderBook {
 
-  protected final LimitQueue askLimits = new LimitQueue(Order.Side.ASK);
-  protected final LimitQueue bidLimits = new LimitQueue(Order.Side.BID);
+  protected final LimitQueue askLimits;
+  protected final LimitQueue bidLimits;
+
+  public LimitOrderBook(int initLimitSize) {
+    askLimits = new LimitQueue(Order.Side.ASK, initLimitSize);
+    bidLimits = new LimitQueue(Order.Side.BID, initLimitSize);
+  }
 
   private List<Order> processAsk(Order ask) {
     List<Order> makers = new LinkedList<>();
@@ -98,14 +103,6 @@ public class LimitOrderBook {
   public void clear() {
     askLimits.clear();
     bidLimits.clear();
-  }
-
-  public LimitQueue getAskLimits() {
-    return askLimits;
-  }
-
-  public LimitQueue getBidLimits() {
-    return bidLimits;
   }
 
 }

@@ -30,8 +30,10 @@ public class LimitQueue {
 
   private final Map<Long, Limit> map = new HashMap<>();
   private final Queue<Limit> queue;
+  private final int initLimitSize;
 
-  public LimitQueue(Order.Side side) {
+  public LimitQueue(Order.Side side, int initLimitSize) {
+    this.initLimitSize = initLimitSize;
     if (side.equals(Order.Side.ASK)) {
       queue = new PriorityQueue<>(new AskSorter());
     } else {
@@ -47,7 +49,7 @@ public class LimitQueue {
     Limit limit = map.get(order.getPrice());
 
     if (limit == null) {
-      limit = new Limit(order.getPrice());
+      limit = new Limit(order.getPrice(), initLimitSize);
       map.put(order.getPrice(), limit);
       queue.add(limit);
     }
