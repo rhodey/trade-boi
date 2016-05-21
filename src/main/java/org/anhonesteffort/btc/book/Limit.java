@@ -27,22 +27,22 @@ import java.util.Queue;
 
 public class Limit {
 
-  private final Queue<Order>       orderQueue = new ArrayDeque<>(12);
+  private final Queue<Order>       orderQueue = new ArrayDeque<>(12); // todo: size from constructor
   private final Map<String, Order> orderMap   = new HashMap<>();
 
-  private final double price;
-  private       double volume;
+  private final long price;
+  private       long volume;
 
-  public Limit(double price) {
+  public Limit(long price) {
     this.price  = price;
     this.volume = 0;
   }
 
-  public double getPrice() {
+  public long getPrice() {
     return price;
   }
 
-  public double getVolume() {
+  public long getVolume() {
     return volume;
   }
 
@@ -65,7 +65,7 @@ public class Limit {
     return order;
   }
 
-  public Optional<Order> reduce(String orderId, double size) {
+  public Optional<Order> reduce(String orderId, long size) {
     Optional<Order> order = Optional.ofNullable(orderMap.get(orderId));
     if (order.isPresent()) {
       order.get().subtract(size, price);
@@ -78,7 +78,7 @@ public class Limit {
     return order;
   }
 
-  private double getTakeSize(Order taker) {
+  private long getTakeSize(Order taker) {
     if (taker instanceof MarketOrder) {
       return ((MarketOrder) taker).getSizeRemainingFor(price);
     } else {
@@ -89,7 +89,7 @@ public class Limit {
   private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
     Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
     if (maker.isPresent()) {
-      double volumeRemoved = maker.get().takeSize(getTakeSize(taker));
+      long volumeRemoved = maker.get().takeSize(getTakeSize(taker));
 
       if (maker.get().getSizeRemaining() <= 0) {
         orderMap.remove(maker.get().getOrderId());
