@@ -70,7 +70,7 @@ public class WsOrderEventPublisher {
     }
   }
 
-  public void publishMessage(JsonNode root, String type) throws WsException {
+  public void publishMessage(JsonNode root, String type, long nsTime) throws WsException {
     Order.Side side  = getSideOrThrow(root);
     OrderEvent event = takeNextEvent();
 
@@ -78,11 +78,13 @@ public class WsOrderEventPublisher {
       case Accessor.TYPE_RECEIVED:
         if (receive.getOrderType(root).equals("limit")) {
           event.initLimitRx(
-              receive.getOrderId(root), side, caster.fromDouble(receive.getPrice(root)), caster.fromDouble(receive.getSize(root))
+              nsTime, receive.getOrderId(root), side,
+              caster.fromDouble(receive.getPrice(root)), caster.fromDouble(receive.getSize(root))
           );
         } else if (receive.getOrderType(root).equals("market")) {
           event.initMarketRx(
-              receive.getOrderId(root), side, caster.fromDouble(receive.getSize(root)), caster.fromDouble(receive.getFunds(root))
+              nsTime, receive.getOrderId(root), side,
+              caster.fromDouble(receive.getSize(root)), caster.fromDouble(receive.getFunds(root))
           );
         } else {
           throw new WsException("received message has invalid order_type");
@@ -91,24 +93,26 @@ public class WsOrderEventPublisher {
 
       case Accessor.TYPE_MATCH:
         event.initMatch(
-            match.getMakerOrderId(root), match.getTakerOrderId(root), side,
+            nsTime, match.getMakerOrderId(root), match.getTakerOrderId(root), side,
             caster.fromDouble(match.getPrice(root)), caster.fromDouble(match.getSize(root))
         );
         break;
 
       case Accessor.TYPE_OPEN:
         event.initLimitOpen(
-            open.getOrderId(root), side, caster.fromDouble(open.getPrice(root)), caster.fromDouble(open.getRemainingSize(root))
+            nsTime, open.getOrderId(root), side,
+            caster.fromDouble(open.getPrice(root)), caster.fromDouble(open.getRemainingSize(root))
         );
         break;
 
       case Accessor.TYPE_DONE:
         if (done.getOrderType(root).equals("limit")) {
           event.initLimitDone(
-              done.getOrderId(root), side, caster.fromDouble(done.getPrice(root)), caster.fromDouble(done.getRemainingSize(root))
+              nsTime, done.getOrderId(root), side,
+              caster.fromDouble(done.getPrice(root)), caster.fromDouble(done.getRemainingSize(root))
           );
         } else if (done.getOrderType(root).equals("market")) {
-          event.initMarketDone(done.getOrderId(root), side);
+          event.initMarketDone(nsTime, done.getOrderId(root), side);
         } else {
           throw new WsException("done message has invalid order_type");
         }
@@ -117,13 +121,14 @@ public class WsOrderEventPublisher {
       case Accessor.TYPE_CHANGE:
         if (change.getPrice(root) > 0f) {
           event.initLimitChange(
-              change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
+              nsTime, change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
               caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root))
           );
         } else {
           event.initMarketChange(
-              change.getOrderId(root), side, caster.fromDouble(change.getOldSize(root)),
-              caster.fromDouble(change.getNewSize(root)), caster.fromDouble(change.getOldFunds(root)), caster.fromDouble(change.getNewFunds(root))
+              nsTime, change.getOrderId(root), side,
+              caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root)),
+              caster.fromDouble(change.getOldFunds(root)), caster.fromDouble(change.getNewFunds(root))
           );
         }
         break;
@@ -135,24 +140,25 @@ public class WsOrderEventPublisher {
     publishCurrentEvent();
   }
 
-  private void publishBookOrder(OrderResponse order) {
+  private void publishBookOrder(OrderResponse order, long nsTime) {
     OrderEvent event = takeNextEvent();
     event.initLimitOpen(
-        order.getOrderId(), order.getSide(), caster.fromDouble(order.getPrice()), caster.fromDouble(order.getSize())
+        nsTime, order.getOrderId(), order.getSide(),
+        caster.fromDouble(order.getPrice()), caster.fromDouble(order.getSize())
     );
     publishCurrentEvent();
   }
 
-  public void publishBook(OrderBookResponse book) {
+  public void publishBook(OrderBookResponse book, long nsTime) {
     OrderEvent event = takeNextEvent();
-    event.initRebuildStart();
+    event.initRebuildStart(nsTime);
     publishCurrentEvent();
 
-    book.getAsks().forEach(this::publishBookOrder);
-    book.getBids().forEach(this::publishBookOrder);
+    book.getAsks().forEach(ask -> this.publishBookOrder(ask, nsTime));
+    book.getBids().forEach(bid -> this.publishBookOrder(bid, nsTime));
 
     event = takeNextEvent();
-    event.initRebuildEnd();
+    event.initRebuildEnd(nsTime);
     publishCurrentEvent();
   }
 

@@ -67,7 +67,7 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
   public void onMessage(ResponseBody body) {
     try {
 
-      sorter.sort(reader.readTree(body.charStream()));
+      sorter.sort(reader.readTree(body.charStream()), System.nanoTime());
 
     } catch (Throwable e) {
       errorFuture.setException(e);
