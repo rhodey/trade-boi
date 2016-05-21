@@ -38,9 +38,9 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
   }
 
   protected MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
-    if (marketRx.getSize() < 0d || marketRx.getFunds() < 0d) {
+    if (marketRx.getSize() < 0f || marketRx.getFunds() < 0f) {
       throw new OrderEventException("market order rx event was parsed incorrectly");
-    } else if (marketRx.getSize() > 0d || marketRx.getFunds() > 0d) {
+    } else if (marketRx.getSize() > 0f || marketRx.getFunds() > 0f) {
       return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), toLong(marketRx.getSize()), toLong(marketRx.getFunds()));
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
@@ -62,7 +62,7 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_CHANGE:
-        if (event.getNewSize() < 0d || event.getNewFunds() < 0d) {
+        if (event.getNewSize() < 0f || event.getNewFunds() < 0f) {
           throw new OrderEventException("market order change event was parsed incorrectly");
         } else if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
           throw new OrderEventException("market order size and funds can only decrease");
