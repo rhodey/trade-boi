@@ -22,6 +22,7 @@ import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
+import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,20 +31,15 @@ public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
   private static final Logger log = LoggerFactory.getLogger(OrderBookBuilder.class);
 
   protected final HeuristicLimitOrderBook book;
-  protected final OrderPool pool;
+  protected final OrderPool               pool;
+  protected final LongCaster              caster;
+
   private boolean rebuilding = false;
 
-  public OrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
-    this.book = book;
-    this.pool = pool;
-  }
-
-  protected boolean isEqual(double one, double two) {
-    return Math.abs(one - two) < 0.000000001d;
-  }
-
-  protected boolean isGreater(double one, double two) {
-    return (one - two) > 0.000000001d;
+  public OrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool, LongCaster caster) {
+    this.book   = book;
+    this.pool   = pool;
+    this.caster = caster;
   }
 
   protected boolean isRebuilding() {

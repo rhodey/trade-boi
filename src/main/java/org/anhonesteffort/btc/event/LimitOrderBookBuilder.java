@@ -21,6 +21,7 @@ import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
+import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,8 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(LimitOrderBookBuilder.class);
 
-  public LimitOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
-    super(book, pool);
+  public LimitOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool, LongCaster caster) {
+    super(book, pool, caster);
   }
 
   protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
