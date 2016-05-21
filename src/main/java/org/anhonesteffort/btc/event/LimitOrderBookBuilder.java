@@ -36,7 +36,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
   }
 
   protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
-    if (event.getPrice() > 0d && event.getSize() > 0d) {
+    if (event.getPrice() > 0f && event.getSize() > 0f) {
       return pool.take(event.getOrderId(), event.getSide(), toLong(event.getPrice()), toLong(event.getSize()));
     } else {
       throw new OrderEventException("limit order rx/open event has invalid price or size");
@@ -44,7 +44,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
   }
 
   protected Order takePooledLimitOrderChange(OrderEvent change) throws OrderEventException {
-    if (change.getPrice() > 0d && change.getNewSize() >= 0d) {
+    if (change.getPrice() > 0f && change.getNewSize() >= 0f) {
       return pool.take(change.getOrderId(), change.getSide(), toLong(change.getPrice()), toLong(change.getNewSize()));
     } else {
       throw new OrderEventException("limit order change event has invalid price or new size");
@@ -71,7 +71,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         break;
 
       case LIMIT_CHANGE:
-        if (event.getNewSize() < 0d || event.getNewSize() >= event.getOldSize()) {
+        if (event.getNewSize() < 0f || event.getNewSize() >= event.getOldSize()) {
           throw new OrderEventException("limit order size can only decrease");
         }
 
@@ -91,7 +91,7 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
 
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), toLong(event.getPrice()), event.getOrderId());
-        if (limitDone.isPresent() && event.getSize() <= 0d && limitDone.get().getSizeRemaining() > 0l) {
+        if (limitDone.isPresent() && event.getSize() <= 0f && limitDone.get().getSizeRemaining() > 0l) {
           throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
         } else if (limitDone.isPresent() && limitDone.get().getSizeRemaining() != toLong(event.getSize())) {
           throw new OrderEventException(
