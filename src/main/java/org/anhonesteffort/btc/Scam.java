@@ -48,13 +48,13 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
-    LongCaster              caster  = new LongCaster(0.00000000000001d);
+    LongCaster              caster  = new LongCaster(0.000000000001d);
     HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
     OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 64);
-    OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool, caster);
+    OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool);
 
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }, caster
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
