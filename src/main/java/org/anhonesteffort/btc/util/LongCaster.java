@@ -25,12 +25,12 @@ public class LongCaster {
     this.precision = precision;
   }
 
-  public long fromFloat(float value) {
+  public long fromDouble(double value) {
     return (long) (value / precision);
   }
 
-  public float toFloat(long value) {
-    return (float) (value * precision);
+  public double toDouble(long value) {
+    return (value * precision);
   }
 
 }

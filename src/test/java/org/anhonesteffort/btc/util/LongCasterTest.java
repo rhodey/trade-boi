@@ -25,16 +25,16 @@ public class LongCasterTest {
   public void test() {
     final LongCaster CASTER = new LongCaster(0.00000000000001d);
 
-    double DIFF = CASTER.toFloat(CASTER.fromFloat(1020f)) - 1020f;
+    double DIFF = CASTER.toDouble(CASTER.fromDouble(1020f)) - 1020f;
     assert Math.abs(DIFF) < 0.00000000000001d;
 
-    DIFF = CASTER.toFloat(CASTER.fromFloat(10.20f)) - 10.20f;
+    DIFF = CASTER.toDouble(CASTER.fromDouble(10.20f)) - 10.20f;
     assert Math.abs(DIFF) < 0.00000000000001d;
 
-    DIFF = CASTER.toFloat(CASTER.fromFloat(1.337f)) - 1.337f;
+    DIFF = CASTER.toDouble(CASTER.fromDouble(1.337f)) - 1.337f;
     assert Math.abs(DIFF) < 0.00000000000001d;
 
-    DIFF = CASTER.toFloat(CASTER.fromFloat(12345.33333333333337f)) - 12345.33333333333337f;
+    DIFF = CASTER.toDouble(CASTER.fromDouble(12345.33333333333337f)) - 12345.33333333333337f;
     assert Math.abs(DIFF) < 0.00000000000001d;
   }
 
