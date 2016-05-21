@@ -94,18 +94,25 @@ public class MarketOrderTest {
     assert ORDER.getFundsRemaining()    ==  50;
     assert ORDER.getVolumeRemoved()     ==   0;
     assert ORDER.getSizeRemainingFor(1) ==  50;
-    assert ORDER.getSizeRemainingFor(5) == 100;
-
-    ORDER.subtract(50, 5);
-
-    assert ORDER.getVolumeRemoved()     == 50;
-    assert ORDER.getSizeRemainingFor(5) == 50;
+    assert ORDER.getSizeRemainingFor(5) == (50 / 5);
 
     ORDER.subtract(25, 1);
 
-    assert ORDER.getVolumeRemoved()     == 75;
+    assert ORDER.getVolumeRemoved()     == 25;
+    assert ORDER.getSizeRemainingFor(5) == (25 / 5);
+
+    ORDER.subtract(10, 2);
+
+    assert ORDER.getVolumeRemoved()     == 35;
+    assert ORDER.getSizeRemainingFor(1) ==  5;
+    assert ORDER.getSizeRemaining()     == 100 - (25 + 10);
+    assert ORDER.getValueRemoved()      ==  0;
+
+    ORDER.subtract(5, 1);
+
+    assert ORDER.getVolumeRemoved()     == 40;
     assert ORDER.getSizeRemainingFor(1) ==  0;
-    assert ORDER.getSizeRemaining()     == 25;
+    assert ORDER.getSizeRemaining()     ==  100 - (25 + 10 + 5);
     assert ORDER.getValueRemoved()      ==  0;
   }
 
