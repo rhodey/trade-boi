@@ -35,16 +35,16 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
   }
 
   protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
-    if (event.getPrice() > 0f && event.getSize() > 0f) {
-      return pool.take(event.getOrderId(), event.getSide(), toLong(event.getPrice()), toLong(event.getSize()));
+    if (event.getPrice() > 0l && event.getSize() > 0l) {
+      return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
       throw new OrderEventException("limit order rx/open event has invalid price or size");
     }
   }
 
   protected Order takePooledLimitOrderChange(OrderEvent change) throws OrderEventException {
-    if (change.getPrice() > 0f && change.getNewSize() >= 0f) {
-      return pool.take(change.getOrderId(), change.getSide(), toLong(change.getPrice()), toLong(change.getNewSize()));
+    if (change.getPrice() > 0l && change.getNewSize() >= 0l) {
+      return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
     } else {
       throw new OrderEventException("limit order change event has invalid price or new size");
     }
@@ -70,12 +70,12 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         break;
 
       case LIMIT_CHANGE:
-        if (event.getNewSize() < 0f || event.getNewSize() >= event.getOldSize()) {
+        if (event.getNewSize() < 0l || event.getNewSize() >= event.getOldSize()) {
           throw new OrderEventException("limit order size can only decrease");
         }
 
-        long            reducedBy   = toLong(event.getOldSize() - event.getNewSize());
-        Optional<Order> limitChange = book.reduce(event.getSide(), toLong(event.getPrice()), event.getOrderId(), reducedBy);
+        long            reducedBy   = event.getOldSize() - event.getNewSize();
+        Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
         if (limitChange.isPresent()) {
           onOpenLimitOrderReduced(limitChange.get(), reducedBy);
           if (limitChange.get().getSizeRemaining() <= 0l) {
@@ -89,13 +89,13 @@ public class LimitOrderBookBuilder extends OrderBookBuilder {
         break;
 
       case LIMIT_DONE:
-        Optional<Order> limitDone = book.remove(event.getSide(), toLong(event.getPrice()), event.getOrderId());
-        if (limitDone.isPresent() && event.getSize() <= 0f && limitDone.get().getSizeRemaining() > 0l) {
+        Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
+        if (limitDone.isPresent() && event.getSize() <= 0l && limitDone.get().getSizeRemaining() > 0l) {
           throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
-        } else if (limitDone.isPresent() && limitDone.get().getSizeRemaining() != toLong(event.getSize())) {
+        } else if (limitDone.isPresent() && limitDone.get().getSizeRemaining() != event.getSize()) {
           throw new OrderEventException(
               "order for cancel order event disagrees about size remaining " +
-                  toLong(event.getSize()) + " vs " + limitDone.get().getSizeRemaining()
+                  event.getSize() + " vs " + limitDone.get().getSizeRemaining()
           );
         } else if (limitDone.isPresent()) {
           onLimitOrderCanceled(limitDone.get());
