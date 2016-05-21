@@ -37,17 +37,17 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
   }
 
   protected MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
-    if (marketRx.getSize() < 0f || marketRx.getFunds() < 0f) {
+    if (marketRx.getSize() < 0l || marketRx.getFunds() < 0l) {
       throw new OrderEventException("market order rx event was parsed incorrectly");
-    } else if (marketRx.getSize() > 0f || marketRx.getFunds() > 0f) {
-      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), toLong(marketRx.getSize()), toLong(marketRx.getFunds()));
+    } else if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
+      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
     }
   }
 
   protected MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    return pool.takeMarket(change.getOrderId(), change.getSide(), toLong(change.getNewSize()), toLong(change.getNewFunds()));
+    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
   }
 
   @Override
@@ -61,14 +61,14 @@ public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
         break;
 
       case MARKET_CHANGE:
-        if (event.getNewSize() < 0f || event.getNewFunds() < 0f) {
+        if (event.getNewSize() < 0l || event.getNewFunds() < 0l) {
           throw new OrderEventException("market order change event was parsed incorrectly");
         } else if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
           throw new OrderEventException("market order size and funds can only decrease");
         }
 
-        long sizeReduced  = toLong(event.getOldSize()  - event.getNewSize());
-        long fundsReduced = toLong(event.getOldFunds() - event.getNewFunds());
+        long sizeReduced  = event.getOldSize()  - event.getNewSize();
+        long fundsReduced = event.getOldFunds() - event.getNewFunds();
 
         MarketOrder marketChange = takePooledMarketOrderChange(event);
         onMarketOrderChange(event, sizeReduced, fundsReduced);
