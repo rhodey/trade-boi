@@ -34,18 +34,18 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
   }
 
   protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
-    if (match.getPrice() > 0f && match.getSize() > 0f) {
+    if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
         if (!activeMarketOrders.contains(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.BID, toLong(match.getPrice()), toLong(match.getSize()));
+          return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, toLong(match.getSize()), -1l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), -1l);
         }
       } else {
         if (!activeMarketOrders.contains(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.ASK, toLong(match.getPrice()), toLong(match.getSize()));
+          return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, toLong(match.getSize()), -1l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), -1l);
         }
       }
     } else {
@@ -61,19 +61,19 @@ public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
     Order      taker    = takePooledTakerOrder(event);
     TakeResult result   = book.add(taker);
 
-    if (result.getTakeSize() != toLong(event.getSize())) {
+    if (result.getTakeSize() != event.getSize()) {
       log.error("taker order " + taker.getOrderId() + " side " + taker.getSide() + " price " + taker.getPrice() + " size " + taker.getSize());
-      log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + toLong(event.getPrice()) + " size " + toLong(event.getSize()));
+      log.error("maker order " + event.getMakerId() + " side " + event.getSide() + " price " + event.getPrice() + " size " + event.getSize());
 
       if (taker instanceof MarketOrder) {
-        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(toLong(event.getPrice())));
+        log.error("taker was market order with remaining " + ((MarketOrder) taker).getSizeRemainingFor(event.getPrice()));
       } else {
         log.error("taker was limit order with remaining " + taker.getSizeRemaining());
       }
 
       throw new OrderEventException(
           "take size for match event does not agree with our book " +
-              toLong(event.getSize()) + " vs " + result.getTakeSize()
+              event.getSize() + " vs " + result.getTakeSize()
       );
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
