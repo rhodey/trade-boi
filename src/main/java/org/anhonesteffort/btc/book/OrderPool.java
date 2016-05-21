@@ -35,10 +35,10 @@ public class OrderPool {
 
     Long serial = 0l;
     for (int i = 0; i < initLimitCapacity; i++) {
-      limitOrders.add(new Order(serial++, null, null, -1, -1));
+      limitOrders.add(new Order(serial++, null, null, -1l, -1l));
     }
     for (int i = 0; i < initMarketCapacity; i++) {
-      marketOrders.add(new MarketOrder(serial++, null, null, -1, -1));
+      marketOrders.add(new MarketOrder(serial++, null, null, -1l, -1l));
     }
   }
 

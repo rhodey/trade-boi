@@ -35,7 +35,7 @@ public class Limit {
 
   public Limit(long price) {
     this.price  = price;
-    this.volume = 0;
+    this.volume = 0l;
   }
 
   public long getPrice() {
@@ -70,7 +70,7 @@ public class Limit {
     if (order.isPresent()) {
       order.get().subtract(size, price);
       volume -= size;
-      if (order.get().getSizeRemaining() <= 0) {
+      if (order.get().getSizeRemaining() <= 0l) {
         orderMap.remove(orderId);
         orderQueue.remove(order.get());
       }
@@ -91,7 +91,7 @@ public class Limit {
     if (maker.isPresent()) {
       long volumeRemoved = maker.get().takeSize(getTakeSize(taker));
 
-      if (maker.get().getSizeRemaining() <= 0) {
+      if (maker.get().getSizeRemaining() <= 0l) {
         orderMap.remove(maker.get().getOrderId());
         orderQueue.remove();
       }
@@ -106,7 +106,7 @@ public class Limit {
     List<Order>     makers = new LinkedList<>();
     Optional<Order> maker  = null;
 
-    while (getTakeSize(taker) > 0) {
+    while (getTakeSize(taker) > 0l) {
       maker = takeLiquidityFromNextMaker(taker);
       if (maker.isPresent()) {
         makers.add(maker.get());
@@ -121,7 +121,7 @@ public class Limit {
   public void clear() {
     orderQueue.clear();
     orderMap.clear();
-    volume = 0;
+    volume = 0l;
   }
 
 }

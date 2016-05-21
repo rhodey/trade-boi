@@ -40,7 +40,7 @@ public class Order {
     this.price         = price;
     this.size          = size;
     this.sizeRemaining = size;
-    this.valueRemoved  = 0;
+    this.valueRemoved  = 0l;
   }
 
   public String getOrderId() {
@@ -68,7 +68,7 @@ public class Order {
   }
 
   public void clearValueRemoved() {
-    this.valueRemoved = 0;
+    this.valueRemoved = 0l;
   }
 
   protected void subtract(long size, long price) {

@@ -35,7 +35,7 @@ public class LimitOrderBook {
       next = bidLimits.takeLiquidityFromBestLimit(ask);
     }
 
-    if (ask.getSizeRemaining() > 0 && !(ask instanceof MarketOrder)) {
+    if (ask.getSizeRemaining() > 0l && !(ask instanceof MarketOrder)) {
       askLimits.addOrder(ask);
     }
 
@@ -51,7 +51,7 @@ public class LimitOrderBook {
       next = askLimits.takeLiquidityFromBestLimit(bid);
     }
 
-    if (bid.getSizeRemaining() > 0 && !(bid instanceof MarketOrder)) {
+    if (bid.getSizeRemaining() > 0l && !(bid instanceof MarketOrder)) {
       bidLimits.addOrder(bid);
     }
 

@@ -24,17 +24,17 @@ public class MarketOrder extends Order {
   private long volumeRemoved;
 
   public MarketOrder(Long serial, String orderId, Side side, long size, long funds) {
-    super(serial, orderId, side, 0, size);
+    super(serial, orderId, side, 0l, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
-    volumeRemoved       = 0;
+    volumeRemoved       = 0l;
   }
 
   protected void initMarket(String orderId, Side side, long size, long funds) {
-    super.init(orderId, side, 0, size);
+    super.init(orderId, side, 0l, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
-    volumeRemoved       = 0;
+    volumeRemoved       = 0l;
   }
 
   public long getFunds() {
@@ -59,14 +59,14 @@ public class MarketOrder extends Order {
   public long getSizeRemainingFor(long price) {
     long fundsTakeSize = fundsRemaining / price;
 
-    if (funds > 0 && size > 0) {
+    if (funds > 0l && size > 0l) {
       return Math.min(fundsTakeSize, sizeRemaining);
-    } else if (funds > 0) {
+    } else if (funds > 0l) {
       return fundsTakeSize;
-    } else if (size > 0) {
+    } else if (size > 0l) {
       return sizeRemaining;
     } else {
-      return 0;
+      return 0l;
     }
   }
 
