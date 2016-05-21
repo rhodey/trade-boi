@@ -25,11 +25,11 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MatchingOrderBookBuilder extends MarketOrderBookBuilder {
+public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
 
-  private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookProcessor.class);
 
-  public MatchingOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+  public MatchingOrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 

@@ -23,8 +23,8 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.event.MatchingOrderBookBuilder;
-import org.anhonesteffort.btc.event.OrderBookBuilder;
+import org.anhonesteffort.btc.event.MatchingOrderBookProcessor;
+import org.anhonesteffort.btc.event.OrderBookProcessor;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
@@ -48,13 +48,13 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
-    LongCaster              caster  = new LongCaster(0.000000000001d);
-    HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
-    OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 64);
-    OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool);
+    LongCaster              caster    = new LongCaster(0.000000000001d);
+    HeuristicLimitOrderBook book      = new HeuristicLimitOrderBook();
+    OrderPool               pool      = new OrderPool(ORDER_POOL_SIZE, 64);
+    OrderBookProcessor      processor = new MatchingOrderBookProcessor(book, pool);
 
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }, caster
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { processor }, caster
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);

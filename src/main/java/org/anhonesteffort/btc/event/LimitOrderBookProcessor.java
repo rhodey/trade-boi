@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class LimitOrderBookBuilder extends OrderBookBuilder {
+public class LimitOrderBookProcessor extends OrderBookProcessor {
 
-  private static final Logger log = LoggerFactory.getLogger(LimitOrderBookBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(LimitOrderBookProcessor.class);
 
-  public LimitOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+  public LimitOrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 

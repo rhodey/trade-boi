@@ -27,12 +27,12 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MarketOrderBookBuilder extends LimitOrderBookBuilder {
+public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
 
-  private static final Logger log = LoggerFactory.getLogger(MarketOrderBookBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(MarketOrderBookProcessor.class);
   protected final Set<String> activeMarketOrders = new HashSet<>();
 
-  public MarketOrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+  public MarketOrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 

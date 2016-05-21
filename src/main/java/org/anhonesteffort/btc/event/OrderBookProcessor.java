@@ -25,16 +25,16 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class OrderBookBuilder implements EventHandler<OrderEvent> {
+public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
 
-  private static final Logger log = LoggerFactory.getLogger(OrderBookBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(OrderBookProcessor.class);
 
   protected final HeuristicLimitOrderBook book;
   protected final OrderPool pool;
 
   private boolean rebuilding = false;
 
-  public OrderBookBuilder(HeuristicLimitOrderBook book, OrderPool pool) {
+  public OrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
     this.book = book;
     this.pool = pool;
   }
