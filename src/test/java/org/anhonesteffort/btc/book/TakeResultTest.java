@@ -49,8 +49,8 @@ public class TakeResultTest extends BaseTest {
     MAKERS.add(ASK1);
     MAKERS.add(ASK2);
 
-    final double     TAKE_SIZE  = ASK0.getSize() + ASK1.getSize() + ASK2.getSize();
-    final double     TAKE_VALUE = ASK0.getValueRemoved() + ASK1.getValueRemoved() + ASK2.getValueRemoved();
+    final long       TAKE_SIZE  = ASK0.getSize() + ASK1.getSize() + ASK2.getSize();
+    final long       TAKE_VALUE = ASK0.getValueRemoved() + ASK1.getValueRemoved() + ASK2.getValueRemoved();
     final TakeResult RESULT     = new TakeResult(MAKERS, TAKE_SIZE);
 
     assert RESULT.getTakeSize()      == TAKE_SIZE;
@@ -79,8 +79,8 @@ public class TakeResultTest extends BaseTest {
     MAKERS.add(BID1);
     MAKERS.add(BID2);
 
-    final double     TAKE_SIZE  = BID0.getSize() + BID1.getSize() + BID2.getSize();
-    final double     TAKE_VALUE = BID0.getValueRemoved() + BID1.getValueRemoved() + BID2.getValueRemoved();
+    final long       TAKE_SIZE  = BID0.getSize() + BID1.getSize() + BID2.getSize();
+    final long       TAKE_VALUE = BID0.getValueRemoved() + BID1.getValueRemoved() + BID2.getValueRemoved();
     final TakeResult RESULT     = new TakeResult(MAKERS, TAKE_SIZE);
 
     assert RESULT.getTakeSize()      == TAKE_SIZE;
