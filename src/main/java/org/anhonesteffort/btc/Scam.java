@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
-import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.event.MatchingOrderBookProcessor;
 import org.anhonesteffort.btc.event.OrderBookProcessor;
@@ -48,10 +48,10 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
-    LongCaster              caster    = new LongCaster(0.000000000001d);
-    HeuristicLimitOrderBook book      = new HeuristicLimitOrderBook();
-    OrderPool               pool      = new OrderPool(ORDER_POOL_SIZE, 64);
-    OrderBookProcessor      processor = new MatchingOrderBookProcessor(book, pool);
+    LongCaster         caster    = new LongCaster(0.000000000001d);
+    LimitOrderBook     book      = new LimitOrderBook();
+    OrderPool          pool      = new OrderPool(ORDER_POOL_SIZE, 64);
+    OrderBookProcessor processor = new MatchingOrderBookProcessor(book, pool);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { processor }, caster
