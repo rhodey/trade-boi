@@ -63,7 +63,7 @@ public class LimitQueue {
       order = limit.get().remove(orderId);
       if (order.isPresent() && !limit.get().peek().isPresent()) {
         map.remove(price);
-        if (!queue.remove(limit.get())) { throw new IllegalStateException("f12"); }
+        queue.remove(limit.get());
       }
     }
 
@@ -78,7 +78,7 @@ public class LimitQueue {
       order = limit.get().reduce(orderId, size);
       if (order.isPresent() && !limit.get().peek().isPresent()) {
         map.remove(price);
-        if (!queue.remove(limit.get())) { throw new IllegalStateException("f12"); }
+        queue.remove(limit.get());
       }
     }
 
@@ -102,7 +102,7 @@ public class LimitQueue {
 
       if (!maker.get().peek().isPresent()) {
         map.remove(maker.get().getPrice());
-        if (!queue.remove().equals(maker.get())) { throw new IllegalStateException("f12"); }
+        queue.remove();
       }
 
       return makers;
