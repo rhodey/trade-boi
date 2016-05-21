@@ -23,12 +23,19 @@ public class LongCasterTest {
 
   @Test
   public void test() {
-    final LongCaster CASTER = new LongCaster(0.000001f);
+    final LongCaster CASTER = new LongCaster(0.00000000000001d);
 
-    assert CASTER.toFloat(CASTER.fromFloat(1020f))     == 1020f;
-    assert CASTER.toFloat(CASTER.fromFloat(10.20f))    == 10.20f;
-    assert CASTER.toFloat(CASTER.fromFloat(1.337f))    == 1.337f;
-    assert CASTER.toFloat(CASTER.fromFloat(1.333337f)) == 1.333337f;
+    double DIFF = CASTER.toFloat(CASTER.fromFloat(1020f)) - 1020f;
+    assert Math.abs(DIFF) < 0.00000000000001d;
+
+    DIFF = CASTER.toFloat(CASTER.fromFloat(10.20f)) - 10.20f;
+    assert Math.abs(DIFF) < 0.00000000000001d;
+
+    DIFF = CASTER.toFloat(CASTER.fromFloat(1.337f)) - 1.337f;
+    assert Math.abs(DIFF) < 0.00000000000001d;
+
+    DIFF = CASTER.toFloat(CASTER.fromFloat(12345.33333333333337f)) - 12345.33333333333337f;
+    assert Math.abs(DIFF) < 0.00000000000001d;
   }
 
 }
