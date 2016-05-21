@@ -90,16 +90,26 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
 
       case LIMIT_DONE:
         Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
-        if (limitDone.isPresent() && event.getSize() <= 0l && limitDone.get().getSizeRemaining() > 1l) {
-          throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
-        } else if (limitDone.isPresent() && event.getSize() > 0l && Math.abs(limitDone.get().getSizeRemaining() - event.getSize()) > 1l) {
-          throw new OrderEventException(
-              "order for cancel order event disagrees about size remaining " +
-                  event.getSize() + " vs " + limitDone.get().getSizeRemaining()
-          );
-        } else if (limitDone.isPresent()) {
-          onLimitOrderCanceled(limitDone.get());
-          returnPooledOrder(limitDone.get());
+
+        if (event.getSize() <= 0l) {
+          if (limitDone.isPresent() && limitDone.get().getSizeRemaining() > 1l) {
+            throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
+          } else {
+            onLimitOrderFilled(limitDone.get());
+            returnPooledOrder(limitDone.get());
+          }
+        } else {
+          if (!limitDone.isPresent()) {
+            throw new OrderEventException("order for cancel order event not found on the book");
+          } else if (Math.abs(event.getSize() - limitDone.get().getSizeRemaining()) > 1l) {
+            throw new OrderEventException(
+                "order for cancel order event disagrees about size remaining " +
+                    event.getSize() + " vs " + limitDone.get().getSizeRemaining()
+            );
+          } else {
+            onLimitOrderCanceled(limitDone.get());
+            returnPooledOrder(limitDone.get());
+          }
         }
         break;
     }
@@ -119,6 +129,10 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
 
   protected void onOpenLimitOrderReduced(Order order, long reducedBy) {
     log.warn("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
+  }
+
+  protected void onLimitOrderFilled(Order order) {
+    log.debug("filled limit order " + order.getOrderId());
   }
 
   protected void onLimitOrderCanceled(Order order) {
