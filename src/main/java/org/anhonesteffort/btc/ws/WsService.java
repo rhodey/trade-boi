@@ -34,6 +34,7 @@ import okhttp3.ws.WebSocketCall;
 import org.anhonesteffort.btc.event.OrderEvent;
 import org.anhonesteffort.btc.http.HttpClient;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,12 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
 
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
+  private final LongCaster                 caster;
 
-  public WsService(WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers) {
+  public WsService(
+      WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers, LongCaster caster
+  ) {
+    this.caster   = caster;
     this.handlers = handlers;
     wsDisruptor   = new Disruptor<>(
         this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
@@ -65,7 +70,7 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
 
   @SuppressWarnings("unchecked")
   public void start() {
-    WsOrderEventPublisher publisher  = new WsOrderEventPublisher(wsDisruptor.getRingBuffer());
+    WsOrderEventPublisher publisher  = new WsOrderEventPublisher(wsDisruptor.getRingBuffer(), caster);
     WsMessageSorter       sorter     = new WsMessageSorter(publisher, http);
     WsMessageReceiver     wsReceiver = new WsMessageReceiver(new WsSubscribeHelper(executor), sorter);
 
