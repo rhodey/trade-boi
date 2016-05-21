@@ -25,6 +25,7 @@ import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.event.MatchingOrderBookBuilder;
 import org.anhonesteffort.btc.event.OrderBookBuilder;
+import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +48,10 @@ public class Scam implements Runnable, FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
+    LongCaster              caster  = new LongCaster(0.000001d);
     HeuristicLimitOrderBook book    = new HeuristicLimitOrderBook();
     OrderPool               pool    = new OrderPool(ORDER_POOL_SIZE, 64);
-    OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool);
+    OrderBookBuilder        builder = new MatchingOrderBookBuilder(book, pool, caster);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { builder }
