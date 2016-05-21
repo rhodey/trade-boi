@@ -28,7 +28,7 @@ import java.util.Queue;
 
 public class LimitQueue {
 
-  private final Map<Double, Limit> map = new HashMap<>();
+  private final Map<Long, Limit> map = new HashMap<>();
   private final Queue<Limit> queue;
 
   public LimitQueue(Order.Side side) {
@@ -55,7 +55,7 @@ public class LimitQueue {
     limit.add(order);
   }
 
-  public Optional<Order> removeOrder(Double price, String orderId) {
+  public Optional<Order> removeOrder(Long price, String orderId) {
     Optional<Order> order = Optional.empty();
     Optional<Limit> limit = Optional.ofNullable(map.get(price));
 
@@ -70,7 +70,7 @@ public class LimitQueue {
     return order;
   }
 
-  public Optional<Order> reduceOrder(Double price, String orderId, double size) {
+  public Optional<Order> reduceOrder(Long price, String orderId, long size) {
     Optional<Order> order = Optional.empty();
     Optional<Limit> limit = Optional.ofNullable(map.get(price));
 
