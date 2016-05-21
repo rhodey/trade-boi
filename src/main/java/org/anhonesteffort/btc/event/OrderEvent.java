@@ -94,11 +94,11 @@ public class OrderEvent {
   }
 
   public void initRebuildStart() {
-    init(Type.REBUILD_START, null, null, 0, 0, 0, null, null, 0, 0, 0, 0);
+    init(Type.REBUILD_START, null, null, -1, -1, -1, null, null, -1, -1, -1, -1);
   }
 
   public void initRebuildEnd() {
-    init(Type.REBUILD_END, null, null, 0, 0, 0, null, null, 0, 0, 0, 0);
+    init(Type.REBUILD_END, null, null, -1, -1, -1, null, null, -1, -1, -1, -1);
   }
 
   public Type getType() {
