@@ -34,7 +34,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
     super(book, pool);
   }
 
-  protected Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
+  private Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
     if (event.getPrice() > 0l && event.getSize() > 0l) {
       return pool.take(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
@@ -42,7 +42,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
     }
   }
 
-  protected Order takePooledLimitOrderChange(OrderEvent change) throws OrderEventException {
+  private Order takePooledLimitOrderChange(OrderEvent change) throws OrderEventException {
     if (change.getPrice() > 0l && change.getNewSize() >= 0l) {
       return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
     } else {

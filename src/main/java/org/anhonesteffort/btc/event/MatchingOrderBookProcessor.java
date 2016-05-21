@@ -33,7 +33,7 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
     super(book, pool);
   }
 
-  protected Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
+  private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
         if (!activeMarketOrders.contains(match.getTakerId())) {

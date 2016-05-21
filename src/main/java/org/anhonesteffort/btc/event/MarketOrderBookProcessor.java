@@ -36,7 +36,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
     super(book, pool);
   }
 
-  protected MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
+  private MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
     if (marketRx.getSize() < 0l || marketRx.getFunds() < 0l) {
       throw new OrderEventException("market order rx event was parsed incorrectly");
     } else if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
@@ -46,7 +46,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
     }
   }
 
-  protected MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
+  private MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
     return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
   }
 
