@@ -94,7 +94,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
         if (event.getSize() <= 0l) {
           if (limitDone.isPresent() && limitDone.get().getSizeRemaining() > 1l) {
             throw new OrderEventException("order for filled order event was still open on the book with " + limitDone.get().getSizeRemaining());
-          } else {
+          } else if (limitDone.isPresent()) {
             returnPooledOrder(limitDone.get());
           }
         } else {
