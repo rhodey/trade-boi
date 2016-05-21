@@ -18,7 +18,7 @@
 package org.anhonesteffort.btc.event;
 
 import com.lmax.disruptor.EventHandler;
-import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
@@ -29,12 +29,12 @@ public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(OrderBookProcessor.class);
 
-  protected final HeuristicLimitOrderBook book;
+  protected final LimitOrderBook book;
   protected final OrderPool pool;
 
   private boolean rebuilding = false;
 
-  public OrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
+  public OrderBookProcessor(LimitOrderBook book, OrderPool pool) {
     this.book = book;
     this.pool = pool;
   }

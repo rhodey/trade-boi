@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.event;
 
-import org.anhonesteffort.btc.book.HeuristicLimitOrderBook;
+import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
@@ -29,7 +29,7 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookProcessor.class);
 
-  public MatchingOrderBookProcessor(HeuristicLimitOrderBook book, OrderPool pool) {
+  public MatchingOrderBookProcessor(LimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 
