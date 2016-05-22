@@ -46,12 +46,11 @@ public class OrderBookViewer {
     TableColumn          priceCol  = new TableColumn("price");
     TableColumn          volumeCol = new TableColumn("volume");
 
-    priceCol.setMinWidth(100);
-    volumeCol.setMinWidth(100);
+    priceCol.setPrefWidth(100);
+    volumeCol.setPrefWidth(100);
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-    table.setEditable(true);
     table.setItems(side.equals(Order.Side.ASK) ? curator.getAskList() : curator.getBidList());
     table.getColumns().addAll(volumeCol, priceCol);
 
