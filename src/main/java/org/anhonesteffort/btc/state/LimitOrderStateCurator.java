@@ -115,14 +115,17 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   protected void onLimitOrderReceived(Order order) {
+    // todo: add to received hashmap
     log.debug("received new limit order " + order.getOrderId());
   }
 
   protected void onReceivedLimitOrderReduced(Order order, long reducedBy) {
+    // todo: change in received hashmap
     log.warn("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
   protected void onLimitOrderOpened(Order order) {
+    // todo: remove from received hashmap
     log.debug("opened new limit order " + order.getOrderId());
   }
 
