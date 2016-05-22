@@ -61,7 +61,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
 
       case LIMIT_OPEN:
         Order      limitOpen = takePooledLimitOrder(event);
-        TakeResult result    = book.add(limitOpen);
+        TakeResult result    = state.getOrderBook().add(limitOpen);
         if (result.getTakeSize() > 0l) {
           throw new OrderEventException("opened limit order took " + result.getTakeSize() + " from the book");
         } else if (!isRebuilding()) {
@@ -75,7 +75,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
         }
 
         long            reducedBy   = event.getOldSize() - event.getNewSize();
-        Optional<Order> limitChange = book.reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
+        Optional<Order> limitChange = state.getOrderBook().reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
         if (limitChange.isPresent()) {
           onOpenLimitOrderReduced(limitChange.get(), reducedBy);
           if (limitChange.get().getSizeRemaining() <= 0l) {
@@ -89,7 +89,7 @@ public class LimitOrderBookProcessor extends OrderBookProcessor {
         break;
 
       case LIMIT_DONE:
-        Optional<Order> limitDone = book.remove(event.getSide(), event.getPrice(), event.getOrderId());
+        Optional<Order> limitDone = state.getOrderBook().remove(event.getSide(), event.getPrice(), event.getOrderId());
 
         if (event.getSize() <= 0l) {
           if (limitDone.isPresent() && limitDone.get().getSizeRemaining() > 1l) {

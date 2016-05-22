@@ -29,14 +29,13 @@ public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(OrderBookProcessor.class);
 
-  protected final LimitOrderBook book;
+  protected final CoinbaseState state;
   protected final OrderPool pool;
-
   private boolean rebuilding = false;
-  private long    nsTimeSum  = 0l;
+  private long nsTimeSum = 0l;
 
   public OrderBookProcessor(LimitOrderBook book, OrderPool pool) {
-    this.book = book;
+    state     = new CoinbaseState(book);
     this.pool = pool;
   }
 
@@ -60,7 +59,7 @@ public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
   public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException {
     switch (event.getType()) {
       case REBUILD_START:
-        book.clear();
+        state.getOrderBook().clear();
         pool.returnAll();
         rebuilding = true;
         onRebuildStart();

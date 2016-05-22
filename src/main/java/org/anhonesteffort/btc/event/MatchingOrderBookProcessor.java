@@ -35,13 +35,13 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
   private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
-        if (!activeMarketOrders.contains(match.getTakerId())) {
+        if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
         } else {
           return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), -1l);
         }
       } else {
-        if (!activeMarketOrders.contains(match.getTakerId())) {
+        if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
         } else {
           return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), -1l);
@@ -58,7 +58,7 @@ public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
     if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 
     Order      taker    = takePooledTakerOrder(event);
-    TakeResult result   = book.add(taker);
+    TakeResult result   = state.getOrderBook().add(taker);
 
     if (result.getTakeSize() != event.getSize()) {
       log.error("taker order " + taker.getOrderId() + " side " + taker.getSide() + " price " + taker.getPrice() + " size " + taker.getSize());

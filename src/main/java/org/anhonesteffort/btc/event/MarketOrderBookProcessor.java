@@ -24,13 +24,9 @@ import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(MarketOrderBookProcessor.class);
-  protected final Set<String> activeMarketOrders = new HashSet<>();
 
   public MarketOrderBookProcessor(LimitOrderBook book, OrderPool pool) {
     super(book, pool);
@@ -82,7 +78,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
   }
 
   protected void onMarketOrderReceived(MarketOrder order) throws OrderEventException {
-    if (!activeMarketOrders.add(order.getOrderId())) {
+    if (state.getMarketOrders().put(order.getOrderId(), order) != null) {
       throw new OrderEventException("market order " + order.getOrderId() + " already in the active set");
     } else {
       log.debug("received new market order " + order.getOrderId());
@@ -94,7 +90,7 @@ public class MarketOrderBookProcessor extends LimitOrderBookProcessor {
   }
 
   protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
-    if (!activeMarketOrders.remove(orderId)) {
+    if (state.getMarketOrders().remove(orderId) == null) {
       throw new OrderEventException("market order " + orderId + " was never in the active set");
     } else {
       log.debug("market order done " + orderId);
