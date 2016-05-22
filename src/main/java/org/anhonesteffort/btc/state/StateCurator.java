@@ -78,11 +78,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
 
       default:
         onEvent(event);
-        computations.forEach(compute -> compute.onStateChange(state));
+        if (!rebuilding) {
+          computations.forEach(compute -> compute.onStateChange(state));
+        }
     }
 
     if ((sequence % 50l) == 0l) {
-      log.info("avg latency -> " + (nsTimeSum / 50d) + "ns");
+      if (!rebuilding) { log.info("avg latency -> " + (nsTimeSum / 50d) + "ns"); }
       nsTimeSum = System.nanoTime() - event.getNsTime();
     } else {
       nsTimeSum += System.nanoTime() - event.getNsTime();
