@@ -66,7 +66,7 @@ public class LimitOrderStateCurator extends StateCurator {
         Optional<Order> oldLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
         if (!oldLimit.isPresent() && !isRebuilding()) {
           throw new OrderEventException("limit order " + event.getOrderId() + " was never in the limit rx state map");
-        } else {
+        } else if (oldLimit.isPresent()) {
           returnPooledOrder(oldLimit.get());
         }
 
