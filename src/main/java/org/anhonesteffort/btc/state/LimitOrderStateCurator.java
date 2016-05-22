@@ -58,7 +58,7 @@ public class LimitOrderStateCurator extends StateCurator {
         if (state.getRxLimitOrders().put(rxLimit.getOrderId(), rxLimit) != null) {
           throw new OrderEventException("limit order " + rxLimit.getOrderId() + " already in the limit rx state map");
         } else {
-          onLimitOrderReceived(rxLimit);
+          onLimitOrderRx(rxLimit);
         }
         break;
 
@@ -93,7 +93,7 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (changeRxLimit.isPresent()) {
           Order newLimitChange = takePooledLimitOrderChange(event);
           state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);
-          onReceivedLimitOrderReduced(newLimitChange, reducedBy);
+          onRxLimitOrderReduced(newLimitChange, reducedBy);
           returnPooledOrder(changeRxLimit.get());
           return;
         }
@@ -142,11 +142,11 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  protected void onLimitOrderReceived(Order order) {
+  protected void onLimitOrderRx(Order order) {
     log.debug("received new limit order " + order.getOrderId());
   }
 
-  protected void onReceivedLimitOrderReduced(Order order, long reducedBy) {
+  protected void onRxLimitOrderReduced(Order order, long reducedBy) {
     log.warn("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
