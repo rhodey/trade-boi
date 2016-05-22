@@ -30,6 +30,7 @@ public class SpreadComputation extends Computation<Optional<Long>> {
 
   private final BestAskComputation ask = new BestAskComputation();
   private final BestBidComputation bid = new BestBidComputation();
+
   private final LongCaster caster;
   private Optional<Long> lastSpread = Optional.empty();
 
