@@ -32,60 +32,35 @@ import java.util.Observer;
 
 public class LimitListCurator {
 
-  private final Map<Long, LimitView>      askMap  = new HashMap<>();
-  private final Map<Long, LimitView>      bidMap  = new HashMap<>();
-  private final ObservableList<LimitView> askList = FXCollections.observableArrayList();
-  private final ObservableList<LimitView> bidList = FXCollections.observableArrayList();
+  private final Map<Long, LimitView>      limitMap  = new HashMap<>();
+  private final ObservableList<LimitView> limitList = FXCollections.observableArrayList();
 
   private final LongCaster caster;
 
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
     this.caster = caster;
-    orderBook.getAskLimits().addObserver(new AskLimitCallback());
-    orderBook.getBidLimits().addObserver(new BidLimitCallback());
+    orderBook.getAskLimits().addObserver(new LimitChangeCallback());
+    orderBook.getBidLimits().addObserver(new LimitChangeCallback());
   }
 
-  public SortedList<LimitView> getAskList() {
-    return new SortedList<>(askList, new SpreadSorter());
+  public SortedList<LimitView> getLimitList() {
+    return new SortedList<>(limitList, new SpreadSorter());
   }
 
-  public SortedList<LimitView> getBidList() {
-    return new SortedList<>(bidList, new SpreadSorter());
-  }
-
-  private class AskLimitCallback implements Observer {
+  private class LimitChangeCallback implements Observer {
     @Override
-    public void update(Observable o, Object arg) {
-      if (arg == null) {
-        askMap.clear();
-        askList.clear();
+    public void update(Observable observable, Object nullOrLimit) {
+      if (nullOrLimit == null) {
+        limitMap.clear();
+        limitList.clear();
       } else {
-        Limit limit = (Limit) arg;
-        if (!askMap.containsKey(limit.getPrice())) {
+        Limit limit = (Limit) nullOrLimit;
+        if (!limitMap.containsKey(limit.getPrice())) {
           LimitView view = new LimitView(limit, caster);
-          askMap.put(limit.getPrice(), view);
-          askList.add(view);
+          limitMap.put(limit.getPrice(), view);
+          limitList.add(view);
         } else {
-          askList.remove(askMap.remove(limit.getPrice()));
-        }
-      }
-    }
-  }
-
-  private class BidLimitCallback implements Observer {
-    @Override
-    public void update(Observable o, Object arg) {
-      if (arg == null) {
-        bidMap.clear();
-        bidList.clear();
-      } else {
-        Limit limit = (Limit) arg;
-        if (!bidMap.containsKey(limit.getPrice())) {
-          LimitView view = new LimitView(limit, caster);
-          bidMap.put(limit.getPrice(), view);
-          bidList.add(view);
-        } else {
-          bidList.remove(bidMap.remove(limit.getPrice()));
+          limitList.remove(limitMap.remove(limit.getPrice()));
         }
       }
     }

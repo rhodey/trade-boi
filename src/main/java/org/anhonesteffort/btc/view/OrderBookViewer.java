@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.view;
 
 import javafx.geometry.Insets;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -27,7 +26,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.util.LongCaster;
 
 public class OrderBookViewer {
@@ -39,33 +37,30 @@ public class OrderBookViewer {
   }
 
   @SuppressWarnings("unchecked")
-  private Node nodeFor(Order.Side side) {
-    TableView<LimitView> table     = new TableView<>();
-    TableColumn          priceCol  = new TableColumn("price");
-    TableColumn          volumeCol = new TableColumn("volume");
+  public void start(Stage stage) {
+    stage.setTitle("Coinbase Trading");
+    stage.setWidth(250);
+    stage.setHeight(600);
 
-    priceCol.setPrefWidth(100);
-    volumeCol.setPrefWidth(100);
+    TableColumn priceCol  = new TableColumn("price");
+    TableColumn volumeCol = new TableColumn("volume");
+
+    priceCol.setMinWidth(100);
+    volumeCol.setMinWidth(100);
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-    table.setItems(side.equals(Order.Side.ASK) ? curator.getAskList() : curator.getBidList());
+    TableView<LimitView> table = new TableView<>();
+    table.setItems(curator.getLimitList());
     table.getColumns().addAll(volumeCol, priceCol);
+    table.setPrefHeight(600);
 
-    return table;
-  }
-
-  public void start(Stage stage) {
-    stage.setTitle("Coinbase Trading");
-    stage.setWidth(300);
-    stage.setHeight(600);
-
-    VBox  vbox  = new VBox();
     Scene scene = new Scene(new Group());
+    VBox  vbox  = new VBox();
 
     vbox.setSpacing(5);
     vbox.setPadding(new Insets(10, 0, 0, 10));
-    vbox.getChildren().addAll(nodeFor(Order.Side.ASK), nodeFor(Order.Side.BID));
+    vbox.getChildren().addAll(table);
 
     ((Group) scene.getRoot()).getChildren().addAll(vbox);
     stage.setScene(scene);
