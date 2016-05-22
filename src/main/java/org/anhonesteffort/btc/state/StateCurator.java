@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.event;
+package org.anhonesteffort.btc.state;
 
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;

@@ -31,7 +31,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import okhttp3.Request;
 import okhttp3.ws.WebSocketCall;
-import org.anhonesteffort.btc.event.OrderEvent;
+import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.http.HttpClient;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.util.LongCaster;
