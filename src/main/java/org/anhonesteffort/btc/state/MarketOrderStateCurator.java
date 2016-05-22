@@ -43,6 +43,10 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
+  private MarketOrder takePooledMarketOrderChange(OrderEvent change) {
+    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
+  }
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
@@ -65,14 +69,17 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
 
         long                  sizeReduced  = event.getOldSize()  - event.getNewSize();
         long                  fundsReduced = event.getOldFunds() - event.getNewFunds();
-        Optional<MarketOrder> marketChange = Optional.ofNullable(
-            state.getMarketOrders().get(event.getOrderId())
+        Optional<MarketOrder> oldMarket    = Optional.ofNullable(
+            state.getMarketOrders().remove(event.getOrderId())
         );
 
-        if (!marketChange.isPresent()) {
+        if (!oldMarket.isPresent()) {
           throw new OrderEventException("market order for change event not found in the state map");
         } else {
-          onMarketOrderChange(marketChange.get(), sizeReduced, fundsReduced);
+          MarketOrder newMarket = takePooledMarketOrderChange(event);
+          state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
+          onMarketOrderChange(newMarket, sizeReduced, fundsReduced);
+          returnPooledOrder(oldMarket.get());
         }
         break;
 
