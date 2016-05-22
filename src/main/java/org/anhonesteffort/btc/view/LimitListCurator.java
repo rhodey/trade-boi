@@ -25,12 +25,12 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
-public class LimitViewListCurator extends TimerTask {
+public class LimitListCurator extends TimerTask {
 
   private final ObservableList<Limit> limits = FXCollections.observableArrayList();
   private final LimitOrderBook orderBook;
 
-  public LimitViewListCurator(LimitOrderBook orderBook) {
+  public LimitListCurator(LimitOrderBook orderBook) {
     this.orderBook = orderBook;
   }
 

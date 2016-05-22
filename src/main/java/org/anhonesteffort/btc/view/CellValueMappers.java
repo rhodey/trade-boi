@@ -22,20 +22,43 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 import org.anhonesteffort.btc.book.Limit;
+import org.anhonesteffort.btc.util.LongCaster;
 
-public class LimitCellValueMappers {
+public class CellValueMappers {
 
-  public static class Price implements Callback<TableColumn.CellDataFeatures<Limit, String>, ObservableValue<String>> {
+  private final LongCaster caster;
+  private final Price      price;
+  private final Volume     volume;
+
+  public CellValueMappers(LongCaster caster) {
+    this.caster = caster;
+    price       = new Price();
+    volume      = new Volume();
+  }
+
+  public Price getPrice() {
+    return price;
+  }
+
+  public Volume getVolume() {
+    return volume;
+  }
+
+  public class Price implements Callback<TableColumn.CellDataFeatures<Limit, String>, ObservableValue<String>> {
     @Override
     public ObservableValue<String> call(TableColumn.CellDataFeatures<Limit, String> param) {
-      return new SimpleStringProperty(Long.toString(param.getValue().getPrice()));
+      return new SimpleStringProperty(
+          Double.toString(caster.toDouble(param.getValue().getPrice()))
+      );
     }
   }
 
-  public static class Volume implements Callback<TableColumn.CellDataFeatures<Limit, String>, ObservableValue<String>> {
+  public class Volume implements Callback<TableColumn.CellDataFeatures<Limit, String>, ObservableValue<String>> {
     @Override
     public ObservableValue<String> call(TableColumn.CellDataFeatures<Limit, String> param) {
-      return new SimpleStringProperty(Long.toString(param.getValue().getVolume()));
+      return new SimpleStringProperty(
+          Double.toString(caster.toDouble(param.getValue().getVolume()))
+      );
     }
   }
 
