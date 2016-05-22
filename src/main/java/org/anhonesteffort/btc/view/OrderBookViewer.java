@@ -21,12 +21,10 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
@@ -41,7 +39,7 @@ public class OrderBookViewer {
   }
 
   @SuppressWarnings("unchecked")
-  private Node[] nodesFor(Order.Side side) {
+  private Node nodeFor(Order.Side side) {
     TableView<LimitView> table     = new TableView<>();
     TableColumn          priceCol  = new TableColumn("price");
     TableColumn          volumeCol = new TableColumn("volume");
@@ -54,10 +52,7 @@ public class OrderBookViewer {
     table.setItems(side.equals(Order.Side.ASK) ? curator.getAskList() : curator.getBidList());
     table.getColumns().addAll(volumeCol, priceCol);
 
-    Label label = new Label((side.equals(Order.Side.ASK) ? "Ask" : "Bid") + " Limit Orders");
-    label.setFont(new Font("Arial", 20));
-
-    return new Node[] { label, table };
+    return table;
   }
 
   public void start(Stage stage) {
@@ -70,8 +65,7 @@ public class OrderBookViewer {
 
     vbox.setSpacing(5);
     vbox.setPadding(new Insets(10, 0, 0, 10));
-    vbox.getChildren().addAll(nodesFor(Order.Side.ASK));
-    vbox.getChildren().addAll(nodesFor(Order.Side.BID));
+    vbox.getChildren().addAll(nodeFor(Order.Side.ASK), nodeFor(Order.Side.BID));
 
     ((Group) scene.getRoot()).getChildren().addAll(vbox);
     stage.setScene(scene);
