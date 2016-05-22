@@ -24,13 +24,13 @@ import org.anhonesteffort.btc.book.Order;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CoinbaseState {
+public class State {
 
   private final Map<String, MarketOrder> marketOrders = new HashMap<>();
   private final Map<String, Order> rxLimitOrders = new HashMap<>();
   private final LimitOrderBook orderBook;
 
-  public CoinbaseState(LimitOrderBook orderBook) {
+  public State(LimitOrderBook orderBook) {
     this.orderBook = orderBook;
   }
 

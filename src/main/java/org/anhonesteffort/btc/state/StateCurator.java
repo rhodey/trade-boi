@@ -32,7 +32,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
-  protected final CoinbaseState    state;
+  protected final State            state;
   protected final OrderPool        pool;
   protected final Set<Computation> computations;
 
@@ -40,7 +40,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   private long    nsTimeSum  = 0l;
 
   public StateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
-    state             = new CoinbaseState(book);
+    state             = new State(book);
     this.pool         = pool;
     this.computations = computations;
   }

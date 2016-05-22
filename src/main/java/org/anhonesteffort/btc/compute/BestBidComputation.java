@@ -18,14 +18,14 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.book.Limit;
-import org.anhonesteffort.btc.state.CoinbaseState;
+import org.anhonesteffort.btc.state.State;
 
 import java.util.Optional;
 
 public class BestBidComputation extends Computation<Optional<Limit>> {
 
   @Override
-  protected Optional<Limit> computeResult(CoinbaseState state) {
+  protected Optional<Limit> computeResult(State state) {
     return state.getOrderBook().getBidLimits().peek();
   }
 

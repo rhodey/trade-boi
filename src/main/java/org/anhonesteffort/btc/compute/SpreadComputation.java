@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.CoinbaseState;
+import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class SpreadComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  protected Optional<Long> computeResult(CoinbaseState state) {
+  protected Optional<Long> computeResult(State state) {
     if (ask.getResult().isPresent() && bid.getResult().isPresent()) {
       return Optional.of(
           ask.getResult().get().getPrice() - bid.getResult().get().getPrice()

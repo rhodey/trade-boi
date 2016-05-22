@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.CoinbaseState;
+import org.anhonesteffort.btc.state.State;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ public abstract class Computation<T> {
     this.children.addAll(Arrays.asList(children));
   }
 
-  protected abstract T computeResult(CoinbaseState state);
+  protected abstract T computeResult(State state);
 
   protected void onResult(T result) { }
 
@@ -45,7 +45,7 @@ public abstract class Computation<T> {
     return result;
   }
 
-  public void onStateChange(CoinbaseState state) {
+  public void onStateChange(State state) {
     children.forEach(child -> child.onStateChange(state));
     result = computeResult(state);
     onResult(result);
