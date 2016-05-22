@@ -39,7 +39,7 @@ public class OrderBookViewer {
   private final LimitListCurator     curator;
 
   public OrderBookViewer(LimitOrderBook orderBook, LongCaster caster) {
-    curator = new LimitListCurator(orderBook);
+    curator = new LimitListCurator(orderBook, caster);
   }
 
   @SuppressWarnings("unchecked")

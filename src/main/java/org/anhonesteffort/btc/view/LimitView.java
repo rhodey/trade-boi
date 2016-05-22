@@ -17,50 +17,53 @@
 
 package org.anhonesteffort.btc.view;
 
-import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import org.anhonesteffort.btc.book.Limit;
+import org.anhonesteffort.btc.util.LongCaster;
 
 public class LimitView implements ChangeListener<Long> {
 
-  private final SimpleLongProperty price;
-  private final SimpleLongProperty volume;
+  private final SimpleDoubleProperty price;
+  private final SimpleDoubleProperty volume;
+  private final LongCaster           caster;
 
-  public LimitView(Limit limit) {
+  public LimitView(Limit limit, LongCaster caster) {
     limit.addListener(new WeakChangeListener<>(this));
-    this.price  = new SimpleLongProperty(limit.getPrice());
-    this.volume = new SimpleLongProperty(limit.getVolume());
+    this.caster = caster;
+    this.price  = new SimpleDoubleProperty(caster.toDouble(limit.getPrice()));
+    this.volume = new SimpleDoubleProperty(caster.toDouble(limit.getVolume()));
   }
 
-  public long getPrice() {
+  public double getPrice() {
     return price.get();
   }
 
-  public void setPrice(long price) {
+  public void setPrice(double price) {
     this.price.set(price);
   }
 
-  public SimpleLongProperty priceProperty() {
+  public SimpleDoubleProperty priceProperty() {
     return price;
   }
 
-  public long getVolume() {
+  public double getVolume() {
     return volume.get();
   }
 
-  public void setVolume(long volume) {
+  public void setVolume(double volume) {
     this.volume.set(volume);
   }
 
-  public SimpleLongProperty volumeProperty() {
+  public SimpleDoubleProperty volumeProperty() {
     return volume;
   }
 
   @Override
   public void changed(ObservableValue<? extends Long> observable, Long oldVolume, Long newVolume) {
-    volume.set(newVolume);
+    volume.set(caster.toDouble(newVolume));
   }
 
 }
