@@ -17,17 +17,16 @@
 
 package org.anhonesteffort.btc.book;
 
-import javafx.beans.value.ObservableValueBase;
-
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Optional;
 import java.util.Queue;
 
-public class Limit extends ObservableValueBase<Long> {
+public class Limit extends Observable {
 
   private final Map<String, Order> orderMap = new HashMap<>();
   private final Queue<Order> orderQueue;
@@ -38,11 +37,6 @@ public class Limit extends ObservableValueBase<Long> {
     orderQueue  = new ArrayDeque<>(initSize);
     this.price  = price;
     this.volume = 0l;
-  }
-
-  @Override
-  public Long getValue() {
-    return volume;
   }
 
   public long getPrice() {
@@ -61,7 +55,8 @@ public class Limit extends ObservableValueBase<Long> {
     orderMap.put(order.getOrderId(), order);
     orderQueue.add(order);
     volume += order.getSizeRemaining();
-    super.fireValueChangedEvent();
+    super.setChanged();
+    super.notifyObservers();
   }
 
   public Optional<Order> remove(String orderId) {
@@ -69,7 +64,8 @@ public class Limit extends ObservableValueBase<Long> {
     if (order.isPresent()) {
       orderQueue.remove(order.get());
       volume -= order.get().getSizeRemaining();
-      super.fireValueChangedEvent();
+      super.setChanged();
+      super.notifyObservers();
     }
     return order;
   }
@@ -83,7 +79,8 @@ public class Limit extends ObservableValueBase<Long> {
         orderMap.remove(orderId);
         orderQueue.remove(order.get());
       }
-      super.fireValueChangedEvent();
+      super.setChanged();
+      super.notifyObservers();
     }
     return order;
   }
@@ -125,7 +122,11 @@ public class Limit extends ObservableValueBase<Long> {
       }
     }
 
-    if (!makers.isEmpty()) { super.fireValueChangedEvent(); }
+    if (!makers.isEmpty()) {
+      super.setChanged();
+      super.notifyObservers();
+    }
+
     return makers;
   }
 
@@ -133,7 +134,8 @@ public class Limit extends ObservableValueBase<Long> {
     orderQueue.clear();
     orderMap.clear();
     volume = 0l;
-    super.fireValueChangedEvent();
+    super.setChanged();
+    super.notifyObservers();
   }
 
 }

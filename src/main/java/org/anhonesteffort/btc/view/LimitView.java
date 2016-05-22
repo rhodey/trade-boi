@@ -18,20 +18,21 @@
 package org.anhonesteffort.btc.view;
 
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.util.LongCaster;
 
-public class LimitView implements ChangeListener<Long> {
+import java.util.Observable;
+import java.util.Observer;
+
+@SuppressWarnings("unused")
+public class LimitView implements Observer {
 
   private final SimpleDoubleProperty price;
   private final SimpleDoubleProperty volume;
   private final LongCaster           caster;
 
   public LimitView(Limit limit, LongCaster caster) {
-    limit.addListener(new WeakChangeListener<>(this));
+    limit.addObserver(this);
     this.caster = caster;
     this.price  = new SimpleDoubleProperty(caster.toDouble(limit.getPrice()));
     this.volume = new SimpleDoubleProperty(caster.toDouble(limit.getVolume()));
@@ -62,8 +63,8 @@ public class LimitView implements ChangeListener<Long> {
   }
 
   @Override
-  public void changed(ObservableValue<? extends Long> observable, Long oldVolume, Long newVolume) {
-    volume.set(caster.toDouble(newVolume));
+  public void update(Observable o, Object arg) {
+    volume.set(caster.toDouble( ((Limit) o).getVolume() ));
   }
 
 }
