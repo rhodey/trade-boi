@@ -17,12 +17,46 @@
 
 package org.anhonesteffort.btc.view;
 
+import javafx.geometry.Insets;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class OrderBookViewer {
 
-  public void start(Stage stage) {
+  private final TableView table = new TableView();
 
+  @SuppressWarnings("unchecked")
+  public void start(Stage stage) {
+    stage.setTitle("Table View Sample");
+    stage.setWidth(300);
+    stage.setHeight(500);
+
+    TableColumn firstNameCol = new TableColumn("First Name");
+    TableColumn lastNameCol  = new TableColumn("Last Name");
+    TableColumn emailCol     = new TableColumn("Email");
+
+    table.setEditable(true);
+    table.getColumns().addAll(firstNameCol, lastNameCol, emailCol);
+
+    Label label = new Label("Address Book");
+    label.setFont(new Font("Arial", 20));
+
+    VBox vbox = new VBox();
+    vbox.setSpacing(5);
+    vbox.setPadding(new Insets(10, 0, 0, 10));
+    vbox.getChildren().addAll(label, table);
+
+    Scene scene = new Scene(new Group());
+    ((Group) scene.getRoot()).getChildren().addAll(vbox);
+
+    stage.setScene(scene);
+    stage.show();
   }
 
 }
