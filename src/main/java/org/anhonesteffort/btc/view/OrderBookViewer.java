@@ -17,34 +17,48 @@
 
 package org.anhonesteffort.btc.view;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class OrderBookViewer {
 
-  private final TableView table = new TableView();
+  private final TableView<LimitView> table = new TableView<>();
+  private final ObservableList<LimitView> data =
+      FXCollections.observableArrayList(
+          new LimitView(10, 20),
+          new LimitView(30, 40),
+          new LimitView(50, 60)
+      );
 
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
-    stage.setTitle("Table View Sample");
+    stage.setTitle("Coinbase Trading");
     stage.setWidth(300);
     stage.setHeight(500);
 
-    TableColumn firstNameCol = new TableColumn("First Name");
-    TableColumn lastNameCol  = new TableColumn("Last Name");
-    TableColumn emailCol     = new TableColumn("Email");
+    TableColumn priceCol = new TableColumn("price");
+    priceCol.setMinWidth(100);
+    priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 
+    TableColumn volumeCol = new TableColumn("volume");
+    volumeCol.setMinWidth(100);
+    volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
+
+    table.setItems(data);
     table.setEditable(true);
-    table.getColumns().addAll(firstNameCol, lastNameCol, emailCol);
+    table.getColumns().addAll(volumeCol, priceCol);
 
-    Label label = new Label("Address Book");
+    Label label = new Label("Limit Order Book");
     label.setFont(new Font("Arial", 20));
 
     VBox vbox = new VBox();
