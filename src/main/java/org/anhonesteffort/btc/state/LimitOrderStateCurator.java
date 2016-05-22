@@ -108,7 +108,15 @@ public class LimitOrderStateCurator extends StateCurator {
         break;
 
       case LIMIT_DONE:
-        Optional<Order> limitDone = state.getOrderBook().remove(event.getSide(), event.getPrice(), event.getOrderId());
+        Optional<Order> rxLimitDone = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
+        Optional<Order> limitDone   = state.getOrderBook().remove(event.getSide(), event.getPrice(), event.getOrderId());
+
+        if (rxLimitDone.isPresent() && limitDone.isPresent()) {
+          throw new OrderEventException("order for limit done event was in the limit rx state map and open on the book");
+        } else if (rxLimitDone.isPresent()) {
+          returnPooledOrder(rxLimitDone.get());
+          return;
+        }
 
         if (event.getSize() <= 0l) {
           if (limitDone.isPresent() && limitDone.get().getSizeRemaining() > 1l) {
