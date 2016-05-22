@@ -44,10 +44,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
-  private MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
-  }
-
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
@@ -63,12 +59,17 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
           throw new OrderEventException("market order size and funds can only decrease");
         }
 
-        long sizeReduced  = event.getOldSize()  - event.getNewSize();
-        long fundsReduced = event.getOldFunds() - event.getNewFunds();
+        long                  sizeReduced  = event.getOldSize()  - event.getNewSize();
+        long                  fundsReduced = event.getOldFunds() - event.getNewFunds();
+        Optional<MarketOrder> marketChange = Optional.ofNullable(
+            state.getMarketOrders().get(event.getOrderId())
+        );
 
-        MarketOrder marketChange = takePooledMarketOrderChange(event);
-        onMarketOrderChange(event, sizeReduced, fundsReduced);
-        returnPooledOrder(marketChange);
+        if (!marketChange.isPresent()) {
+          throw new OrderEventException("market order for change event not found in the state map");
+        } else {
+          onMarketOrderChange(marketChange.get(), sizeReduced, fundsReduced);
+        }
         break;
 
       case MARKET_DONE:
@@ -85,8 +86,8 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
-  protected void onMarketOrderChange(OrderEvent event, long sizeReduced, long fundsReduced) {
-    log.warn("!!! changed market order " + event.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
+  protected void onMarketOrderChange(MarketOrder order, long sizeReduced, long fundsReduced) {
+    log.warn("!!! changed market order " + order.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
   protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
