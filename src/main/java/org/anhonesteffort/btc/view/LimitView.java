@@ -44,20 +44,28 @@ public class LimitView implements ChangeListener<Long> {
     return (LimitView limit) -> new Observable[] { limit.volume };
   }
 
-  public Long getPrice() {
+  public long getPrice() {
     return price.get();
   }
 
-  public void setPrice(Long price) {
+  public void setPrice(long price) {
     this.price.set(price);
   }
 
-  public Long getVolume() {
+  public SimpleLongProperty priceProperty() {
+    return price;
+  }
+
+  public long getVolume() {
     return volume.get();
   }
 
-  public void setVolume(Long volume) {
+  public void setVolume(long volume) {
     this.volume.set(volume);
+  }
+
+  public SimpleLongProperty volumeProperty() {
+    return volume;
   }
 
   @Override

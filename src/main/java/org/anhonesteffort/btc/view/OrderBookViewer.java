@@ -56,6 +56,7 @@ public class OrderBookViewer {
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
+    table.setEditable(true);
     table.setItems(curator.getLimits());
     table.getColumns().addAll(volumeCol, priceCol);
 
