@@ -24,12 +24,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.util.Callback;
 import org.anhonesteffort.btc.book.Limit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LimitView implements ChangeListener<Long> {
-
-  private static final Logger log = LoggerFactory.getLogger(LimitView.class);
 
   private final SimpleLongProperty price;
   private final SimpleLongProperty volume;
@@ -70,7 +66,6 @@ public class LimitView implements ChangeListener<Long> {
 
   @Override
   public void changed(ObservableValue<? extends Long> observable, Long oldVolume, Long newVolume) {
-    log.info("limit " + price.get() + " has new volume " + newVolume);
     volume.set(newVolume);
   }
 

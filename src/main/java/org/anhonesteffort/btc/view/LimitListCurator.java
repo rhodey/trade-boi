@@ -18,30 +18,19 @@
 package org.anhonesteffort.btc.view;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class LimitListCurator extends TimerTask {
 
-  private static final Logger log = LoggerFactory.getLogger(LimitListCurator.class);
-
   private final ObservableList<LimitView> limits = FXCollections.observableArrayList(LimitView.extractor());
   private final LimitOrderBook orderBook;
 
   public LimitListCurator(LimitOrderBook orderBook) {
     this.orderBook = orderBook;
-    limits.addListener(new ListChangeListener<LimitView>() {
-      @Override
-      public void onChanged(Change<? extends LimitView> c) {
-        log.info("!!! why not !!!");
-      }
-    });
   }
 
   public ObservableList<LimitView> getLimits() {
