@@ -29,22 +29,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
 public class LimitListCurator {
 
   private final Map<Long, LimitView>      limitMap  = new HashMap<>();
   private final ObservableList<LimitView> limitList = FXCollections.observableArrayList();
 
+  private final LimitOrderBook orderBook;
   private final LongCaster caster;
 
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
-    this.caster = caster;
+    this.orderBook = orderBook;
+    this.caster    = caster;
     orderBook.getAskLimits().addObserver(new LimitChangeCallback());
     orderBook.getBidLimits().addObserver(new LimitChangeCallback());
   }
 
   public SortedList<LimitView> getLimitList() {
     return new SortedList<>(limitList, new SpreadSorter());
+  }
+
+  public Optional<LimitView> getBestAsk() {
+    Optional<Limit> limit = orderBook.getAskLimits().peek();
+    if (limit.isPresent()) {
+      return Optional.ofNullable(limitMap.get(limit.get().getPrice()));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private class LimitChangeCallback implements Observer {

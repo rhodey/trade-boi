@@ -17,6 +17,8 @@
 
 package org.anhonesteffort.btc.view;
 
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -28,8 +30,11 @@ import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
+import java.util.Optional;
+
 public class OrderBookViewer {
 
+  private final TableView<LimitView> table = new TableView<>();
   private final LimitListCurator curator;
 
   public OrderBookViewer(LimitOrderBook orderBook, LongCaster caster) {
@@ -50,7 +55,6 @@ public class OrderBookViewer {
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-    TableView<LimitView> table = new TableView<>();
     table.setItems(curator.getLimitList());
     table.getColumns().addAll(volumeCol, priceCol);
     table.setPrefHeight(600);
@@ -65,6 +69,28 @@ public class OrderBookViewer {
     ((Group) scene.getRoot()).getChildren().addAll(vbox);
     stage.setScene(scene);
     stage.show();
+
+    curator.getLimitList().addListener(new SpreadScroller());
+  }
+
+  private class SpreadScroller implements ListChangeListener<LimitView> {
+    private Optional<LimitView> lastAsk = Optional.empty();
+
+    @Override
+    public void onChanged(Change<? extends LimitView> c) {
+      Platform.runLater(() -> {
+
+        Optional<LimitView> currentAsk = curator.getBestAsk();
+        if (!lastAsk.isPresent() && currentAsk.isPresent()) {
+          lastAsk = currentAsk;
+          table.scrollTo(currentAsk.get());
+        } else if (currentAsk.isPresent()) {
+          lastAsk = currentAsk;
+          table.scrollTo(currentAsk.get());
+        }
+
+      });
+    }
   }
 
 }
