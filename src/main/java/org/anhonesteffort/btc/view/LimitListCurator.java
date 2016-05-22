@@ -46,11 +46,11 @@ public class LimitListCurator {
   }
 
   public SortedList<LimitView> getAskList() {
-    return new SortedList<>(askList, new AskSorter());
+    return new SortedList<>(askList, new SpreadSorter());
   }
 
   public SortedList<LimitView> getBidList() {
-    return new SortedList<>(bidList, new BidSorter());
+    return new SortedList<>(bidList, new SpreadSorter());
   }
 
   private class AskLimitCallback implements Observer {
@@ -91,25 +91,12 @@ public class LimitListCurator {
     }
   }
 
-  private static class AskSorter implements Comparator<LimitView> {
+  private static class SpreadSorter implements Comparator<LimitView> {
     @Override
     public int compare(LimitView ask1, LimitView ask2) {
       if (ask1.getPrice() > ask2.getPrice()) {
         return -1;
       } else if (ask1.getPrice() == ask2.getPrice()) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }
-  }
-
-  private static class BidSorter implements Comparator<LimitView> {
-    @Override
-    public int compare(LimitView bid1, LimitView bid2) {
-      if (bid1.getPrice() < bid2.getPrice()) {
-        return -1;
-      } else if (bid1.getPrice() == bid2.getPrice()) {
         return 0;
       } else {
         return 1;

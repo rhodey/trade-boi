@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.view;
 
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -40,8 +41,7 @@ public class OrderBookViewer {
   }
 
   @SuppressWarnings("unchecked")
-  private VBox vBoxFor(Order.Side side) {
-    VBox                 vbox      = new VBox();
+  private Node[] nodesFor(Order.Side side) {
     TableView<LimitView> table     = new TableView<>();
     TableColumn          priceCol  = new TableColumn("price");
     TableColumn          volumeCol = new TableColumn("volume");
@@ -57,23 +57,23 @@ public class OrderBookViewer {
     Label label = new Label((side.equals(Order.Side.ASK) ? "Ask" : "Bid") + " Limit Orders");
     label.setFont(new Font("Arial", 20));
 
-    vbox.setSpacing(5);
-    vbox.setPadding(new Insets(10, 0, 0, 10));
-    vbox.getChildren().addAll(label, table);
-
-    return vbox;
+    return new Node[] { label, table };
   }
 
   public void start(Stage stage) {
     stage.setTitle("Coinbase Trading");
     stage.setWidth(300);
-    stage.setHeight(500);
+    stage.setHeight(600);
 
+    VBox  vbox  = new VBox();
     Scene scene = new Scene(new Group());
 
-    ((Group) scene.getRoot()).getChildren().addAll(
-        vBoxFor(Order.Side.ASK)/*, vBoxFor(Order.Side.BID)*/
-    );
+    vbox.setSpacing(5);
+    vbox.setPadding(new Insets(10, 0, 0, 10));
+    vbox.getChildren().addAll(nodesFor(Order.Side.ASK));
+    vbox.getChildren().addAll(nodesFor(Order.Side.BID));
+
+    ((Group) scene.getRoot()).getChildren().addAll(vbox);
     stage.setScene(scene);
     stage.show();
   }
