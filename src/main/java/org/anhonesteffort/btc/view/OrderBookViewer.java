@@ -17,6 +17,8 @@
 
 package org.anhonesteffort.btc.view;
 
+import com.sun.javafx.scene.control.skin.TableViewSkin;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -31,9 +33,13 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class OrderBookViewer {
 
+  private final Timer timer = new Timer(true);
   private final TableView<LimitView> table = new TableView<>();
   private final LimitListCurator curator;
 
@@ -70,26 +76,50 @@ public class OrderBookViewer {
     stage.setScene(scene);
     stage.show();
 
-    curator.getLimitList().addListener(new SpreadScroller());
+    table.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(() -> {
+      TableViewSkin<?> ts = (TableViewSkin<?>) table.getSkin();
+      VirtualFlow<?>   vf = (VirtualFlow<?>)ts.getChildren().get(1);
+
+      if (vf.getFirstVisibleCellWithinViewPort() != null &&
+          vf.getLastVisibleCellWithinViewPort()  != null)
+      {
+        int first = vf.getFirstVisibleCellWithinViewPort().getIndex();
+        int  last = vf.getLastVisibleCellWithinViewPort().getIndex();
+
+        if ((newValue.intValue() - ((last - first) / 2)) >= 0) {
+          vf.scrollTo(newValue.intValue() - ((last - first) / 2));
+        }
+      }
+    }));
+
+    SpreadScroller scroller = new SpreadScroller();
+    curator.getLimitList().addListener(scroller);
+    timer.scheduleAtFixedRate(scroller, 2500l, 5000l);
   }
 
-  private class SpreadScroller implements ListChangeListener<LimitView> {
-    private Optional<LimitView> lastAsk = Optional.empty();
+  private class SpreadScroller extends TimerTask implements ListChangeListener<LimitView> {
+    private AtomicReference<LimitView> lastAsk = new AtomicReference<>(null);
 
     @Override
     public void onChanged(Change<? extends LimitView> c) {
       Platform.runLater(() -> {
+        LimitView           last    = lastAsk.get();
+        Optional<LimitView> current = curator.getBestAsk();
 
-        Optional<LimitView> currentAsk = curator.getBestAsk();
-        if (!lastAsk.isPresent() && currentAsk.isPresent()) {
-          lastAsk = currentAsk;
-          table.scrollTo(currentAsk.get());
-        } else if (currentAsk.isPresent()) {
-          lastAsk = currentAsk;
-          table.scrollTo(currentAsk.get());
+        if (last == null && current.isPresent()) {
+          lastAsk.lazySet(current.get());
+          table.getSelectionModel().select(current.get());
+        } else if (current.isPresent() && current.get().getPrice() != last.getPrice()) {
+          lastAsk.lazySet(current.get());
+          table.getSelectionModel().select(current.get());
         }
-
       });
+    }
+
+    @Override
+    public void run() {
+      lastAsk.set(null);
+      this.onChanged(null);
     }
   }
 
