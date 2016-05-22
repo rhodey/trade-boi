@@ -39,14 +39,14 @@ public class OrderBookViewer {
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
     stage.setTitle("Coinbase Trading");
-    stage.setWidth(250);
+    stage.setWidth(300);
     stage.setHeight(600);
 
     TableColumn priceCol  = new TableColumn("price");
     TableColumn volumeCol = new TableColumn("volume");
 
-    priceCol.setMinWidth(100);
-    volumeCol.setMinWidth(100);
+    priceCol.setMinWidth(150);
+    volumeCol.setMinWidth(150);
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
@@ -59,7 +59,7 @@ public class OrderBookViewer {
     VBox  vbox  = new VBox();
 
     vbox.setSpacing(5);
-    vbox.setPadding(new Insets(10, 0, 0, 10));
+    vbox.setPadding(new Insets(0, 0, 0, 0));
     vbox.getChildren().addAll(table);
 
     ((Group) scene.getRoot()).getChildren().addAll(vbox);
