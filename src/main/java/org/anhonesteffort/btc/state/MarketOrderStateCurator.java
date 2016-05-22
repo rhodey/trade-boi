@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +48,12 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
-        onMarketOrderReceived(takePooledMarketOrder(event));
+        MarketOrder rxMarket = takePooledMarketOrder(event);
+        if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
+          throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the active set");
+        } else {
+          onMarketOrderReceived(rxMarket);
+        }
         break;
 
       case MARKET_CHANGE:
@@ -73,31 +77,30 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         break;
 
       case MARKET_DONE:
-        onMarketOrderDone(event.getOrderId(), event.getSide());
+        Optional<MarketOrder> doneMarket = Optional.ofNullable(
+            state.getMarketOrders().remove(event.getOrderId())
+        );
+
+        if (!doneMarket.isPresent()) {
+          throw new OrderEventException("market order " + event.getOrderId() + " was never in the active set");
+        } else {
+          onMarketOrderDone(doneMarket.get());
+          returnPooledOrder(doneMarket.get());
+        }
         break;
     }
   }
 
-  protected void onMarketOrderReceived(MarketOrder order) throws OrderEventException {
-    if (state.getMarketOrders().put(order.getOrderId(), order) != null) {
-      throw new OrderEventException("market order " + order.getOrderId() + " already in the active set");
-    } else {
-      log.debug("received new market order " + order.getOrderId());
-    }
+  protected void onMarketOrderReceived(MarketOrder order) {
+    log.debug("received new market order " + order.getOrderId());
   }
 
   protected void onMarketOrderChange(MarketOrder order, long sizeReduced, long fundsReduced) {
     log.warn("!!! changed market order " + order.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
   }
 
-  protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
-    Optional<MarketOrder> order = Optional.ofNullable(state.getMarketOrders().remove(orderId));
-    if (!order.isPresent()) {
-      throw new OrderEventException("market order " + orderId + " was never in the active set");
-    } else {
-      returnPooledOrder(order.get());
-      log.debug("market order done " + orderId);
-    }
+  protected void onMarketOrderDone(MarketOrder order) {
+    log.debug("market order done " + order.getOrderId());
   }
 
 }
