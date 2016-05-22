@@ -22,11 +22,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Optional;
 import java.util.Queue;
 
-public class Limit extends Observable {
+public class Limit {
 
   private final Map<String, Order> orderMap = new HashMap<>();
   private final Queue<Order> orderQueue;
@@ -55,8 +54,6 @@ public class Limit extends Observable {
     orderMap.put(order.getOrderId(), order);
     orderQueue.add(order);
     volume += order.getSizeRemaining();
-    super.setChanged();
-    super.notifyObservers();
   }
 
   public Optional<Order> remove(String orderId) {
@@ -64,8 +61,6 @@ public class Limit extends Observable {
     if (order.isPresent()) {
       orderQueue.remove(order.get());
       volume -= order.get().getSizeRemaining();
-      super.setChanged();
-      super.notifyObservers();
     }
     return order;
   }
@@ -79,8 +74,6 @@ public class Limit extends Observable {
         orderMap.remove(orderId);
         orderQueue.remove(order.get());
       }
-      super.setChanged();
-      super.notifyObservers();
     }
     return order;
   }
@@ -122,11 +115,6 @@ public class Limit extends Observable {
       }
     }
 
-    if (!makers.isEmpty()) {
-      super.setChanged();
-      super.notifyObservers();
-    }
-
     return makers;
   }
 
@@ -134,8 +122,6 @@ public class Limit extends Observable {
     orderQueue.clear();
     orderMap.clear();
     volume = 0l;
-    super.setChanged();
-    super.notifyObservers();
   }
 
 }

@@ -22,19 +22,19 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.LimitOrderBook;
+import org.anhonesteffort.btc.book.LimitQueueListener;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Optional;
 
-public class LimitListCurator {
+public class LimitListCurator implements LimitQueueListener {
 
   private final Map<Long, LimitView>      limitMap  = new HashMap<>();
   private final ObservableList<LimitView> limitList = FXCollections.observableArrayList();
+  private final SortedList<LimitView>     sorted    = new SortedList<>(limitList, new SpreadSorter());
 
   private final LimitOrderBook orderBook;
   private final LongCaster caster;
@@ -42,12 +42,12 @@ public class LimitListCurator {
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
     this.orderBook = orderBook;
     this.caster    = caster;
-    orderBook.getAskLimits().addObserver(new LimitChangeCallback());
-    orderBook.getBidLimits().addObserver(new LimitChangeCallback());
+    orderBook.getAskLimits().addListener(this);
+    orderBook.getBidLimits().addListener(this);
   }
 
   public SortedList<LimitView> getLimitList() {
-    return new SortedList<>(limitList, new SpreadSorter());
+    return sorted;
   }
 
   public Optional<LimitView> getBestAsk() {
@@ -59,23 +59,29 @@ public class LimitListCurator {
     }
   }
 
-  private class LimitChangeCallback implements Observer {
-    @Override
-    public void update(Observable observable, Object nullOrLimit) {
-      if (nullOrLimit == null) {
-        limitMap.clear();
-        limitList.clear();
-      } else {
-        Limit limit = (Limit) nullOrLimit;
-        if (!limitMap.containsKey(limit.getPrice())) {
-          LimitView view = new LimitView(limit, caster);
-          limitMap.put(limit.getPrice(), view);
-          limitList.add(view);
-        } else {
-          limitList.remove(limitMap.remove(limit.getPrice()));
-        }
-      }
-    }
+  @Override
+  public void onLimitAdded(Limit limit) {
+    LimitView view = new LimitView(caster.toDouble(limit.getPrice()), caster.toDouble(limit.getVolume()));
+    limitMap.put(limit.getPrice(), view);
+    limitList.add(view);
+  }
+
+  @Override
+  public void onLimitChanged(Limit limit) {
+    limitMap.get(limit.getPrice()).volumeProperty().set(
+        caster.toDouble(limit.getVolume())
+    );
+  }
+
+  @Override
+  public void onLimitRemoved(Limit limit) {
+    limitList.remove(limitMap.remove(limit.getPrice()));
+  }
+
+  @Override
+  public void onLimitsCleared() {
+    limitMap.clear();
+    limitList.clear();
   }
 
   private static class SpreadSorter implements Comparator<LimitView> {

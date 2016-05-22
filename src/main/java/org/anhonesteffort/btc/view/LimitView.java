@@ -18,24 +18,16 @@
 package org.anhonesteffort.btc.view;
 
 import javafx.beans.property.SimpleDoubleProperty;
-import org.anhonesteffort.btc.book.Limit;
-import org.anhonesteffort.btc.util.LongCaster;
-
-import java.util.Observable;
-import java.util.Observer;
 
 @SuppressWarnings("unused")
-public class LimitView implements Observer {
+public class LimitView {
 
-  private final LongCaster           caster;
   private final SimpleDoubleProperty price;
   private final SimpleDoubleProperty volume;
 
-  public LimitView(Limit limit, LongCaster caster) {
-    limit.addObserver(this);
-    this.caster = caster;
-    this.price  = new SimpleDoubleProperty(caster.toDouble(limit.getPrice()));
-    this.volume = new SimpleDoubleProperty(caster.toDouble(limit.getVolume()));
+  public LimitView(Double price, Double volume) {
+    this.price  = new SimpleDoubleProperty(price);
+    this.volume = new SimpleDoubleProperty(volume);
   }
 
   public double getPrice() {
@@ -60,11 +52,6 @@ public class LimitView implements Observer {
 
   public SimpleDoubleProperty volumeProperty() {
     return volume;
-  }
-
-  @Override
-  public void update(Observable o, Object arg) {
-    volume.set(caster.toDouble( ((Limit) o).getVolume() ));
   }
 
 }

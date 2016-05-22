@@ -83,10 +83,8 @@ public class OrderBookViewer {
     stage.setScene(scene);
     stage.show();
 
-    SpreadSelector selector = new SpreadSelector();
     table.getSelectionModel().selectedIndexProperty().addListener(new SelectedScroller());
-    curator.getLimitList().addListener(selector);
-    timer.scheduleAtFixedRate(selector, 2500l, SCROLL_RATE);
+    timer.scheduleAtFixedRate(new SpreadSelector(), 3000l, SCROLL_RATE);
   }
 
   private class SelectedScroller implements ChangeListener<Number> {
@@ -112,6 +110,7 @@ public class OrderBookViewer {
 
   private class SpreadSelector extends TimerTask implements ListChangeListener<LimitView> {
     private AtomicReference<LimitView> lastAsk = new AtomicReference<>(null);
+    private boolean firstRun = true;
 
     @Override
     public void onChanged(Change<? extends LimitView> c) {
@@ -131,8 +130,13 @@ public class OrderBookViewer {
 
     @Override
     public void run() {
-      lastAsk.set(null);
-      this.onChanged(null);
+      if (firstRun) {
+        curator.getLimitList().addListener(this);
+        firstRun = false;
+      } else {
+        lastAsk.set(null);
+        this.onChanged(null);
+      }
     }
   }
 

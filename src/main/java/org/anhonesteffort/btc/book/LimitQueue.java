@@ -19,16 +19,18 @@ package org.anhonesteffort.btc.book;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 
-public class LimitQueue extends Observable {
+public class LimitQueue {
 
+  private final Set<LimitQueueListener> listeners = new HashSet<>();
   private final Map<Long, Limit> map = new HashMap<>();
   private final Queue<Limit> queue;
   private final int initLimitSize;
@@ -42,8 +44,28 @@ public class LimitQueue extends Observable {
     }
   }
 
+  public void addListener(LimitQueueListener listener) {
+    listeners.add(listener);
+  }
+
+  public void removeListener(LimitQueueListener listener) {
+    listeners.remove(listener);
+  }
+
   public Optional<Limit> peek() {
     return Optional.ofNullable(queue.peek());
+  }
+
+  private void limitAdded(Limit newLimit) {
+    for (LimitQueueListener listener : listeners) { listener.onLimitAdded(newLimit); }
+  }
+
+  private void limitChanged(Limit changedLimit) {
+    for (LimitQueueListener listener : listeners) { listener.onLimitChanged(changedLimit); }
+  }
+
+  private void limitRemoved(Limit removedLimit) {
+    for (LimitQueueListener listener : listeners) { listener.onLimitRemoved(removedLimit); }
   }
 
   public void addOrder(Order order) {
@@ -53,11 +75,11 @@ public class LimitQueue extends Observable {
       limit = new Limit(order.getPrice(), initLimitSize);
       map.put(order.getPrice(), limit);
       queue.add(limit);
-      super.setChanged();
-      super.notifyObservers(limit);
+      limitAdded(limit);
     }
 
     limit.add(order);
+    limitChanged(limit);
   }
 
   public Optional<Order> removeOrder(Long price, String orderId) {
@@ -66,11 +88,12 @@ public class LimitQueue extends Observable {
 
     if (limit.isPresent()) {
       order = limit.get().remove(orderId);
-      if (order.isPresent() && !limit.get().peek().isPresent()) {
+      if (order.isPresent() && limit.get().peek().isPresent()) {
+        limitChanged(limit.get());
+      } else if (order.isPresent()) {
         map.remove(price);
         queue.remove(limit.get());
-        super.setChanged();
-        super.notifyObservers(limit.get());
+        limitRemoved(limit.get());
       }
     }
 
@@ -83,11 +106,12 @@ public class LimitQueue extends Observable {
 
     if (limit.isPresent()) {
       order = limit.get().reduce(orderId, size);
-      if (order.isPresent() && !limit.get().peek().isPresent()) {
+      if (order.isPresent() && limit.get().peek().isPresent()) {
+        limitChanged(limit.get());
+      } else if (order.isPresent()) {
         map.remove(price);
         queue.remove(limit.get());
-        super.setChanged();
-        super.notifyObservers(limit.get());
+        limitRemoved(limit.get());
       }
     }
 
@@ -109,11 +133,12 @@ public class LimitQueue extends Observable {
     if (maker.isPresent() && isTaken(maker.get(), taker)) {
       List<Order> makers = maker.get().takeLiquidity(taker);
 
-      if (!maker.get().peek().isPresent()) {
+      if (makers.size() > 0 && maker.get().peek().isPresent()) {
+        limitChanged(maker.get());
+      } else if (makers.size() > 0) {
         map.remove(maker.get().getPrice());
         queue.remove();
-        super.setChanged();
-        super.notifyObservers(maker.get());
+        limitRemoved(maker.get());
       }
 
       return makers;
@@ -125,8 +150,7 @@ public class LimitQueue extends Observable {
   public void clear() {
     map.clear();
     while (!queue.isEmpty()) { queue.remove().clear(); }
-    super.setChanged();
-    super.notifyObservers();
+    listeners.forEach(LimitQueueListener::onLimitsCleared);
   }
 
   private static class AskSorter implements Comparator<Limit> {
