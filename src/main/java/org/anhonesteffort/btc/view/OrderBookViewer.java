@@ -20,6 +20,8 @@ package org.anhonesteffort.btc.view;
 import com.sun.javafx.scene.control.skin.TableViewSkin;
 import com.sun.javafx.scene.control.skin.VirtualFlow;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -39,6 +41,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class OrderBookViewer {
 
+  private static final Integer WIDTH       =  300;
+  private static final Integer HEIGHT      =  600;
+  private static final Integer COL_WIDTH   =  150;
+  private static final Long    SCROLL_RATE = 5000l;
+
   private final Timer timer = new Timer(true);
   private final TableView<LimitView> table = new TableView<>();
   private final LimitListCurator curator;
@@ -50,20 +57,20 @@ public class OrderBookViewer {
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
     stage.setTitle("Coinbase Trading");
-    stage.setWidth(300);
-    stage.setHeight(600);
+    stage.setWidth(WIDTH);
+    stage.setHeight(HEIGHT);
 
     TableColumn priceCol  = new TableColumn("price");
     TableColumn volumeCol = new TableColumn("volume");
 
-    priceCol.setMinWidth(150);
-    volumeCol.setMinWidth(150);
+    priceCol.setMinWidth(COL_WIDTH);
+    volumeCol.setMinWidth(COL_WIDTH);
     priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
     table.setItems(curator.getLimitList());
     table.getColumns().addAll(volumeCol, priceCol);
-    table.setPrefHeight(600);
+    table.setPrefHeight(HEIGHT);
 
     Scene scene = new Scene(new Group());
     VBox  vbox  = new VBox();
@@ -76,28 +83,34 @@ public class OrderBookViewer {
     stage.setScene(scene);
     stage.show();
 
-    table.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(() -> {
-      TableViewSkin<?> ts = (TableViewSkin<?>) table.getSkin();
-      VirtualFlow<?>   vf = (VirtualFlow<?>)ts.getChildren().get(1);
-
-      if (vf.getFirstVisibleCellWithinViewPort() != null &&
-          vf.getLastVisibleCellWithinViewPort()  != null)
-      {
-        int first = vf.getFirstVisibleCellWithinViewPort().getIndex();
-        int  last = vf.getLastVisibleCellWithinViewPort().getIndex();
-
-        if ((newValue.intValue() - ((last - first) / 2)) >= 0) {
-          vf.scrollTo(newValue.intValue() - ((last - first) / 2));
-        }
-      }
-    }));
-
-    SpreadScroller scroller = new SpreadScroller();
-    curator.getLimitList().addListener(scroller);
-    timer.scheduleAtFixedRate(scroller, 2500l, 5000l);
+    SpreadSelector selector = new SpreadSelector();
+    table.getSelectionModel().selectedIndexProperty().addListener(new SelectedScroller());
+    curator.getLimitList().addListener(selector);
+    timer.scheduleAtFixedRate(selector, 2500l, SCROLL_RATE);
   }
 
-  private class SpreadScroller extends TimerTask implements ListChangeListener<LimitView> {
+  private class SelectedScroller implements ChangeListener<Number> {
+    @Override
+    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+      Platform.runLater(() -> {
+        TableViewSkin<?> ts = (TableViewSkin<?>) table.getSkin();
+        VirtualFlow<?>   vf = (VirtualFlow<?>)   ts.getChildren().get(1);
+
+        if (vf.getFirstVisibleCellWithinViewPort() != null &&
+            vf.getLastVisibleCellWithinViewPort()  != null)
+        {
+          int first = vf.getFirstVisibleCellWithinViewPort().getIndex();
+          int last  = vf.getLastVisibleCellWithinViewPort().getIndex();
+
+          if ((newValue.intValue() - ((last - first) / 2)) >= 0) {
+            vf.scrollTo(newValue.intValue() - ((last - first) / 2));
+          }
+        }
+      });
+    }
+  }
+
+  private class SpreadSelector extends TimerTask implements ListChangeListener<LimitView> {
     private AtomicReference<LimitView> lastAsk = new AtomicReference<>(null);
 
     @Override
