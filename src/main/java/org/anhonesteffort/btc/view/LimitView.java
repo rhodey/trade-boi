@@ -28,21 +28,15 @@ import java.util.Observer;
 @SuppressWarnings("unused")
 public class LimitView implements Observer {
 
-  private final Limit                limit;
   private final LongCaster           caster;
   private final SimpleDoubleProperty price;
   private final SimpleDoubleProperty volume;
 
   public LimitView(Limit limit, LongCaster caster) {
     limit.addObserver(new WeakObserver(this, limit));
-    this.limit  = limit;
     this.caster = caster;
     this.price  = new SimpleDoubleProperty(caster.toDouble(limit.getPrice()));
     this.volume = new SimpleDoubleProperty(caster.toDouble(limit.getVolume()));
-  }
-
-  public Limit getLimit() {
-    return limit;
   }
 
   public double getPrice() {

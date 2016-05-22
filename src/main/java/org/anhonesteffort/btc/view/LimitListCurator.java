@@ -25,14 +25,17 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Optional;
 
 public class LimitListCurator {
 
-  private final ObservableList<LimitView> askLimits = FXCollections.observableArrayList();
-  private final ObservableList<LimitView> bidLimits = FXCollections.observableArrayList();
+  private final Map<Long, LimitView>      askMap  = new HashMap<>();
+  private final Map<Long, LimitView>      bidMap  = new HashMap<>();
+  private final ObservableList<LimitView> askList = FXCollections.observableArrayList();
+  private final ObservableList<LimitView> bidList = FXCollections.observableArrayList();
 
   private final LongCaster caster;
 
@@ -42,29 +45,28 @@ public class LimitListCurator {
     orderBook.getBidLimits().addObserver(new BidLimitCallback());
   }
 
-  public SortedList<LimitView> getAskLimits() {
-    return new SortedList<>(askLimits, new AskSorter());
+  public SortedList<LimitView> getAskList() {
+    return new SortedList<>(askList, new AskSorter());
   }
 
-  public SortedList<LimitView> getBidLimits() {
-    return new SortedList<>(bidLimits, new BidSorter());
+  public SortedList<LimitView> getBidList() {
+    return new SortedList<>(bidList, new BidSorter());
   }
 
   private class AskLimitCallback implements Observer {
     @Override
     public void update(Observable o, Object arg) {
       if (arg == null) {
-        askLimits.clear();
+        askMap.clear();
+        askList.clear();
       } else {
-        Limit               addOrRemove  = (Limit) arg;
-        Optional<LimitView> existingView = askLimits.stream().filter(
-            view -> view.getLimit().equals(addOrRemove)
-        ).findAny();
-
-        if (existingView.isPresent()) {
-          askLimits.remove(existingView.get());
+        Limit limit = (Limit) arg;
+        if (!askMap.containsKey(limit.getPrice())) {
+          LimitView view = new LimitView(limit, caster);
+          askMap.put(limit.getPrice(), view);
+          askList.add(view);
         } else {
-          askLimits.add(new LimitView(addOrRemove, caster));
+          askList.remove(askMap.remove(limit.getPrice()));
         }
       }
     }
@@ -74,17 +76,16 @@ public class LimitListCurator {
     @Override
     public void update(Observable o, Object arg) {
       if (arg == null) {
-        bidLimits.clear();
+        bidMap.clear();
+        bidList.clear();
       } else {
-        Limit               addOrRemove  = (Limit) arg;
-        Optional<LimitView> existingView = bidLimits.stream().filter(
-            view -> view.getLimit().equals(addOrRemove)
-        ).findAny();
-
-        if (existingView.isPresent()) {
-          bidLimits.remove(existingView.get());
+        Limit limit = (Limit) arg;
+        if (!bidMap.containsKey(limit.getPrice())) {
+          LimitView view = new LimitView(limit, caster);
+          bidMap.put(limit.getPrice(), view);
+          bidList.add(view);
         } else {
-          bidLimits.add(new LimitView(addOrRemove, caster));
+          bidList.remove(bidMap.remove(limit.getPrice()));
         }
       }
     }

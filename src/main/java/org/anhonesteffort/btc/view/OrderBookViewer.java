@@ -52,7 +52,7 @@ public class OrderBookViewer {
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
     table.setEditable(true);
-    table.setItems(side.equals(Order.Side.ASK) ? curator.getAskLimits() : curator.getBidLimits());
+    table.setItems(side.equals(Order.Side.ASK) ? curator.getAskList() : curator.getBidList());
     table.getColumns().addAll(volumeCol, priceCol);
 
     Label label = new Label((side.equals(Order.Side.ASK) ? "Ask" : "Bid") + " Limit Orders");
