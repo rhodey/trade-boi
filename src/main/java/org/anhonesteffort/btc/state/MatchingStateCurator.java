@@ -86,9 +86,10 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     } else {
       Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
       if (!limitTaker.isPresent()) {
-        throw new OrderEventException("limit order for match event not found in the limit state map");
+        throw new OrderEventException("limit order for match event not found in the limit rx state map");
+      } else if (limitTaker.get().takeSize(result.getTakeSize()) != result.getTakeSize()) {
+        throw new OrderEventException("limit order for match event disagrees with order in the limit rx state map");
       } else {
-        // todo: update rx limit
         onOrderMatched(taker, result);
         returnPooledOrder(taker);
         returnPooledOrders(result);
