@@ -108,27 +108,21 @@ public class OrderBookViewer {
   }
 
   private class SpreadSelector extends TimerTask implements ListChangeListener<LimitView> {
-    private LimitView lastLimit      = null;
-    private Integer   lastLimitCount = null;
+    private LimitView lastLimit = null;
 
-    private void setLast(LimitView limit, Integer limitCount) {
-      lastLimit      = limit;
-      lastLimitCount = limitCount;
+    private void setLastAndSelect(LimitView limit) {
+      lastLimit = limit;
       table.getSelectionModel().select(limit);
     }
 
     @Override
     public void onChanged(Change<? extends LimitView> c) {
       Platform.runLater(() -> {
-        Optional<LimitView> currentLimit      = curator.getBestAsk();
-        Integer             currentLimitCount = curator.getLimitList().size();
-
+        Optional<LimitView> currentLimit = curator.getBestAsk();
         if (lastLimit == null && currentLimit.isPresent()) {
-          setLast(currentLimit.get(), currentLimitCount);
+          setLastAndSelect(currentLimit.get());
         } else if (currentLimit.isPresent() && currentLimit.get().getPrice() != lastLimit.getPrice()) {
-          setLast(currentLimit.get(), currentLimitCount);
-        } else if (currentLimit.isPresent() && !lastLimitCount.equals(currentLimitCount)) {
-          setLast(currentLimit.get(), currentLimitCount);
+          setLastAndSelect(currentLimit.get());
         }
       });
     }
