@@ -23,10 +23,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 
 import java.util.Timer;
@@ -34,7 +34,7 @@ import java.util.Timer;
 public class OrderBookViewer {
 
   private final Timer                timer = new Timer(true);
-  private final TableView<LimitView> table = new TableView<>();
+  private final TableView<Limit>     table = new TableView<>();
   private final LimitViewListCurator curator;
 
   public OrderBookViewer(LimitOrderBook orderBook) {
@@ -52,8 +52,8 @@ public class OrderBookViewer {
 
     priceCol.setMinWidth(100);
     volumeCol.setMinWidth(100);
-    priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-    volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
+    priceCol.setCellValueFactory(new LimitCellValueMappers.Price());
+    volumeCol.setCellValueFactory(new LimitCellValueMappers.Volume());
 
     table.setEditable(true);
     table.setItems(curator.getLimits());

@@ -19,33 +19,29 @@ package org.anhonesteffort.btc.view;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 
-import java.util.List;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class LimitViewListCurator extends TimerTask {
 
-  private final ObservableList<LimitView> limits = FXCollections.observableArrayList();
+  private final ObservableList<Limit> limits = FXCollections.observableArrayList();
   private final LimitOrderBook orderBook;
 
   public LimitViewListCurator(LimitOrderBook orderBook) {
     this.orderBook = orderBook;
   }
 
-  public ObservableList<LimitView> getLimits() {
+  public ObservableList<Limit> getLimits() {
     return limits;
   }
 
   @Override
   public void run() {
     limits.clear();
-    List<LimitView> next =
-        orderBook.getAskLimits().stream().map(limit ->
-          new LimitView(limit.getPrice(), limit.getVolume())
-        ).limit(10).collect(Collectors.toList());
-    limits.addAll(next);
+    limits.addAll(orderBook.getAskLimits().stream().limit(10).collect(Collectors.toList()));
   }
 
 }

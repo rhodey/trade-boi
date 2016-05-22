@@ -17,6 +17,8 @@
 
 package org.anhonesteffort.btc.book;
 
+import javafx.beans.value.ObservableValueBase;
+
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
-public class Limit {
+public class Limit extends ObservableValueBase<Limit> {
 
   private final Map<String, Order> orderMap = new HashMap<>();
   private final Queue<Order> orderQueue;
@@ -36,6 +38,11 @@ public class Limit {
     orderQueue  = new ArrayDeque<>(initSize);
     this.price  = price;
     this.volume = 0l;
+  }
+
+  @Override
+  public Limit getValue() {
+    return this;
   }
 
   public long getPrice() {
@@ -54,6 +61,7 @@ public class Limit {
     orderMap.put(order.getOrderId(), order);
     orderQueue.add(order);
     volume += order.getSizeRemaining();
+    super.fireValueChangedEvent();
   }
 
   public Optional<Order> remove(String orderId) {
@@ -61,6 +69,7 @@ public class Limit {
     if (order.isPresent()) {
       orderQueue.remove(order.get());
       volume -= order.get().getSizeRemaining();
+      super.fireValueChangedEvent();
     }
     return order;
   }
@@ -74,6 +83,7 @@ public class Limit {
         orderMap.remove(orderId);
         orderQueue.remove(order.get());
       }
+      super.fireValueChangedEvent();
     }
     return order;
   }
@@ -115,6 +125,7 @@ public class Limit {
       }
     }
 
+    if (!makers.isEmpty()) { super.fireValueChangedEvent(); }
     return makers;
   }
 
@@ -122,6 +133,7 @@ public class Limit {
     orderQueue.clear();
     orderMap.clear();
     volume = 0l;
+    super.fireValueChangedEvent();
   }
 
 }
