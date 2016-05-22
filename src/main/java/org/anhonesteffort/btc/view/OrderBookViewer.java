@@ -17,8 +17,6 @@
 
 package org.anhonesteffort.btc.view;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -29,16 +27,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.anhonesteffort.btc.book.LimitOrderBook;
+
+import java.util.Timer;
 
 public class OrderBookViewer {
 
+  private final Timer                timer = new Timer(true);
   private final TableView<LimitView> table = new TableView<>();
-  private final ObservableList<LimitView> data =
-      FXCollections.observableArrayList(
-          new LimitView(10, 20),
-          new LimitView(30, 40),
-          new LimitView(50, 60)
-      );
+  private final LimitViewListCurator curator;
+
+  public OrderBookViewer(LimitOrderBook orderBook) {
+    curator = new LimitViewListCurator(orderBook);
+  }
 
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
@@ -46,16 +47,16 @@ public class OrderBookViewer {
     stage.setWidth(300);
     stage.setHeight(500);
 
-    TableColumn priceCol = new TableColumn("price");
-    priceCol.setMinWidth(100);
-    priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
+    TableColumn priceCol  = new TableColumn("price");
     TableColumn volumeCol = new TableColumn("volume");
+
+    priceCol.setMinWidth(100);
     volumeCol.setMinWidth(100);
+    priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-    table.setItems(data);
     table.setEditable(true);
+    table.setItems(curator.getLimits());
     table.getColumns().addAll(volumeCol, priceCol);
 
     Label label = new Label("Limit Order Book");
@@ -71,6 +72,8 @@ public class OrderBookViewer {
 
     stage.setScene(scene);
     stage.show();
+
+    timer.scheduleAtFixedRate(curator, 1000l, 2500l);
   }
 
 }

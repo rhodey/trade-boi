@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.stream.Stream;
 
 public class LimitQueue {
 
@@ -43,6 +44,10 @@ public class LimitQueue {
 
   public Optional<Limit> peek() {
     return Optional.ofNullable(queue.peek());
+  }
+
+  public Stream<Limit> stream() {
+    return queue.stream();
   }
 
   public void addOrder(Order order) {

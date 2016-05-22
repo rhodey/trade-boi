@@ -71,6 +71,14 @@ public class LimitOrderBook {
     }
   }
 
+  public LimitQueue getAskLimits() {
+    return askLimits;
+  }
+
+  public LimitQueue getBidLimits() {
+    return bidLimits;
+  }
+
   public TakeResult add(Order taker) {
     long        takeSize = taker.getSizeRemaining();
     List<Order> makers   = null;
