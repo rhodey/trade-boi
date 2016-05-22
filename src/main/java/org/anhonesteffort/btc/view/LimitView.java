@@ -80,7 +80,6 @@ public class LimitView implements Observer {
     @Override
     public void update(Observable o, Object arg) {
       Observer realObserver = observer.get();
-
       if (realObserver != null) {
         realObserver.update(o, arg);
       } else {

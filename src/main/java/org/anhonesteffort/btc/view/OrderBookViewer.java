@@ -54,10 +54,10 @@ public class OrderBookViewer {
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
     table.setEditable(true);
-    table.setItems(curator.getLimits());
+    table.setItems(curator.getAskLimits());
     table.getColumns().addAll(volumeCol, priceCol);
 
-    Label label = new Label("Limit Order Book");
+    Label label = new Label("Ask Limit Orders");
     label.setFont(new Font("Arial", 20));
 
     VBox vbox = new VBox();

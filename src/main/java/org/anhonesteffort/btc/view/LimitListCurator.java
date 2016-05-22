@@ -28,10 +28,10 @@ import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LimitListCurator implements Observer {
+public class LimitListCurator {
 
-  private final ObservableList<LimitView> limits       = FXCollections.observableArrayList();
-  private final SortedList<LimitView>     sortedLimits = new SortedList<>(limits, new AskSorter());
+  private final ObservableList<LimitView> askLimits = FXCollections.observableArrayList();
+  private final ObservableList<LimitView> bidLimits = FXCollections.observableArrayList();
 
   private final LimitOrderBook orderBook;
   private final LongCaster caster;
@@ -39,28 +39,46 @@ public class LimitListCurator implements Observer {
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
     this.orderBook = orderBook;
     this.caster    = caster;
-    orderBook.getAskLimits().addObserver(this);
-    orderBook.getBidLimits().addObserver(this);
+    orderBook.getAskLimits().addObserver(new AskLimitCallback());
+    orderBook.getBidLimits().addObserver(new BidLimitCallback());
   }
 
-  public SortedList<LimitView> getLimits() {
-    return sortedLimits;
+  public SortedList<LimitView> getAskLimits() {
+    return new SortedList<>(askLimits, new AskSorter());
   }
 
-  @Override
-  public void update(Observable o, Object arg) {
-    Platform.runLater(() -> {
-      limits.clear();
-      orderBook.getAskLimits().stream().map(
-          limit -> new LimitView(limit, caster)
-      ).limit(10).forEach(limits::add);
-    });
+  public SortedList<LimitView> getBidLimits() {
+    return new SortedList<>(bidLimits, new BidSorter());
+  }
+
+  private class AskLimitCallback implements Observer {
+    @Override
+    public void update(Observable o, Object arg) {
+      Platform.runLater(() -> {
+        askLimits.clear();
+        orderBook.getAskLimits().stream().map(
+            limit -> new LimitView(limit, caster)
+        ).limit(10).forEach(askLimits::add);
+      });
+    }
+  }
+
+  private class BidLimitCallback implements Observer {
+    @Override
+    public void update(Observable o, Object arg) {
+      Platform.runLater(() -> {
+        bidLimits.clear();
+        orderBook.getBidLimits().stream().map(
+            limit -> new LimitView(limit, caster)
+        ).limit(10).forEach(bidLimits::add);
+      });
+    }
   }
 
   private static class AskSorter implements Comparator<LimitView> {
     @Override
     public int compare(LimitView ask1, LimitView ask2) {
-      if (ask1.getPrice() < ask2.getPrice()) {
+      if (ask1.getPrice() > ask2.getPrice()) {
         return -1;
       } else if (ask1.getPrice() == ask2.getPrice()) {
         return 0;
@@ -73,7 +91,7 @@ public class LimitListCurator implements Observer {
   private static class BidSorter implements Comparator<LimitView> {
     @Override
     public int compare(LimitView bid1, LimitView bid2) {
-      if (bid1.getPrice() > bid2.getPrice()) {
+      if (bid1.getPrice() < bid2.getPrice()) {
         return -1;
       } else if (bid1.getPrice() == bid2.getPrice()) {
         return 0;
