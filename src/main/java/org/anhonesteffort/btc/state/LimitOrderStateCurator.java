@@ -56,7 +56,7 @@ public class LimitOrderStateCurator extends StateCurator {
       case LIMIT_RX:
         Order limitRx = takePooledLimitOrder(event);
         if (state.getRxLimitOrders().put(limitRx.getOrderId(), limitRx) != null) {
-          throw new OrderEventException("limit order " + limitRx.getOrderId() + " already in the rx state map");
+          throw new OrderEventException("limit order " + limitRx.getOrderId() + " already in the limit rx state map");
         } else {
           onLimitOrderReceived(limitRx);
         }
@@ -65,7 +65,7 @@ public class LimitOrderStateCurator extends StateCurator {
       case LIMIT_OPEN:
         Optional<Order> oldLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
         if (!oldLimit.isPresent()) {
-          throw new OrderEventException("limit order " + event.getOrderId() + " was never in the rx state map");
+          throw new OrderEventException("limit order " + event.getOrderId() + " was never in the limit rx state map");
         } else {
           returnPooledOrder(oldLimit.get());
         }
@@ -97,7 +97,7 @@ public class LimitOrderStateCurator extends StateCurator {
           );
 
           if (!oldLimitChange.isPresent()) {
-            throw new OrderEventException("limit order for change event not found in the rx state map");
+            throw new OrderEventException("limit order for change event not found in the limit rx state map");
           } else {
             Order newLimitChange = takePooledLimitOrderChange(event);
             state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);

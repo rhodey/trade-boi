@@ -54,7 +54,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
       case MARKET_RX:
         MarketOrder rxMarket = takePooledMarketOrder(event);
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
-          throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the state map");
+          throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the market state map");
         } else {
           onMarketOrderReceived(rxMarket);
         }
@@ -74,7 +74,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         );
 
         if (!oldMarket.isPresent()) {
-          throw new OrderEventException("market order for change event not found in the state map");
+          throw new OrderEventException("market order for change event not found in the market state map");
         } else {
           MarketOrder newMarket = takePooledMarketOrderChange(event);
           state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
@@ -89,7 +89,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         );
 
         if (!doneMarket.isPresent()) {
-          throw new OrderEventException("market order " + event.getOrderId() + " was never in the state map");
+          throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
         } else {
           onMarketOrderDone(doneMarket.get());
           returnPooledOrder(doneMarket.get());
