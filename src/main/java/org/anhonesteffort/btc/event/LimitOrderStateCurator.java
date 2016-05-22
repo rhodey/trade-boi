@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class LimitOrderBookProcessor extends OrderBookProcessor {
+public class LimitOrderStateCurator extends StateCurator {
 
-  private static final Logger log = LoggerFactory.getLogger(LimitOrderBookProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(LimitOrderStateCurator.class);
 
-  public LimitOrderBookProcessor(LimitOrderBook book, OrderPool pool) {
+  public LimitOrderStateCurator(LimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 

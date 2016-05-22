@@ -24,11 +24,11 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MatchingOrderBookProcessor extends MarketOrderBookProcessor {
+public class MatchingStateCurator extends MarketOrderStateCurator {
 
-  private static final Logger log = LoggerFactory.getLogger(MatchingOrderBookProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(MatchingStateCurator.class);
 
-  public MatchingOrderBookProcessor(LimitOrderBook book, OrderPool pool) {
+  public MatchingStateCurator(LimitOrderBook book, OrderPool pool) {
     super(book, pool);
   }
 

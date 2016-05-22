@@ -25,8 +25,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.event.MatchingOrderBookProcessor;
-import org.anhonesteffort.btc.event.OrderBookProcessor;
+import org.anhonesteffort.btc.event.MatchingStateCurator;
+import org.anhonesteffort.btc.event.StateCurator;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.view.OrderBookViewer;
 import org.anhonesteffort.btc.ws.WsService;
@@ -51,13 +51,13 @@ public class Scam extends Application implements FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
-    LongCaster         caster    = new LongCaster(0.000000000001d);
-    LimitOrderBook     book      = new LimitOrderBook(16);
-    OrderPool          pool      = new OrderPool(ORDER_POOL_SIZE, 64);
-    OrderBookProcessor processor = new MatchingOrderBookProcessor(book, pool);
+    LongCaster     caster = new LongCaster(0.000000000001d);
+    LimitOrderBook book   = new LimitOrderBook(16);
+    OrderPool      pool   = new OrderPool(ORDER_POOL_SIZE, 64);
+    StateCurator   state  = new MatchingStateCurator(book, pool);
 
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { processor }, caster
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { state }, caster
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);

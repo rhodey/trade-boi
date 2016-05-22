@@ -25,16 +25,16 @@ import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class OrderBookProcessor implements EventHandler<OrderEvent> {
+public abstract class StateCurator implements EventHandler<OrderEvent> {
 
-  private static final Logger log = LoggerFactory.getLogger(OrderBookProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
   protected final CoinbaseState state;
   protected final OrderPool pool;
   private boolean rebuilding = false;
   private long nsTimeSum = 0l;
 
-  public OrderBookProcessor(LimitOrderBook book, OrderPool pool) {
+  public StateCurator(LimitOrderBook book, OrderPool pool) {
     state     = new CoinbaseState(book);
     this.pool = pool;
   }
