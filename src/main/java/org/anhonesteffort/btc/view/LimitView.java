@@ -17,12 +17,10 @@
 
 package org.anhonesteffort.btc.view;
 
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
-import javafx.util.Callback;
 import org.anhonesteffort.btc.book.Limit;
 
 public class LimitView implements ChangeListener<Long> {
@@ -34,10 +32,6 @@ public class LimitView implements ChangeListener<Long> {
     limit.addListener(new WeakChangeListener<>(this));
     this.price  = new SimpleLongProperty(limit.getPrice());
     this.volume = new SimpleLongProperty(limit.getVolume());
-  }
-
-  public static Callback<LimitView, Observable[]> extractor() {
-    return (LimitView limit) -> new Observable[] { limit.volume };
   }
 
   public long getPrice() {

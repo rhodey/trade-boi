@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class LimitListCurator extends TimerTask {
 
-  private final ObservableList<LimitView> limits = FXCollections.observableArrayList(LimitView.extractor());
+  private final ObservableList<LimitView> limits = FXCollections.observableArrayList();
   private final LimitOrderBook orderBook;
 
   public LimitListCurator(LimitOrderBook orderBook) {
