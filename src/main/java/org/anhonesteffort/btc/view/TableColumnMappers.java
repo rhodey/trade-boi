@@ -24,13 +24,13 @@ import javafx.util.Callback;
 import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.util.LongCaster;
 
-public class CellValueMappers {
+public class TableColumnMappers {
 
   private final LongCaster caster;
   private final Price      price;
   private final Volume     volume;
 
-  public CellValueMappers(LongCaster caster) {
+  public TableColumnMappers(LongCaster caster) {
     this.caster = caster;
     price       = new Price();
     volume      = new Volume();

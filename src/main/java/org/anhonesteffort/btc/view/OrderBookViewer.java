@@ -34,14 +34,14 @@ import java.util.Timer;
 
 public class OrderBookViewer {
 
-  private final Timer            timer = new Timer(true);
-  private final TableView<Limit> table = new TableView<>();
-  private final LimitListCurator curator;
-  private final CellValueMappers mappers;
+  private final Timer              timer = new Timer(true);
+  private final TableView<Limit>   table = new TableView<>();
+  private final LimitListCurator   curator;
+  private final TableColumnMappers mappers;
 
   public OrderBookViewer(LimitOrderBook orderBook, LongCaster caster) {
     curator = new LimitListCurator(orderBook);
-    mappers = new CellValueMappers(caster);
+    mappers = new TableColumnMappers(caster);
   }
 
   @SuppressWarnings("unchecked")
