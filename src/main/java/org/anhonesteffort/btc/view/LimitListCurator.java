@@ -17,15 +17,17 @@
 
 package org.anhonesteffort.btc.view;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
-import java.util.TimerTask;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.stream.Collectors;
 
-public class LimitListCurator extends TimerTask {
+public class LimitListCurator implements Observer {
 
   private final ObservableList<LimitView> limits = FXCollections.observableArrayList();
   private final LimitOrderBook orderBook;
@@ -34,6 +36,8 @@ public class LimitListCurator extends TimerTask {
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
     this.orderBook = orderBook;
     this.caster    = caster;
+    orderBook.getAskLimits().addObserver(this);
+    orderBook.getBidLimits().addObserver(this);
   }
 
   public ObservableList<LimitView> getLimits() {
@@ -41,11 +45,13 @@ public class LimitListCurator extends TimerTask {
   }
 
   @Override
-  public void run() {
-    limits.clear();
-    limits.addAll(orderBook.getAskLimits().stream().map(
-        limit -> new LimitView(limit, caster)
-    ).limit(10).collect(Collectors.toList()));
+  public void update(Observable o, Object arg) {
+    Platform.runLater(() -> {
+      limits.clear();
+      limits.addAll(orderBook.getAskLimits().stream().map(
+          limit -> new LimitView(limit, caster)
+      ).limit(10).collect(Collectors.toList()));
+    });
   }
 
 }

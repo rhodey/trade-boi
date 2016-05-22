@@ -22,12 +22,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-public class LimitQueue {
+public class LimitQueue extends Observable {
 
   private final Map<Long, Limit> map = new HashMap<>();
   private final Queue<Limit> queue;
@@ -57,6 +58,8 @@ public class LimitQueue {
       limit = new Limit(order.getPrice(), initLimitSize);
       map.put(order.getPrice(), limit);
       queue.add(limit);
+      super.setChanged();
+      super.notifyObservers();
     }
 
     limit.add(order);
@@ -71,6 +74,8 @@ public class LimitQueue {
       if (order.isPresent() && !limit.get().peek().isPresent()) {
         map.remove(price);
         queue.remove(limit.get());
+        super.setChanged();
+        super.notifyObservers();
       }
     }
 
@@ -86,6 +91,8 @@ public class LimitQueue {
       if (order.isPresent() && !limit.get().peek().isPresent()) {
         map.remove(price);
         queue.remove(limit.get());
+        super.setChanged();
+        super.notifyObservers();
       }
     }
 
@@ -110,6 +117,8 @@ public class LimitQueue {
       if (!maker.get().peek().isPresent()) {
         map.remove(maker.get().getPrice());
         queue.remove();
+        super.setChanged();
+        super.notifyObservers();
       }
 
       return makers;
@@ -121,6 +130,8 @@ public class LimitQueue {
   public void clear() {
     map.clear();
     while (!queue.isEmpty()) { queue.remove().clear(); }
+    super.setChanged();
+    super.notifyObservers();
   }
 
   private static class AskSorter implements Comparator<Limit> {

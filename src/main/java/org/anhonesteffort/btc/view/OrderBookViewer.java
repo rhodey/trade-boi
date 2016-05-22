@@ -30,11 +30,8 @@ import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
-import java.util.Timer;
-
 public class OrderBookViewer {
 
-  private final Timer                timer = new Timer(true);
   private final TableView<LimitView> table = new TableView<>();
   private final LimitListCurator     curator;
 
@@ -73,8 +70,6 @@ public class OrderBookViewer {
 
     stage.setScene(scene);
     stage.show();
-
-    timer.scheduleAtFixedRate(curator, 5000l, 30_000l);
   }
 
 }
