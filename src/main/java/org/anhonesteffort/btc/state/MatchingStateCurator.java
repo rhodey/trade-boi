@@ -18,11 +18,14 @@
 package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
+import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class MatchingStateCurator extends MarketOrderStateCurator {
 
@@ -70,10 +73,26 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       );
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
+    } else if (taker instanceof MarketOrder) {
+      Optional<MarketOrder> marketTaker = Optional.ofNullable(state.getMarketOrders().get(taker.getOrderId()));
+      if (!marketTaker.isPresent()) {
+        throw new OrderEventException("market order for match event not found in the market state map");
+      } else {
+        // todo: update rx market
+        onOrderMatched(taker, result);
+        returnPooledOrder(taker);
+        returnPooledOrders(result);
+      }
     } else {
-      onOrderMatched(taker, result);
-      returnPooledOrder(taker);
-      returnPooledOrders(result);
+      Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
+      if (!limitTaker.isPresent()) {
+        throw new OrderEventException("limit order for match event not found in the limit state map");
+      } else {
+        // todo: update rx limit
+        onOrderMatched(taker, result);
+        returnPooledOrder(taker);
+        returnPooledOrders(result);
+      }
     }
   }
 
