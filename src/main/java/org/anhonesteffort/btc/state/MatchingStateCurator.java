@@ -90,7 +90,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       } else if (limitTaker.get().takeSize(result.getTakeSize()) != result.getTakeSize()) {
         throw new OrderEventException("limit order for match event disagrees with order in the limit rx state map");
       } else {
-        onOrderMatched(taker, result);
+        onOrderMatched(limitTaker.get(), result);
         returnPooledOrder(taker);
         returnPooledOrders(result);
       }
