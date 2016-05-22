@@ -20,16 +20,19 @@ package org.anhonesteffort.btc.view;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
+import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.stream.Collectors;
 
 public class LimitListCurator implements Observer {
 
-  private final ObservableList<LimitView> limits = FXCollections.observableArrayList();
+  private final ObservableList<LimitView> limits       = FXCollections.observableArrayList();
+  private final SortedList<LimitView>     sortedLimits = new SortedList<>(limits, new AskSorter());
+
   private final LimitOrderBook orderBook;
   private final LongCaster caster;
 
@@ -40,18 +43,44 @@ public class LimitListCurator implements Observer {
     orderBook.getBidLimits().addObserver(this);
   }
 
-  public ObservableList<LimitView> getLimits() {
-    return limits;
+  public SortedList<LimitView> getLimits() {
+    return sortedLimits;
   }
 
   @Override
   public void update(Observable o, Object arg) {
     Platform.runLater(() -> {
       limits.clear();
-      limits.addAll(orderBook.getAskLimits().stream().map(
+      orderBook.getAskLimits().stream().map(
           limit -> new LimitView(limit, caster)
-      ).limit(10).collect(Collectors.toList()));
+      ).limit(10).forEach(limits::add);
     });
+  }
+
+  private static class AskSorter implements Comparator<LimitView> {
+    @Override
+    public int compare(LimitView ask1, LimitView ask2) {
+      if (ask1.getPrice() < ask2.getPrice()) {
+        return -1;
+      } else if (ask1.getPrice() == ask2.getPrice()) {
+        return 0;
+      } else {
+        return 1;
+      }
+    }
+  }
+
+  private static class BidSorter implements Comparator<LimitView> {
+    @Override
+    public int compare(LimitView bid1, LimitView bid2) {
+      if (bid1.getPrice() > bid2.getPrice()) {
+        return -1;
+      } else if (bid1.getPrice() == bid2.getPrice()) {
+        return 0;
+      } else {
+        return 1;
+      }
+    }
   }
 
 }
