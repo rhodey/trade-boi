@@ -64,7 +64,9 @@ public class Scam extends Application implements FutureCallback<Void> {
     Futures.addCallback(wsService.getShutdownFuture(), this);
     wsService.start();
 
-    new OrderBookViewer(book, caster).start(stage);
+    if (getParameters().getRaw().size() > 0 && getParameters().getRaw().get(0).equals("book")) {
+      new OrderBookViewer(book, caster).start(stage);
+    }
   }
 
   @Override
