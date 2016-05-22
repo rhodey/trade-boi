@@ -115,6 +115,7 @@ public class LimitOrderStateCurator extends StateCurator {
         if (doneRxLimit.isPresent() && doneLimit.isPresent()) {
           throw new OrderEventException("order for limit done event was in the limit rx state map and open on the book");
         } else if (doneRxLimit.isPresent()) {
+          // todo: check size remaining against event
           returnPooledOrder(doneRxLimit.get());
           return;
         }
