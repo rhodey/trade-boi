@@ -51,9 +51,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
-        MarketOrder marketRx = takePooledMarketOrder(event);
-        onMarketOrderReceived(marketRx);
-        returnPooledOrder(marketRx);
+        onMarketOrderReceived(takePooledMarketOrder(event));
         break;
 
       case MARKET_CHANGE:
@@ -90,9 +88,11 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   }
 
   protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
-    if (state.getMarketOrders().remove(orderId) == null) {
+    MarketOrder order = state.getMarketOrders().remove(orderId);
+    if (order == null) {
       throw new OrderEventException("market order " + orderId + " was never in the active set");
     } else {
+      returnPooledOrder(order);
       log.debug("market order done " + orderId);
     }
   }
