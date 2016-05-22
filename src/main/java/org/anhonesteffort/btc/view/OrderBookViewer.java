@@ -37,14 +37,13 @@ import org.anhonesteffort.btc.util.LongCaster;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class OrderBookViewer {
 
-  private static final Integer WIDTH       =  300;
-  private static final Integer HEIGHT      =  600;
-  private static final Integer COL_WIDTH   =  150;
-  private static final Long    SCROLL_RATE = 5000l;
+  private static final Integer WIDTH        =  300;
+  private static final Integer HEIGHT       =  600;
+  private static final Integer COL_WIDTH    =  150;
+  private static final Long    SCROLL_DELAY = 3000l;
 
   private final Timer timer = new Timer(true);
   private final TableView<LimitView> table = new TableView<>();
@@ -84,7 +83,7 @@ public class OrderBookViewer {
     stage.show();
 
     table.getSelectionModel().selectedIndexProperty().addListener(new SelectedScroller());
-    timer.scheduleAtFixedRate(new SpreadSelector(), 3000l, SCROLL_RATE);
+    timer.schedule(new SpreadSelector(), SCROLL_DELAY);
   }
 
   private class SelectedScroller implements ChangeListener<Number> {
@@ -109,34 +108,34 @@ public class OrderBookViewer {
   }
 
   private class SpreadSelector extends TimerTask implements ListChangeListener<LimitView> {
-    private AtomicReference<LimitView> lastAsk = new AtomicReference<>(null);
-    private boolean firstRun = true;
+    private LimitView lastLimit      = null;
+    private Integer   lastLimitCount = null;
+
+    private void setLast(LimitView limit, Integer limitCount) {
+      lastLimit      = limit;
+      lastLimitCount = limitCount;
+      table.getSelectionModel().select(limit);
+    }
 
     @Override
     public void onChanged(Change<? extends LimitView> c) {
       Platform.runLater(() -> {
-        LimitView           last    = lastAsk.get();
-        Optional<LimitView> current = curator.getBestAsk();
+        Optional<LimitView> currentLimit      = curator.getBestAsk();
+        Integer             currentLimitCount = curator.getLimitList().size();
 
-        if (last == null && current.isPresent()) {
-          lastAsk.lazySet(current.get());
-          table.getSelectionModel().select(current.get());
-        } else if (current.isPresent() && current.get().getPrice() != last.getPrice()) {
-          lastAsk.lazySet(current.get());
-          table.getSelectionModel().select(current.get());
+        if (lastLimit == null && currentLimit.isPresent()) {
+          setLast(currentLimit.get(), currentLimitCount);
+        } else if (currentLimit.isPresent() && currentLimit.get().getPrice() != lastLimit.getPrice()) {
+          setLast(currentLimit.get(), currentLimitCount);
+        } else if (currentLimit.isPresent() && !lastLimitCount.equals(currentLimitCount)) {
+          setLast(currentLimit.get(), currentLimitCount);
         }
       });
     }
 
     @Override
     public void run() {
-      if (firstRun) {
-        curator.getLimitList().addListener(this);
-        firstRun = false;
-      } else {
-        lastAsk.set(null);
-        this.onChanged(null);
-      }
+      curator.getLimitList().addListener(this);
     }
   }
 
