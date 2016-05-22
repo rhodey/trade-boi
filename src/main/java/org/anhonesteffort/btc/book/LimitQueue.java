@@ -26,7 +26,6 @@ import java.util.Observable;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.stream.Stream;
 
 public class LimitQueue extends Observable {
 
@@ -47,10 +46,6 @@ public class LimitQueue extends Observable {
     return Optional.ofNullable(queue.peek());
   }
 
-  public Stream<Limit> stream() {
-    return queue.stream();
-  }
-
   public void addOrder(Order order) {
     Limit limit = map.get(order.getPrice());
 
@@ -59,7 +54,7 @@ public class LimitQueue extends Observable {
       map.put(order.getPrice(), limit);
       queue.add(limit);
       super.setChanged();
-      super.notifyObservers();
+      super.notifyObservers(limit);
     }
 
     limit.add(order);
@@ -75,7 +70,7 @@ public class LimitQueue extends Observable {
         map.remove(price);
         queue.remove(limit.get());
         super.setChanged();
-        super.notifyObservers();
+        super.notifyObservers(limit.get());
       }
     }
 
@@ -92,7 +87,7 @@ public class LimitQueue extends Observable {
         map.remove(price);
         queue.remove(limit.get());
         super.setChanged();
-        super.notifyObservers();
+        super.notifyObservers(limit.get());
       }
     }
 
@@ -118,7 +113,7 @@ public class LimitQueue extends Observable {
         map.remove(maker.get().getPrice());
         queue.remove();
         super.setChanged();
-        super.notifyObservers();
+        super.notifyObservers(maker.get());
       }
 
       return makers;

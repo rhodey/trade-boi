@@ -17,28 +17,27 @@
 
 package org.anhonesteffort.btc.view;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
 public class LimitListCurator {
 
   private final ObservableList<LimitView> askLimits = FXCollections.observableArrayList();
   private final ObservableList<LimitView> bidLimits = FXCollections.observableArrayList();
 
-  private final LimitOrderBook orderBook;
   private final LongCaster caster;
 
   public LimitListCurator(LimitOrderBook orderBook, LongCaster caster) {
-    this.orderBook = orderBook;
-    this.caster    = caster;
+    this.caster = caster;
     orderBook.getAskLimits().addObserver(new AskLimitCallback());
     orderBook.getBidLimits().addObserver(new BidLimitCallback());
   }
@@ -54,24 +53,40 @@ public class LimitListCurator {
   private class AskLimitCallback implements Observer {
     @Override
     public void update(Observable o, Object arg) {
-      Platform.runLater(() -> {
+      if (arg == null) {
         askLimits.clear();
-        orderBook.getAskLimits().stream().map(
-            limit -> new LimitView(limit, caster)
-        ).limit(10).forEach(askLimits::add);
-      });
+      } else {
+        Limit               addOrRemove  = (Limit) arg;
+        Optional<LimitView> existingView = askLimits.stream().filter(
+            view -> view.getLimit().equals(addOrRemove)
+        ).findAny();
+
+        if (existingView.isPresent()) {
+          askLimits.remove(existingView.get());
+        } else {
+          askLimits.add(new LimitView(addOrRemove, caster));
+        }
+      }
     }
   }
 
   private class BidLimitCallback implements Observer {
     @Override
     public void update(Observable o, Object arg) {
-      Platform.runLater(() -> {
+      if (arg == null) {
         bidLimits.clear();
-        orderBook.getBidLimits().stream().map(
-            limit -> new LimitView(limit, caster)
-        ).limit(10).forEach(bidLimits::add);
-      });
+      } else {
+        Limit               addOrRemove  = (Limit) arg;
+        Optional<LimitView> existingView = bidLimits.stream().filter(
+            view -> view.getLimit().equals(addOrRemove)
+        ).findAny();
+
+        if (existingView.isPresent()) {
+          bidLimits.remove(existingView.get());
+        } else {
+          bidLimits.add(new LimitView(addOrRemove, caster));
+        }
+      }
     }
   }
 

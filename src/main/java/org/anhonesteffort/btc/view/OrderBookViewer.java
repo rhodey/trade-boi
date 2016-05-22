@@ -28,25 +28,23 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
+import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.util.LongCaster;
 
 public class OrderBookViewer {
 
-  private final TableView<LimitView> table = new TableView<>();
-  private final LimitListCurator     curator;
+  private final LimitListCurator curator;
 
   public OrderBookViewer(LimitOrderBook orderBook, LongCaster caster) {
     curator = new LimitListCurator(orderBook, caster);
   }
 
   @SuppressWarnings("unchecked")
-  public void start(Stage stage) {
-    stage.setTitle("Coinbase Trading");
-    stage.setWidth(300);
-    stage.setHeight(500);
-
-    TableColumn priceCol  = new TableColumn("price");
-    TableColumn volumeCol = new TableColumn("volume");
+  private VBox vBoxFor(Order.Side side) {
+    VBox                 vbox      = new VBox();
+    TableView<LimitView> table     = new TableView<>();
+    TableColumn          priceCol  = new TableColumn("price");
+    TableColumn          volumeCol = new TableColumn("volume");
 
     priceCol.setMinWidth(100);
     volumeCol.setMinWidth(100);
@@ -54,20 +52,29 @@ public class OrderBookViewer {
     volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
     table.setEditable(true);
-    table.setItems(curator.getAskLimits());
+    table.setItems(side.equals(Order.Side.ASK) ? curator.getAskLimits() : curator.getBidLimits());
     table.getColumns().addAll(volumeCol, priceCol);
 
-    Label label = new Label("Ask Limit Orders");
+    Label label = new Label((side.equals(Order.Side.ASK) ? "Ask" : "Bid") + " Limit Orders");
     label.setFont(new Font("Arial", 20));
 
-    VBox vbox = new VBox();
     vbox.setSpacing(5);
     vbox.setPadding(new Insets(10, 0, 0, 10));
     vbox.getChildren().addAll(label, table);
 
-    Scene scene = new Scene(new Group());
-    ((Group) scene.getRoot()).getChildren().addAll(vbox);
+    return vbox;
+  }
 
+  public void start(Stage stage) {
+    stage.setTitle("Coinbase Trading");
+    stage.setWidth(300);
+    stage.setHeight(500);
+
+    Scene scene = new Scene(new Group());
+
+    ((Group) scene.getRoot()).getChildren().addAll(
+        vBoxFor(Order.Side.ASK)/*, vBoxFor(Order.Side.BID)*/
+    );
     stage.setScene(scene);
     stage.show();
   }
