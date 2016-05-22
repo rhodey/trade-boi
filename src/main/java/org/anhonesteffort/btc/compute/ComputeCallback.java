@@ -17,28 +17,8 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.State;
+public interface ComputeCallback<T> {
 
-import java.util.Optional;
-
-public class SpreadComputation extends Computation<Optional<Long>> {
-
-  private final BestAskComputation ask = new BestAskComputation();
-  private final BestBidComputation bid = new BestBidComputation();
-
-  public SpreadComputation() {
-    addChildren(ask, bid);
-  }
-
-  @Override
-  protected Optional<Long> computeResult(State state) {
-    if (ask.getResult().isPresent() && bid.getResult().isPresent()) {
-      return Optional.of(
-          ask.getResult().get().getPrice() - bid.getResult().get().getPrice()
-      );
-    } else {
-      return Optional.empty();
-    }
-  }
+  public void onResult(T result);
 
 }

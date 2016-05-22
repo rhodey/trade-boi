@@ -15,30 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.compute;
+package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.compute.Computation;
 
-import java.util.Optional;
+public interface Strategy {
 
-public class SpreadComputation extends Computation<Optional<Long>> {
-
-  private final BestAskComputation ask = new BestAskComputation();
-  private final BestBidComputation bid = new BestBidComputation();
-
-  public SpreadComputation() {
-    addChildren(ask, bid);
-  }
-
-  @Override
-  protected Optional<Long> computeResult(State state) {
-    if (ask.getResult().isPresent() && bid.getResult().isPresent()) {
-      return Optional.of(
-          ask.getResult().get().getPrice() - bid.getResult().get().getPrice()
-      );
-    } else {
-      return Optional.empty();
-    }
-  }
+  public Computation[] getComputations();
 
 }

@@ -26,9 +26,9 @@ import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
-import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.StateCurator;
+import org.anhonesteffort.btc.strategy.SpreadStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.view.OrderBookViewer;
 import org.anhonesteffort.btc.ws.WsService;
@@ -57,10 +57,11 @@ public class Scam extends Application implements FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
-    LimitOrderBook   book    = new LimitOrderBook(16);
-    OrderPool        pool    = new OrderPool(ORDER_POOL_SIZE, 64);
-    Set<Computation> compute = new HashSet<>(Arrays.asList(new SpreadComputation(caster)));
-    StateCurator     state   = new MatchingStateCurator(book, pool, compute);
+    LimitOrderBook   book     = new LimitOrderBook(16);
+    OrderPool        pool     = new OrderPool(ORDER_POOL_SIZE, 64);
+    SpreadStrategy   strategy = new SpreadStrategy(caster);
+    Set<Computation> compute  = new HashSet<>(Arrays.asList(strategy.getComputations()));
+    StateCurator     state    = new MatchingStateCurator(book, pool, compute);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { state }, caster

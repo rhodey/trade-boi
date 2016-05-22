@@ -21,11 +21,13 @@ import org.anhonesteffort.btc.state.State;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class Computation<T> {
 
   private final Set<Computation> children = new HashSet<>();
+  private Optional<ComputeCallback<T>> callback = Optional.empty();
   protected T result;
 
   public Computation() { }
@@ -41,14 +43,19 @@ public abstract class Computation<T> {
 
   protected void onResult(T result) { }
 
-  public T getResult() {
+  protected T getResult() {
     return result;
+  }
+
+  public void setCallback(ComputeCallback<T> callback) {
+    this.callback = Optional.of(callback);
   }
 
   public void onStateChange(State state) {
     children.forEach(child -> child.onStateChange(state));
     result = computeResult(state);
     onResult(result);
+    if (callback.isPresent()) { callback.get().onResult(result); }
   }
 
 }
