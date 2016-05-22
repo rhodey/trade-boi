@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
+import org.anhonesteffort.btc.book.Order;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class CoinbaseState {
 
   private final Map<String, MarketOrder> marketOrders = new HashMap<>();
+  private final Map<String, Order> rxLimitOrders = new HashMap<>();
   private final LimitOrderBook orderBook;
 
   public CoinbaseState(LimitOrderBook orderBook) {
@@ -34,6 +36,10 @@ public class CoinbaseState {
 
   public LimitOrderBook getOrderBook() {
     return orderBook;
+  }
+
+  public Map<String, Order> getRxLimitOrders() {
+    return rxLimitOrders;
   }
 
   public Map<String, MarketOrder> getMarketOrders() {

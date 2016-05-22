@@ -55,11 +55,21 @@ public class LimitOrderStateCurator extends StateCurator {
     switch (event.getType()) {
       case LIMIT_RX:
         Order limitRx = takePooledLimitOrder(event);
-        onLimitOrderReceived(limitRx);
-        returnPooledOrder(limitRx);
+        if (state.getRxLimitOrders().put(limitRx.getOrderId(), limitRx) != null) {
+          throw new OrderEventException("limit order " + limitRx.getOrderId() + " already in the rx state map");
+        } else {
+          onLimitOrderReceived(limitRx);
+        }
         break;
 
       case LIMIT_OPEN:
+        Optional<Order> oldLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
+        if (!oldLimit.isPresent()) {
+          throw new OrderEventException("limit order " + event.getOrderId() + " was never in the rx state map");
+        } else {
+          returnPooledOrder(oldLimit.get());
+        }
+
         Order      limitOpen = takePooledLimitOrder(event);
         TakeResult result    = state.getOrderBook().add(limitOpen);
         if (result.getTakeSize() > 0l) {
@@ -115,7 +125,6 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   protected void onLimitOrderReceived(Order order) {
-    // todo: add to received hashmap
     log.debug("received new limit order " + order.getOrderId());
   }
 
@@ -125,7 +134,6 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   protected void onLimitOrderOpened(Order order) {
-    // todo: remove from received hashmap
     log.debug("opened new limit order " + order.getOrderId());
   }
 
