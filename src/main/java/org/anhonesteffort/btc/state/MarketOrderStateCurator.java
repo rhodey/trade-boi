@@ -24,6 +24,8 @@ import org.anhonesteffort.btc.book.OrderPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class MarketOrderStateCurator extends LimitOrderStateCurator {
 
   private static final Logger log = LoggerFactory.getLogger(MarketOrderStateCurator.class);
@@ -88,11 +90,11 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   }
 
   protected void onMarketOrderDone(String orderId, Order.Side side) throws OrderEventException {
-    MarketOrder order = state.getMarketOrders().remove(orderId);
-    if (order == null) {
+    Optional<MarketOrder> order = Optional.ofNullable(state.getMarketOrders().remove(orderId));
+    if (!order.isPresent()) {
       throw new OrderEventException("market order " + orderId + " was never in the active set");
     } else {
-      returnPooledOrder(order);
+      returnPooledOrder(order.get());
       log.debug("market order done " + orderId);
     }
   }
