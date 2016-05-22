@@ -92,9 +92,18 @@ public class LimitOrderStateCurator extends StateCurator {
             returnPooledOrder(limitChange.get());
           }
         } else {
-          Order rxLimitChange = takePooledLimitOrderChange(event);
-          onReceivedLimitOrderReduced(rxLimitChange, reducedBy);
-          returnPooledOrder(rxLimitChange);
+          Optional<Order> oldLimitChange = Optional.ofNullable(
+              state.getRxLimitOrders().remove(event.getOrderId())
+          );
+
+          if (!oldLimitChange.isPresent()) {
+            throw new OrderEventException("limit order for change event not found in the rx state map");
+          } else {
+            Order newLimitChange = takePooledLimitOrderChange(event);
+            state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);
+            onReceivedLimitOrderReduced(newLimitChange, reducedBy);
+            returnPooledOrder(oldLimitChange.get());
+          }
         }
         break;
 
@@ -129,7 +138,6 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   protected void onReceivedLimitOrderReduced(Order order, long reducedBy) {
-    // todo: change in received hashmap
     log.warn("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
   }
 
