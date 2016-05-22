@@ -56,7 +56,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
           throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the market state map");
         } else {
-          onMarketOrderReceived(rxMarket);
+          onMarketOrderRx(rxMarket);
         }
         break;
 
@@ -98,7 +98,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
-  protected void onMarketOrderReceived(MarketOrder order) {
+  protected void onMarketOrderRx(MarketOrder order) {
     log.debug("received new market order " + order.getOrderId());
   }
 
