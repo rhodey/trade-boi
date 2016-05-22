@@ -25,6 +25,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
+import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.StateCurator;
 import org.anhonesteffort.btc.util.LongCaster;
@@ -33,6 +35,9 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,6 +49,7 @@ public class Scam extends Application implements FutureCallback<Void> {
   private static final Integer WS_BUFFER_SIZE  = 16384;
   private static final Integer ORDER_POOL_SIZE = 16384;
 
+  private final LongCaster        caster       = new LongCaster(0.000000000001d);
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
   private       ShutdownProcedure shutdownProcedure;
@@ -51,10 +57,10 @@ public class Scam extends Application implements FutureCallback<Void> {
   @Override
   @SuppressWarnings("unchecked")
   public void start(Stage stage) {
-    LongCaster     caster = new LongCaster(0.000000000001d);
-    LimitOrderBook book   = new LimitOrderBook(16);
-    OrderPool      pool   = new OrderPool(ORDER_POOL_SIZE, 64);
-    StateCurator   state  = new MatchingStateCurator(book, pool);
+    LimitOrderBook   book    = new LimitOrderBook(16);
+    OrderPool        pool    = new OrderPool(ORDER_POOL_SIZE, 64);
+    Set<Computation> compute = new HashSet<>(Arrays.asList(new SpreadComputation(caster)));
+    StateCurator     state   = new MatchingStateCurator(book, pool, compute);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { state }, caster

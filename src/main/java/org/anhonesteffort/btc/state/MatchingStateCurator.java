@@ -22,17 +22,19 @@ import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
+import org.anhonesteffort.btc.compute.Computation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class MatchingStateCurator extends MarketOrderStateCurator {
 
   private static final Logger log = LoggerFactory.getLogger(MatchingStateCurator.class);
 
-  public MatchingStateCurator(LimitOrderBook book, OrderPool pool) {
-    super(book, pool);
+  public MatchingStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
+    super(book, pool, computations);
   }
 
   private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {

@@ -22,21 +22,27 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
+import org.anhonesteffort.btc.compute.Computation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 public abstract class StateCurator implements EventHandler<OrderEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
-  protected final CoinbaseState state;
-  protected final OrderPool pool;
-  private boolean rebuilding = false;
-  private long nsTimeSum = 0l;
+  protected final CoinbaseState    state;
+  protected final OrderPool        pool;
+  protected final Set<Computation> computations;
 
-  public StateCurator(LimitOrderBook book, OrderPool pool) {
-    state     = new CoinbaseState(book);
-    this.pool = pool;
+  private boolean rebuilding = false;
+  private long    nsTimeSum  = 0l;
+
+  public StateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
+    state             = new CoinbaseState(book);
+    this.pool         = pool;
+    this.computations = computations;
   }
 
   protected boolean isRebuilding() {
@@ -72,6 +78,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
 
       default:
         onEvent(event);
+        computations.forEach(compute -> compute.onStateChange(state));
     }
 
     if ((sequence % 50l) == 0l) {
