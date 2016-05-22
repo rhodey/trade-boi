@@ -23,10 +23,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.util.LongCaster;
 
@@ -34,14 +34,12 @@ import java.util.Timer;
 
 public class OrderBookViewer {
 
-  private final Timer              timer = new Timer(true);
-  private final TableView<Limit>   table = new TableView<>();
-  private final LimitListCurator   curator;
-  private final TableColumnMappers mappers;
+  private final Timer                timer = new Timer(true);
+  private final TableView<LimitView> table = new TableView<>();
+  private final LimitListCurator     curator;
 
   public OrderBookViewer(LimitOrderBook orderBook, LongCaster caster) {
     curator = new LimitListCurator(orderBook);
-    mappers = new TableColumnMappers(caster);
   }
 
   @SuppressWarnings("unchecked")
@@ -55,10 +53,9 @@ public class OrderBookViewer {
 
     priceCol.setMinWidth(100);
     volumeCol.setMinWidth(100);
-    priceCol.setCellValueFactory(mappers.getPrice());
-    volumeCol.setCellValueFactory(mappers.getVolume());
+    priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+    volumeCol.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-    table.setEditable(true);
     table.setItems(curator.getLimits());
     table.getColumns().addAll(volumeCol, priceCol);
 
@@ -76,7 +73,7 @@ public class OrderBookViewer {
     stage.setScene(scene);
     stage.show();
 
-    timer.scheduleAtFixedRate(curator, 1000l, 2500l);
+    timer.scheduleAtFixedRate(curator, 5000l, 30_000l);
   }
 
 }

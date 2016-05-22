@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
-public class Limit extends ObservableValueBase<Limit> {
+public class Limit extends ObservableValueBase<Long> {
 
   private final Map<String, Order> orderMap = new HashMap<>();
   private final Queue<Order> orderQueue;
@@ -41,8 +41,8 @@ public class Limit extends ObservableValueBase<Limit> {
   }
 
   @Override
-  public Limit getValue() {
-    return this;
+  public Long getValue() {
+    return volume;
   }
 
   public long getPrice() {
