@@ -46,4 +46,10 @@ public class CoinbaseState {
     return marketOrders;
   }
 
+  public void clear() {
+    orderBook.clear();
+    rxLimitOrders.clear();
+    marketOrders.clear();
+  }
+
 }

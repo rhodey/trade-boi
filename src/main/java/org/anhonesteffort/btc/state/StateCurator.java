@@ -59,7 +59,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException {
     switch (event.getType()) {
       case REBUILD_START:
-        state.getOrderBook().clear();
+        state.clear();
         pool.returnAll();
         rebuilding = true;
         onRebuildStart();
