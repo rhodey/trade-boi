@@ -69,17 +69,17 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
 
         long                  sizeReduced  = event.getOldSize()  - event.getNewSize();
         long                  fundsReduced = event.getOldFunds() - event.getNewFunds();
-        Optional<MarketOrder> oldMarket    = Optional.ofNullable(
+        Optional<MarketOrder> changeMarket = Optional.ofNullable(
             state.getMarketOrders().remove(event.getOrderId())
         );
 
-        if (!oldMarket.isPresent()) {
+        if (!changeMarket.isPresent()) {
           throw new OrderEventException("market order for change event not found in the market state map");
         } else {
           MarketOrder newMarket = takePooledMarketOrderChange(event);
           state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
           onMarketOrderChange(newMarket, sizeReduced, fundsReduced);
-          returnPooledOrder(oldMarket.get());
+          returnPooledOrder(changeMarket.get());
         }
         break;
 
