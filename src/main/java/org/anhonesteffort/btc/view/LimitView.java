@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.util.LongCaster;
 
-import java.lang.ref.WeakReference;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -33,7 +32,7 @@ public class LimitView implements Observer {
   private final SimpleDoubleProperty volume;
 
   public LimitView(Limit limit, LongCaster caster) {
-    limit.addObserver(new WeakObserver(this, limit));
+    limit.addObserver(this);
     this.caster = caster;
     this.price  = new SimpleDoubleProperty(caster.toDouble(limit.getPrice()));
     this.volume = new SimpleDoubleProperty(caster.toDouble(limit.getVolume()));
@@ -66,26 +65,6 @@ public class LimitView implements Observer {
   @Override
   public void update(Observable o, Object arg) {
     volume.set(caster.toDouble( ((Limit) o).getVolume() ));
-  }
-
-  private static class WeakObserver implements Observer {
-    private final WeakReference<Observer> observer;
-    private final Observable observed;
-
-    public WeakObserver(Observer observer, Observable observed) {
-      this.observer = new WeakReference<>(observer);
-      this.observed = observed;
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-      Observer realObserver = observer.get();
-      if (realObserver != null) {
-        realObserver.update(o, arg);
-      } else {
-        observed.deleteObserver(this);
-      }
-    }
   }
 
 }
