@@ -86,10 +86,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         break;
 
       case MARKET_DONE:
-        Optional<MarketOrder> doneMarket = Optional.ofNullable(
-            state.getMarketOrders().remove(event.getOrderId())
-        );
-
+        Optional<MarketOrder> doneMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
         if (!doneMarket.isPresent()) {
           throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
         } else {
