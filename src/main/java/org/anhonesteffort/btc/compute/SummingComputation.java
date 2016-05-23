@@ -19,12 +19,13 @@ package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.state.State;
 
+import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Stack;
+import java.util.Queue;
 
 public class SummingComputation extends Computation<Optional<Long>> {
 
-  private final Stack<ChildResult> history = new Stack<>();
+  private final Queue<ChildResult> history = new ArrayDeque<>();
   private final Computation<Long> child;
   private final long periodNs;
   private long sum = 0l;
@@ -38,13 +39,13 @@ public class SummingComputation extends Computation<Optional<Long>> {
   @Override
   protected Optional<Long> computeNextResult(State state, long nanoseconds) {
     sum += child.getResult();
-    history.push(new ChildResult(child.getResult(), nanoseconds));
+    history.add(new ChildResult(child.getResult(), nanoseconds));
 
     boolean historyComplete = false;
     while (!history.isEmpty()) {
       if ((nanoseconds - history.peek().nanoseconds) > periodNs) {
         historyComplete = true;
-        sum -= history.pop().result;
+        sum -= history.remove().result;
       } else {
         break;
       }
