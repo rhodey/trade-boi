@@ -17,16 +17,23 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.book.Limit;
+import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.state.State;
 
-import java.util.Optional;
+public class TakeVolumeComputation extends Computation<Long> {
 
-public class BestBidComputation extends Computation<Optional<Limit>> {
+  private final Order.Side side;
+
+  public TakeVolumeComputation(Order.Side side) {
+    this.side = side;
+  }
 
   @Override
-  protected Optional<Limit> computeNextResult(State state) {
-    return state.getOrderBook().getBidLimits().peek();
+  protected Long computeNextResult(State state, long nanoseconds) {
+    return state.getTakes().stream().filter(
+        take -> take.getTaker().getSide().equals(side)
+    ).mapToLong(TakeResult::getTakeSize).sum();
   }
 
 }

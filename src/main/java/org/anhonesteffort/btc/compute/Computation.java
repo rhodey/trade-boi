@@ -27,11 +27,11 @@ import java.util.Set;
 public abstract class Computation<T> {
 
   private final Set<Computation> children = new HashSet<>();
-  private Optional<ComputeCallback<T>> callback = Optional.empty();
+  private Optional<ComputeCallback> callback = Optional.empty();
   protected T result;
 
-  public Computation() { }
-  public Computation(Computation ... children) {
+  protected Computation() { }
+  protected Computation(Computation ... children) {
     addChildren(children);
   }
 
@@ -39,28 +39,25 @@ public abstract class Computation<T> {
     this.children.addAll(Arrays.asList(children));
   }
 
-  protected abstract T computeNextResult(State state);
+  protected abstract T computeNextResult(State state, long nanoseconds);
 
-  protected void onNextResult(T result) { }
-
-  protected T getResult() {
+  public T getResult() {
     return result;
   }
 
-  public void setCallback(ComputeCallback<T> callback) {
+  public void setCallback(ComputeCallback callback) {
     this.callback = Optional.of(callback);
   }
 
   public void onStateChange(State state, long nanoseconds) {
     children.forEach(child -> child.onStateChange(state, nanoseconds));
-    result = computeNextResult(state);
-    onNextResult(result);
-    if (callback.isPresent()) { callback.get().onNextResult(result, nanoseconds); }
+    result = computeNextResult(state, nanoseconds);
+    if (callback.isPresent()) { callback.get().onNextResult(); }
   }
 
   public void onStateReset() {
     children.forEach(Computation::onStateReset);
-    if (callback.isPresent()) { callback.get().onResultsInvalidated(); }
+    if (callback.isPresent()) { callback.get().onResultInvalidated(); }
   }
 
 }

@@ -18,9 +18,53 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.compute.ComputeCallback;
 
-public interface Strategy {
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-  public Computation[] getComputations();
+public abstract class Strategy implements ComputeCallback {
+
+  private final Set<Computation> computations = new HashSet<>();
+  private int callbackCount = 0;
+
+  protected Strategy() { }
+  protected Strategy(Computation ... compute) {
+    addComputations(compute);
+  }
+
+  public Set<Computation> getComputations() {
+    return computations;
+  }
+
+  protected void addComputations(Computation ... compute) {
+    Arrays.asList(compute).forEach(comp -> {
+      comp.setCallback(this);
+      computations.add(comp);
+    });
+  }
+
+  protected abstract void onResultsReady();
+
+  protected abstract void onResultsInvalidated();
+
+  @Override
+  public void onNextResult() {
+    callbackCount++;
+    if (callbackCount == computations.size()) {
+      callbackCount = 0;
+      onResultsReady();
+    }
+  }
+
+  @Override
+  public void onResultInvalidated() {
+    callbackCount++;
+    if (callbackCount == computations.size()) {
+      callbackCount = 0;
+      onResultsInvalidated();
+    }
+  }
 
 }

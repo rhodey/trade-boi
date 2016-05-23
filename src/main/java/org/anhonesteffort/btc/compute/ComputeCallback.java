@@ -17,10 +17,10 @@
 
 package org.anhonesteffort.btc.compute;
 
-public interface ComputeCallback<T> {
+public interface ComputeCallback {
 
-  public void onNextResult(T result, long nanosecods);
+  public void onNextResult();
 
-  public void onResultsInvalidated();
+  public void onResultInvalidated();
 
 }

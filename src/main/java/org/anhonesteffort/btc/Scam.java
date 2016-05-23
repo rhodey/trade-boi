@@ -23,18 +23,14 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.compute.Computation;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.StateCurator;
-import org.anhonesteffort.btc.strategy.SpreadStrategy;
+import org.anhonesteffort.btc.strategy.ScamStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,9 +52,8 @@ public class Scam implements Runnable, FutureCallback<Void> {
   public void run() {
     LimitOrderBook   book     = new LimitOrderBook(16);
     OrderPool        pool     = new OrderPool(ORDER_POOL_SIZE, 64);
-    SpreadStrategy   strategy = new SpreadStrategy(caster);
-    Set<Computation> compute  = new HashSet<>(Arrays.asList(strategy.getComputations()));
-    StateCurator     state    = new MatchingStateCurator(book, pool, compute);
+    ScamStrategy     strategy = new ScamStrategy(caster);
+    StateCurator     state    = new MatchingStateCurator(book, pool, strategy.getComputations());
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { state }, caster
