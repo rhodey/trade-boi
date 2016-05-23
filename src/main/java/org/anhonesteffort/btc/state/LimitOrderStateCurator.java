@@ -98,10 +98,7 @@ public class LimitOrderStateCurator extends StateCurator {
           // todo: could test changeRxLimit size > newLimitChange size
           state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);
           returnPooledOrder(changeRxLimit.get());
-          return;
-        }
-
-        if (!changeLimit.isPresent()) {
+        } else if (!changeLimit.isPresent()) {
           throw new OrderEventException("order for limit change event not found on the book");
         } else if (changeLimit.get().getSizeRemaining() <= 0l) {
           returnPooledOrder(changeLimit.get());
