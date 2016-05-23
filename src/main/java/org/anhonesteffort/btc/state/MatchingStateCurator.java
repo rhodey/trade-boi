@@ -18,7 +18,6 @@
 package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
@@ -45,17 +44,9 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
   private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
-        if (!state.getMarketOrders().containsKey(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
-        } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), 0l);
-        }
+        return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
       } else {
-        if (!state.getMarketOrders().containsKey(match.getTakerId())) {
-          return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
-        } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), 0l);
-        }
+        return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
       }
     } else {
       throw new OrderEventException("match event has invalid taker price or size");
@@ -79,47 +70,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       throw new OrderEventException(
           "taker for match event was left on the book with " + taker.getSizeRemaining()
       );
-    }
-
-    if (taker instanceof MarketOrder) {
-      Optional<MarketOrder> oldMarket = Optional.ofNullable(state.getMarketOrders().remove(taker.getOrderId()));
-      if (!oldMarket.isPresent()) {
-        throw new OrderEventException("market order for match event not found in the market state map");
-      } else if (oldMarket.get().getSize() <= 0l && oldMarket.get().getFunds() <= 0l) {
-        throw new OrderEventException(
-            "market order for match event disagrees with filled order in the market state map, " +
-                "event wanted size " + event.getSize()
-        );
-      } else {
-        long newSize  = oldMarket.get().getSize()  - event.getSize();
-        long newFunds = oldMarket.get().getFunds() - (event.getPrice() * event.getSize());
-
-        /*
-        todo:
-          newSize could be moved off by 1 every time it matches
-          newFunds could be moved off by 2 every time it matches
-         */
-        if (newSize < -1l && newFunds < -2l) {
-          throw new OrderEventException(
-              "market order for match event disagrees with order in the market state map, " +
-                  "event wanted size " + event.getSize() + " at price " + event.getPrice() + ", " +
-                  "state had size " + oldMarket.get().getSize() + " and funds " + oldMarket.get().getFunds()
-          );
-        }
-
-        if (newSize  < 0l) { newSize  = 0l; }
-        if (newFunds < 0l) { newFunds = 0l; }
-
-        MarketOrder newMarket = pool.takeMarket(oldMarket.get().getOrderId(), oldMarket.get().getSide(), newSize, newFunds);
-        state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
-
-        returnPooledOrder(taker);
-        returnPooledOrders(result);
-        returnPooledOrder(oldMarket.get());
-      }
-    }
-
-    else {
+    } else {
       Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
       if (!limitTaker.isPresent()) {
         throw new OrderEventException("limit order for match event not found in the limit rx state map");

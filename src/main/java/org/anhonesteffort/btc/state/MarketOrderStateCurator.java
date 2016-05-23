@@ -21,16 +21,16 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class MarketOrderStateCurator extends LimitOrderStateCurator {
 
-  private static final Logger log = LoggerFactory.getLogger(MarketOrderStateCurator.class);
-
+  /*
+  coinbase lies about market orders in receive messages
+  https://community.coinbase.com/t/why-is-this-market-order-filled-without-having-any-fills/10001
+   */
   public MarketOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
   }
@@ -45,22 +45,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
-  private MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    if (change.getOldSize()  < 0l || change.getNewSize()  < 0l ||
-        change.getOldFunds() < 0l || change.getNewFunds() < 0l)
-    {
-      throw new OrderEventException("market order change event was parsed incorrectly");
-    } else if (change.getNewSize() > 0l && change.getNewSize() >= change.getOldSize()) {
-      throw new OrderEventException("market order size can only decrease");
-    } else if (change.getNewFunds() > 0l && change.getNewFunds() >= change.getOldFunds()) {
-      throw new OrderEventException("market order funds can only decrease");
-    } else if (change.getOldSize() == 0l && change.getOldFunds() == 0l) {
-      throw new OrderEventException("market order had no size or funds to change");
-    } else {
-      return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
-    }
-  }
-
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     super.onEvent(event);
@@ -69,20 +53,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         MarketOrder rxMarket = takePooledMarketOrder(event);
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
           throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the market state map");
-        } else if (rxMarket.getFunds() > 0l) {
-          log.warn("received market order with funds " + rxMarket.getFunds());
-        }
-        break;
-
-      case MARKET_CHANGE:
-        Optional<MarketOrder> changedMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
-        if (!changedMarket.isPresent()) {
-          throw new OrderEventException("market order for change event not found in the market state map");
-        } else {
-          // todo: could test changeMarket size > event newSize and changeMarket funds > event newFunds
-          MarketOrder newMarket = takePooledMarketOrderChange(event);
-          state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
-          returnPooledOrder(changedMarket.get());
         }
         break;
 
@@ -91,7 +61,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         if (!doneMarket.isPresent()) {
           throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
         } else {
-          // todo: could test doneMarket size remaining <= 0 or doneMarket funds remaining <= 0
           returnPooledOrder(doneMarket.get());
         }
         break;

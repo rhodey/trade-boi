@@ -89,7 +89,7 @@ public class LimitOrderStateCurator extends StateCurator {
           throw new OrderEventException("order for limit change event was in the limit rx state map and open on the book");
         } else if (changedRxLimit.isPresent()) {
           Order newRxLimit = takePooledLimitOrderChange(event);
-          // todo: could test changeRxLimit size > newLimitChange size
+          // todo: could test changedRxLimit size > newRxLimit size
           state.getRxLimitOrders().put(newRxLimit.getOrderId(), newRxLimit);
           returnPooledOrder(changedRxLimit.get());
         } else if (!changedLimit.isPresent()) {
