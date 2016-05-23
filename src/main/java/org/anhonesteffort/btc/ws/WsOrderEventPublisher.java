@@ -70,7 +70,7 @@ public class WsOrderEventPublisher {
     }
   }
 
-  public void publishMessage(JsonNode root, String type, long nsTime) throws WsException {
+  public void publishMessage(JsonNode root, String type, long nanoseconds) throws WsException {
     Order.Side side  = getSideOrThrow(root);
     OrderEvent event = takeNextEvent();
 
@@ -78,12 +78,12 @@ public class WsOrderEventPublisher {
       case Accessor.TYPE_RECEIVED:
         if (receive.getOrderType(root).equals("limit")) {
           event.initLimitRx(
-              nsTime, receive.getOrderId(root), side,
+              nanoseconds, receive.getOrderId(root), side,
               caster.fromDouble(receive.getPrice(root)), caster.fromDouble(receive.getSize(root))
           );
         } else if (receive.getOrderType(root).equals("market")) {
           event.initMarketRx(
-              nsTime, receive.getOrderId(root), side,
+              nanoseconds, receive.getOrderId(root), side,
               caster.fromDouble(receive.getSize(root)), caster.fromDouble(receive.getFunds(root))
           );
         } else {
@@ -93,14 +93,14 @@ public class WsOrderEventPublisher {
 
       case Accessor.TYPE_MATCH:
         event.initMatch(
-            nsTime, match.getMakerOrderId(root), match.getTakerOrderId(root), side,
+            nanoseconds, match.getMakerOrderId(root), match.getTakerOrderId(root), side,
             caster.fromDouble(match.getPrice(root)), caster.fromDouble(match.getSize(root))
         );
         break;
 
       case Accessor.TYPE_OPEN:
         event.initLimitOpen(
-            nsTime, open.getOrderId(root), side,
+            nanoseconds, open.getOrderId(root), side,
             caster.fromDouble(open.getPrice(root)), caster.fromDouble(open.getRemainingSize(root))
         );
         break;
@@ -108,11 +108,11 @@ public class WsOrderEventPublisher {
       case Accessor.TYPE_DONE:
         if (done.getOrderType(root).equals("limit")) {
           event.initLimitDone(
-              nsTime, done.getOrderId(root), side,
+              nanoseconds, done.getOrderId(root), side,
               caster.fromDouble(done.getPrice(root)), caster.fromDouble(done.getRemainingSize(root))
           );
         } else if (done.getOrderType(root).equals("market")) {
-          event.initMarketDone(nsTime, done.getOrderId(root), side);
+          event.initMarketDone(nanoseconds, done.getOrderId(root), side);
         } else {
           throw new WsException("done message has invalid order_type");
         }
@@ -121,12 +121,12 @@ public class WsOrderEventPublisher {
       case Accessor.TYPE_CHANGE:
         if (change.getPrice(root) > 0d) {
           event.initLimitChange(
-              nsTime, change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
+              nanoseconds, change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
               caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root))
           );
         } else {
           event.initMarketChange(
-              nsTime, change.getOrderId(root), side,
+              nanoseconds, change.getOrderId(root), side,
               caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root)),
               caster.fromDouble(change.getOldFunds(root)), caster.fromDouble(change.getNewFunds(root))
           );
@@ -140,25 +140,25 @@ public class WsOrderEventPublisher {
     publishCurrentEvent();
   }
 
-  private void publishBookOrder(OrderResponse order, long nsTime) {
+  private void publishBookOrder(OrderResponse order, long nanoseconds) {
     OrderEvent event = takeNextEvent();
     event.initLimitOpen(
-        nsTime, order.getOrderId(), order.getSide(),
+        nanoseconds, order.getOrderId(), order.getSide(),
         caster.fromDouble(order.getPrice()), caster.fromDouble(order.getSize())
     );
     publishCurrentEvent();
   }
 
-  public void publishBook(OrderBookResponse book, long nsTime) {
+  public void publishBook(OrderBookResponse book, long nanoseconds) {
     OrderEvent event = takeNextEvent();
-    event.initRebuildStart(nsTime);
+    event.initRebuildStart(nanoseconds);
     publishCurrentEvent();
 
-    book.getAsks().forEach(ask -> this.publishBookOrder(ask, nsTime));
-    book.getBids().forEach(bid -> this.publishBookOrder(bid, nsTime));
+    book.getAsks().forEach(ask -> this.publishBookOrder(ask, nanoseconds));
+    book.getBids().forEach(bid -> this.publishBookOrder(bid, nanoseconds));
 
     event = takeNextEvent();
-    event.initRebuildEnd(nsTime);
+    event.initRebuildEnd(nanoseconds);
     publishCurrentEvent();
   }
 

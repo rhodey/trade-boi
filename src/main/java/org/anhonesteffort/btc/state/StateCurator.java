@@ -36,8 +36,8 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   protected final OrderPool        pool;
   protected final Set<Computation> computations;
 
-  private boolean rebuilding = false;
-  private long    nsTimeSum  = 0l;
+  private boolean rebuilding    = false;
+  private long    nanosecondSum = 0l;
 
   public StateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     state             = new State(book);
@@ -80,15 +80,15 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       default:
         onEvent(event);
         if (!rebuilding) {
-          computations.forEach(compute -> compute.onStateChange(state, event.getNsTime()));
+          computations.forEach(compute -> compute.onStateChange(state, event.getNanoseconds()));
         }
     }
 
     if ((sequence % 50l) == 0l) {
-      if (!rebuilding) { log.info("avg latency -> " + (nsTimeSum / 50d) + "ns"); }
-      nsTimeSum = System.nanoTime() - event.getNsTime();
+      if (!rebuilding) { log.info("avg latency -> " + (nanosecondSum / 50d) + "ns"); }
+      nanosecondSum = System.nanoTime() - event.getNanoseconds();
     } else {
-      nsTimeSum += System.nanoTime() - event.getNsTime();
+      nanosecondSum += System.nanoTime() - event.getNanoseconds();
     }
   }
 

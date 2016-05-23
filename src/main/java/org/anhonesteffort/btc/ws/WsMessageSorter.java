@@ -42,7 +42,7 @@ public class WsMessageSorter {
     this.http      = http;
   }
 
-  private void checkSeqAndPublish(JsonNode root, String type, long sequence, long nsTime)
+  private void checkSeqAndPublish(JsonNode root, String type, long sequence, long nanoseconds)
       throws WsException, InterruptedException, ExecutionException
   {
     if (!messageSeqLast.isPresent()) {
@@ -51,7 +51,7 @@ public class WsMessageSorter {
       publisher.publishBook(orderBook, System.nanoTime());
     } else if (sequence == (messageSeqLast.get() + 1l)) {
       messageSeqLast = Optional.of(sequence);
-      publisher.publishMessage(root, type, nsTime);
+      publisher.publishMessage(root, type, nanoseconds);
     } else if (sequence > messageSeqLast.get()) {
       log.warn("received out of order seq -> " + sequence + ", expected -> " + (messageSeqLast.get() + 1));
       OrderBookResponse orderBook = http.geOrderBook().get();
@@ -60,7 +60,7 @@ public class WsMessageSorter {
     }
   }
 
-  public void sort(JsonNode root, long nsTime)
+  public void sort(JsonNode root, long nanoseconds)
       throws WsException, InterruptedException, ExecutionException
   {
     String type = accessor.getType(root);
@@ -70,7 +70,7 @@ public class WsMessageSorter {
       case Accessor.TYPE_OPEN:
       case Accessor.TYPE_DONE:
       case Accessor.TYPE_CHANGE:
-        checkSeqAndPublish(root, type, accessor.getSequence(root), nsTime);
+        checkSeqAndPublish(root, type, accessor.getSequence(root), nanoseconds);
         break;
 
       case Accessor.TYPE_ERROR:

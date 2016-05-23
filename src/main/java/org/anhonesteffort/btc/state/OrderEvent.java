@@ -28,7 +28,7 @@ public class OrderEvent {
     REBUILD_START, REBUILD_END
   }
 
-  private long       nsTime;
+  private long       nanoseconds;
   private Type       type;
   private String     orderId;
   private Order.Side side;
@@ -44,67 +44,67 @@ public class OrderEvent {
 
   // F12
   private void init(
-      long nsTime, Type type, String orderId, Order.Side side,
+      long nanoseconds, Type type, String orderId, Order.Side side,
       long price, long size, long funds, String makerId, String takerId,
       long oldSize, long newSize, long oldFunds, long newFunds
   ) {
-    this.nsTime   = nsTime;
-    this.type     = type;
-    this.orderId  = orderId;
-    this.side     = side;
-    this.price    = price;
-    this.size     = size;
-    this.funds    = funds;
-    this.makerId  = makerId;
-    this.takerId  = takerId;
-    this.oldSize  = oldSize;
-    this.newSize  = newSize;
-    this.oldFunds = oldFunds;
-    this.newFunds = newFunds;
+    this.nanoseconds = nanoseconds;
+    this.type        = type;
+    this.orderId     = orderId;
+    this.side        = side;
+    this.price       = price;
+    this.size        = size;
+    this.funds       = funds;
+    this.makerId     = makerId;
+    this.takerId     = takerId;
+    this.oldSize     = oldSize;
+    this.newSize     = newSize;
+    this.oldFunds    = oldFunds;
+    this.newFunds    = newFunds;
   }
 
-  public void initLimitRx(long nsTime, String orderId, Order.Side side, long price, long size) {
-    init(nsTime, Type.LIMIT_RX, orderId, side, price, size, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitRx(long nanoseconds, String orderId, Order.Side side, long price, long size) {
+    init(nanoseconds, Type.LIMIT_RX, orderId, side, price, size, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initMarketRx(long nsTime, String orderId, Order.Side side, long size, long funds) {
-    init(nsTime, Type.MARKET_RX, orderId, side, -1l, size, funds, null, null, -1l, -1l, -1l, -1l);
+  public void initMarketRx(long nanoseconds, String orderId, Order.Side side, long size, long funds) {
+    init(nanoseconds, Type.MARKET_RX, orderId, side, -1l, size, funds, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initLimitOpen(long nsTime, String orderId, Order.Side side, long price, long openSize) {
-    init(nsTime, Type.LIMIT_OPEN, orderId, side, price, openSize, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitOpen(long nanoseconds, String orderId, Order.Side side, long price, long openSize) {
+    init(nanoseconds, Type.LIMIT_OPEN, orderId, side, price, openSize, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initLimitDone(long nsTime, String orderId, Order.Side side, long price, long doneSize) {
-    init(nsTime, Type.LIMIT_DONE, orderId, side, price, doneSize, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitDone(long nanoseconds, String orderId, Order.Side side, long price, long doneSize) {
+    init(nanoseconds, Type.LIMIT_DONE, orderId, side, price, doneSize, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initMarketDone(long nsTime, String orderId, Order.Side side) {
-    init(nsTime, Type.MARKET_DONE, orderId, side, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initMarketDone(long nanoseconds, String orderId, Order.Side side) {
+    init(nanoseconds, Type.MARKET_DONE, orderId, side, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initMatch(long nsTime, String makerId, String takerId, Order.Side side, long price, long size) {
-    init(nsTime, Type.MATCH, null, side, price, size, -1l, makerId, takerId, -1l, -1l, -1l, -1l);
+  public void initMatch(long nanoseconds, String makerId, String takerId, Order.Side side, long price, long size) {
+    init(nanoseconds, Type.MATCH, null, side, price, size, -1l, makerId, takerId, -1l, -1l, -1l, -1l);
   }
 
-  public void initLimitChange(long nsTime, String orderId, Order.Side side, long price, long oldSize, long newSize) {
-    init(nsTime, Type.LIMIT_CHANGE, orderId, side, price, -1l , -1l, null, null, oldSize, newSize, -1l, -1l);
+  public void initLimitChange(long nanoseconds, String orderId, Order.Side side, long price, long oldSize, long newSize) {
+    init(nanoseconds, Type.LIMIT_CHANGE, orderId, side, price, -1l , -1l, null, null, oldSize, newSize, -1l, -1l);
   }
 
-  public void initMarketChange(long nsTime, String orderId, Order.Side side, long oldSize, long newSize, long oldFunds, long newFunds) {
-    init(nsTime, Type.MARKET_CHANGE, orderId, side, -1l, -1l, -1l, null, null, oldSize, newSize, oldFunds, newFunds);
+  public void initMarketChange(long nanoseconds, String orderId, Order.Side side, long oldSize, long newSize, long oldFunds, long newFunds) {
+    init(nanoseconds, Type.MARKET_CHANGE, orderId, side, -1l, -1l, -1l, null, null, oldSize, newSize, oldFunds, newFunds);
   }
 
-  public void initRebuildStart(long nsTime) {
-    init(nsTime, Type.REBUILD_START, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initRebuildStart(long nanoseconds) {
+    init(nanoseconds, Type.REBUILD_START, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public void initRebuildEnd(long nsTime) {
-    init(nsTime, Type.REBUILD_END, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initRebuildEnd(long nanoseconds) {
+    init(nanoseconds, Type.REBUILD_END, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
   }
 
-  public long getNsTime() {
-    return nsTime;
+  public long getNanoseconds() {
+    return nanoseconds;
   }
 
   public Type getType() {
