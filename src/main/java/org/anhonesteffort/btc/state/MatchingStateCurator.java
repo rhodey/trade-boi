@@ -129,7 +129,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       }
 
       long rxLimitTakeSize = limitTaker.get().takeSize(result.getTakeSize());
-      if (rxLimitTakeSize != result.getTakeSize()) {
+      if (Math.abs(rxLimitTakeSize - result.getTakeSize()) > 1l) {
         throw new OrderEventException(
             "limit order for match event disagrees with order size in the limit rx state map, " +
                 "event wanted " + result.getTakeSize() + ", state had " + rxLimitTakeSize
