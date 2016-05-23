@@ -63,8 +63,8 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
 
     if (Math.abs(result.getTakeSize() - event.getSize()) > 1l) {
       throw new OrderEventException(
-          "take size for match event does not agree with our book " +
-              event.getSize() + " vs " + result.getTakeSize()
+          "take size for match event does not agree with our book, " +
+              "event wants " + event.getSize() + ", book gave " + result.getTakeSize()
       );
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
