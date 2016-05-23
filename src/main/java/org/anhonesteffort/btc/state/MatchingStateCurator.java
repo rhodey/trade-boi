@@ -87,8 +87,8 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
 
         /*
         todo:
-          newSize could be made off by 1 every time it matches
-          newFunds could be made off by 2 every time it matches
+          newSize could be moved off by 1 every time it matches
+          newFunds could be moved off by 2 every time it matches
          */
         if (newSize < -1l && newFunds < -2l) {
           throw new OrderEventException(
