@@ -110,8 +110,12 @@ public class LimitOrderStateCurator extends StateCurator {
 
         if (doneRxLimit.isPresent() && doneLimit.isPresent()) {
           throw new OrderEventException("order for limit done event was in the limit rx state map and open on the book");
+        } else if (doneRxLimit.isPresent() && Math.abs(doneRxLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
+          throw new OrderEventException(
+              "rx limit order for limit done event disagrees about size remaining, " +
+                  "event wants " + event.getSize() + ", state has " + doneRxLimit.get().getSizeRemaining()
+          );
         } else if (doneRxLimit.isPresent()) {
-          // todo: could test doneRxLimit size remaining ~= event size
           returnPooledOrder(doneRxLimit.get());
           return;
         }
