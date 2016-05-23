@@ -67,6 +67,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         if (!changeMarket.isPresent()) {
           throw new OrderEventException("market order for change event not found in the market state map");
         } else {
+          // todo: could test changeMarket size > event newSize and changeMarket funds > event newFunds
           MarketOrder newMarket = takePooledMarketOrderChange(event);
           state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
           returnPooledOrder(changeMarket.get());
@@ -78,6 +79,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         if (!doneMarket.isPresent()) {
           throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
         } else {
+          // todo: could test doneMarket size remaining <= 0 or doneMarket funds remaining <= 0
           returnPooledOrder(doneMarket.get());
         }
         break;
