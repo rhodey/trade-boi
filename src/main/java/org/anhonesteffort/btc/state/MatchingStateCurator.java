@@ -117,7 +117,6 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
 
         MarketOrder newMarket = pool.takeMarket(taker.getOrderId(), taker.getSide(), newSize, newFunds);
         state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
-        onOrderMatched(newMarket, result);
 
         returnPooledOrder(taker);
         returnPooledOrders(result);
@@ -136,15 +135,10 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
                 "event wanted " + result.getTakeSize() + ", state had " + rxLimitTakeSize
         );
       } else {
-        onOrderMatched(limitTaker.get(), result);
         returnPooledOrder(taker);
         returnPooledOrders(result);
       }
     }
-  }
-
-  protected void onOrderMatched(Order taker, TakeResult result) {
-    log.debug("matched order " + taker.getOrderId() + " for size " + result.getTakeSize());
   }
 
 }
