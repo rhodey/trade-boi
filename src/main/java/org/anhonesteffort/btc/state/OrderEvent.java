@@ -131,6 +131,7 @@ public class OrderEvent {
     return funds;
   }
 
+  // todo: check?
   public String getMakerId() {
     return makerId;
   }
