@@ -29,6 +29,12 @@ import java.util.Set;
 
 public class MatchingStateCurator extends MarketOrderStateCurator {
 
+  /*
+  todo:
+    if we begin rebuilding after taker order received and complete rebuilding
+    before the taker finishes matching, we'll be unable to find a taker for
+    the remaining match events
+   */
   public MatchingStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
   }
