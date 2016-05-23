@@ -61,7 +61,9 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     Order      taker  = takePooledTakerOrder(event);
     TakeResult result = state.getOrderBook().add(taker);
 
-    if (Math.abs(result.getTakeSize() - event.getSize()) > 1l) {
+    if (result.getMakers().isEmpty() || !result.getMakers().get(0).getOrderId().equals(event.getMakerId())) {
+      throw new OrderEventException("maker id for match event not found in list of makers returned from our book");
+    } else if (Math.abs(result.getTakeSize() - event.getSize()) > 1l) {
       throw new OrderEventException(
           "take size for match event does not agree with our book, " +
               "event wants " + event.getSize() + ", book gave " + result.getTakeSize()
