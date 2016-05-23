@@ -31,9 +31,12 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
 
   /*
   todo:
-    if we begin rebuilding after taker order received and complete rebuilding
-    before the taker finishes matching, we'll be unable to find a taker for
-    the remaining match events
+    if coinbase receives any takers or does any matching while we're rebuilding,
+    and the matching does not complete until after we've finished rebuilding,
+    we'll be unable to find takers for the remaining match events.
+
+    we can only really begin to trust the rx limit and market state after some
+    time has passed since rebuilding
    */
   public MatchingStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
