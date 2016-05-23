@@ -85,11 +85,16 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         long newSize  = oldMarket.get().getSize()  - event.getSize();
         long newFunds = oldMarket.get().getFunds() - (event.getPrice() * event.getSize());
 
-        if (newSize < -1l && newFunds < -1l) {
+        /*
+        todo:
+          newSize could be made off by 1 every time it matches
+          newFunds could be made off by 2 every time it matches
+         */
+        if (newSize < -1l && newFunds < -2l) {
           throw new OrderEventException(
               "market order for match event disagrees with order in the market state map, " +
-                  " event wanted size " + event.getSize() + ", state had size " + oldMarket.get().getSize() +
-                  " and funds " + oldMarket.get().getFunds()
+                  " event wanted size " + event.getSize() + " and funds " + (event.getPrice() * event.getSize()) +
+                  ", state had size " + oldMarket.get().getSize() + " and funds " + oldMarket.get().getFunds()
           );
         }
 
