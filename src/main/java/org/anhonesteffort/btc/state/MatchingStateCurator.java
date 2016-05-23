@@ -43,13 +43,13 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), 0l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), match.getSize() * match.getPrice());
         }
       } else {
         if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), 0l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), match.getSize() * match.getPrice());
         }
       }
     } else {
@@ -75,7 +75,9 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       );
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
-    } else if (taker instanceof MarketOrder) {
+    }
+
+    if (taker instanceof MarketOrder) {
       MarketOrder           takerMarket = (MarketOrder) taker;
       Optional<MarketOrder> oldMarket   = Optional.ofNullable(state.getMarketOrders().remove(taker.getOrderId()));
 
@@ -86,33 +88,29 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
             "market order for match event disagrees with filled order in the market state map, " +
                 " event wanted size " + event.getSize() + " and funds " + event.getFunds()
         );
-      } else if (taker.getSize() > 0l && (taker.getSize() - oldMarket.get().getSize()) > 1l) {
+      } else if (oldMarket.get().getSize() > 0l && (taker.getSize() - oldMarket.get().getSize()) > 1l) {
         throw new OrderEventException(
             "market order for match event disagrees with order size in the market state map, " +
                 " event wanted " + taker.getSize() + ", state had " + oldMarket.get().getSize()
         );
-      } else if (takerMarket.getFunds() > 0l && (takerMarket.getFunds() - oldMarket.get().getFunds()) > 1l) {
+      } else if (oldMarket.get().getFunds() > 0l && (takerMarket.getFunds() - oldMarket.get().getFunds()) > 1l) {
         throw new OrderEventException(
             "market order for match event disagrees with order funds in the market state map, " +
                 " event wanted " + ((MarketOrder) taker).getFunds() + ", state had " + oldMarket.get().getFunds()
         );
       } else {
         long newSize;
-        if (taker.getSize() > 0l && oldMarket.get().getSize() >= taker.getSize()) {
+        if (oldMarket.get().getSize() > 0l && oldMarket.get().getSize() >= taker.getSize()) {
           newSize = oldMarket.get().getSize() - taker.getSize();
-        } else if (taker.getSize() > 0l) {
-          newSize = 0l;
         } else {
-          newSize = -1l;
+          newSize = 0l;
         }
 
         long newFunds;
-        if (takerMarket.getFunds() > 0l && oldMarket.get().getFunds() >= takerMarket.getFunds()) {
+        if (oldMarket.get().getFunds() > 0l && oldMarket.get().getFunds() >= takerMarket.getFunds()) {
           newFunds = oldMarket.get().getFunds() - takerMarket.getFunds();
-        } else if (takerMarket.getFunds() > 0l) {
-          newFunds = 0l;
         } else {
-          newFunds = -1l;
+          newFunds = 0l;
         }
 
         MarketOrder newMarket = pool.takeMarket(taker.getOrderId(), taker.getSide(), newSize, newFunds);
@@ -122,7 +120,9 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         returnPooledOrders(result);
         returnPooledOrder(oldMarket.get());
       }
-    } else {
+    }
+
+    else {
       Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
       if (!limitTaker.isPresent()) {
         throw new OrderEventException("limit order for match event not found in the limit rx state map");
