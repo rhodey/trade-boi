@@ -22,11 +22,15 @@ import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.compute.Computation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class LimitOrderStateCurator extends StateCurator {
+
+  private static final Logger log = LoggerFactory.getLogger(LimitOrderStateCurator.class);
 
   public LimitOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
@@ -77,6 +81,8 @@ public class LimitOrderStateCurator extends StateCurator {
       case LIMIT_CHANGE:
         if (event.getNewSize() < 0l || event.getNewSize() >= event.getOldSize()) {
           throw new OrderEventException("limit order size can only decrease");
+        } else {
+          log.warn("LIMIT_CHANGE, old size " + event.getOldSize() + " new size " + event.getNewSize());
         }
 
         long            reducedBy     = event.getOldSize() - event.getNewSize();

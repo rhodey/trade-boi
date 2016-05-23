@@ -21,11 +21,15 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class MarketOrderStateCurator extends LimitOrderStateCurator {
+
+  private static final Logger log = LoggerFactory.getLogger(MarketOrderStateCurator.class);
 
   public MarketOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
@@ -68,6 +72,8 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
           throw new OrderEventException("market order for change event not found in the market state map");
         } else {
           // todo: could test changeMarket size > event newSize and changeMarket funds > event newFunds
+          log.warn("MARKET_CHANGE, old size " + event.getOldSize() + " new size " + event.getNewSize() + ", " +
+              "old funds " + event.getOldFunds() + " new funds " + event.getNewFunds());
           MarketOrder newMarket = takePooledMarketOrderChange(event);
           state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
           returnPooledOrder(changeMarket.get());
