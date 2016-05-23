@@ -119,7 +119,7 @@ public class WsOrderEventPublisher {
         break;
 
       case Accessor.TYPE_CHANGE:
-        if (change.getPrice(root) > 0f) {
+        if (change.getPrice(root) > 0d) {
           event.initLimitChange(
               nsTime, change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
               caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root))
