@@ -46,10 +46,16 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   }
 
   private MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
-    if (change.getNewSize() < 0l || change.getNewFunds() < 0l) {
+    if (change.getOldSize()  < 0l || change.getNewSize()  < 0l ||
+        change.getOldFunds() < 0l || change.getNewFunds() < 0l)
+    {
       throw new OrderEventException("market order change event was parsed incorrectly");
-    } else if (change.getNewSize() > change.getOldSize() || change.getNewFunds() > change.getOldFunds()) {
-      throw new OrderEventException("market order size and funds can only decrease");
+    } else if (change.getNewSize() > 0l && change.getNewSize() >= change.getOldSize()) {
+      throw new OrderEventException("market order size can only decrease");
+    } else if (change.getNewFunds() > 0l && change.getNewFunds() >= change.getOldFunds()) {
+      throw new OrderEventException("market order funds can only decrease");
+    } else if (change.getOldSize() == 0l && change.getOldFunds() == 0l) {
+      throw new OrderEventException("market order had no size or funds to change");
     } else {
       return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
     }
