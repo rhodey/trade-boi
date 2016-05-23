@@ -43,8 +43,8 @@ public class LimitOrderStateCurator extends StateCurator {
   private Order takePooledRxLimitOrderChange(Order rxLimit, OrderEvent change) throws OrderEventException {
     if (change.getPrice() != rxLimit.getPrice()) {
       throw new OrderEventException("limit order change event disagrees with rx limit order on price");
-    } else if (change.getSize() >= rxLimit.getSize()) {
-      throw new OrderEventException("limit order change event size is >= rx limit order size");
+    } else if (change.getNewSize() >= rxLimit.getSize()) {
+      throw new OrderEventException("limit order change event new size is >= rx limit order size");
     } else {
       return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
     }
@@ -66,7 +66,7 @@ public class LimitOrderStateCurator extends StateCurator {
           throw new OrderEventException("limit order " + event.getOrderId() + " was never in the limit rx state map");
         } else if (oldLimit.isPresent() && Math.abs(oldLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
           throw new OrderEventException(
-              "rx limit order for limit open event disagrees about size remaining, " +
+              "rx limit order for limit open event disagrees about open size, " +
                   "event wants " + event.getSize() + ", state has " + oldLimit.get().getSizeRemaining()
           );
         } else if (oldLimit.isPresent()) {
