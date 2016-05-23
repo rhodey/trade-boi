@@ -59,7 +59,7 @@ public class SpreadStrategy implements Strategy, ComputeCallback<Optional<Long>>
   }
 
   @Override
-  public void onReset() {
+  public void onResultsInvalidated() {
     lastSpread = Optional.empty();
   }
 

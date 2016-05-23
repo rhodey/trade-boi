@@ -60,7 +60,7 @@ public abstract class Computation<T> {
 
   public void onStateReset() {
     children.forEach(Computation::onStateReset);
-    if (callback.isPresent()) { callback.get().onReset(); }
+    if (callback.isPresent()) { callback.get().onResultsInvalidated(); }
   }
 
 }

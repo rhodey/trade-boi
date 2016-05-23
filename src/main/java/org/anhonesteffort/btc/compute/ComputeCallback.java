@@ -21,6 +21,6 @@ public interface ComputeCallback<T> {
 
   public void onNextResult(T result);
 
-  public void onReset();
+  public void onResultsInvalidated();
 
 }
