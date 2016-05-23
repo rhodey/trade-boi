@@ -79,24 +79,14 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       } else if (oldMarket.get().getSize() <= 0l && oldMarket.get().getFunds() <= 0l) {
         throw new OrderEventException(
             "market order for match event disagrees with filled order in the market state map, " +
-                " event wanted size " + event.getSize() + " and funds " + event.getFunds()
-        );
-      } else if (oldMarket.get().getSize() > 0l && (event.getSize() - oldMarket.get().getSize()) > 1l) {
-        throw new OrderEventException(
-            "market order for match event disagrees with order size in the market state map, " +
-                " event wanted " + event.getSize() + ", state had " + oldMarket.get().getSize()
-        );
-      } else if (oldMarket.get().getFunds() > 0l && ((event.getPrice() * event.getSize()) - oldMarket.get().getFunds()) > 1l) {
-        throw new OrderEventException(
-            "market order for match event disagrees with order funds in the market state map, " +
-                " event wanted " + (event.getPrice() * event.getSize()) + ", state had " + oldMarket.get().getFunds()
+                " event wanted size " + event.getSize()
         );
       } else {
-        long newSize  = oldMarket.get().getSize()  - result.getTakeSize();
-        long newFunds = oldMarket.get().getFunds() - (event.getPrice() * result.getTakeSize());
+        long newSize  = oldMarket.get().getSize()  - event.getSize();
+        long newFunds = oldMarket.get().getFunds() - (event.getPrice() * event.getSize());
 
-        if (newSize  < 0) { newSize  = 0; }
-        if (newFunds < 0) { newFunds = 0; }
+        if (newSize  < 0l) { newSize  = 0l; }
+        if (newFunds < 0l) { newFunds = 0l; }
 
         MarketOrder newMarket = pool.takeMarket(taker.getOrderId(), taker.getSide(), newSize, newFunds);
         state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
