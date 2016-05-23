@@ -87,21 +87,21 @@ public class LimitOrderStateCurator extends StateCurator {
           log.warn("LIMIT_CHANGE, old size " + event.getOldSize() + " new size " + event.getNewSize());
         }
 
-        long            reducedBy     = event.getOldSize() - event.getNewSize();
-        Optional<Order> changeRxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
-        Optional<Order> changeLimit   = state.getOrderBook().reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
+        long            reducedBy      = event.getOldSize() - event.getNewSize();
+        Optional<Order> changedRxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
+        Optional<Order> changedLimit   = state.getOrderBook().reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
 
-        if (changeRxLimit.isPresent() && changeLimit.isPresent()) {
+        if (changedRxLimit.isPresent() && changedLimit.isPresent()) {
           throw new OrderEventException("order for limit change event was in the limit rx state map and open on the book");
-        } else if (changeRxLimit.isPresent()) {
-          Order newLimitChange = takePooledLimitOrderChange(event);
+        } else if (changedRxLimit.isPresent()) {
+          Order newRxLimit = takePooledLimitOrderChange(event);
           // todo: could test changeRxLimit size > newLimitChange size
-          state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);
-          returnPooledOrder(changeRxLimit.get());
-        } else if (!changeLimit.isPresent()) {
+          state.getRxLimitOrders().put(newRxLimit.getOrderId(), newRxLimit);
+          returnPooledOrder(changedRxLimit.get());
+        } else if (!changedLimit.isPresent()) {
           throw new OrderEventException("order for limit change event not found on the book");
-        } else if (changeLimit.get().getSizeRemaining() <= 0l) {
-          returnPooledOrder(changeLimit.get());
+        } else if (changedLimit.get().getSizeRemaining() <= 0l) {
+          returnPooledOrder(changedLimit.get());
         }
         break;
 
