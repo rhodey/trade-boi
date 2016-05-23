@@ -20,14 +20,19 @@ package org.anhonesteffort.btc.state;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.book.TakeResult;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class State {
 
-  private final Map<String, MarketOrder> marketOrders = new HashMap<>();
-  private final Map<String, Order> rxLimitOrders = new HashMap<>();
+  private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
+  private final Map<String, Order>       rxLimitOrders = new HashMap<>();
+  private final Set<TakeResult>          takes         = new HashSet<>();
+
   private final LimitOrderBook orderBook;
 
   public State(LimitOrderBook orderBook) {
@@ -36,6 +41,10 @@ public class State {
 
   public LimitOrderBook getOrderBook() {
     return orderBook;
+  }
+
+  public Set<TakeResult> getTakes() {
+    return takes;
   }
 
   public Map<String, Order> getRxLimitOrders() {
@@ -48,6 +57,7 @@ public class State {
 
   public void clear() {
     orderBook.clear();
+    takes.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
   }

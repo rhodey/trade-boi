@@ -71,8 +71,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
     } else if (state.getMarketOrders().containsKey(taker.getOrderId())) {
-      returnPooledOrder(taker);
-      returnPooledOrders(result);
+      state.getTakes().add(result);
     } else {
       Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
       if (!limitTaker.isPresent()) {
@@ -86,8 +85,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
                 "event wanted " + event.getSize() + ", state had " + rxLimitTakeSize
         );
       } else {
-        returnPooledOrder(taker);
-        returnPooledOrders(result);
+        state.getTakes().add(result);
       }
     }
   }

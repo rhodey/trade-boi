@@ -21,7 +21,6 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.compute.Computation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +52,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     pool.returnOrder(order);
   }
 
-  protected void returnPooledOrders(TakeResult result) {
-    result.getMakers().stream()
-                      .filter(maker -> maker.getSizeRemaining() <= 0l)
-                      .forEach(this::returnPooledOrder);
+  private void returnTakersAndMakers() {
+    state.getTakes().forEach(take -> {
+      returnPooledOrder(take.getTaker());
+      take.getMakers().stream().filter(
+          maker -> maker.getSizeRemaining() <= 0l
+      ).forEach(this::returnPooledOrder);
+    });
   }
 
   protected abstract void onEvent(OrderEvent event) throws OrderEventException;
@@ -82,6 +84,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
         if (!rebuilding) {
           computations.forEach(compute -> compute.onStateChange(state, event.getNanoseconds()));
         }
+        returnTakersAndMakers();
     }
 
     if ((sequence % 50l) == 0l) {
