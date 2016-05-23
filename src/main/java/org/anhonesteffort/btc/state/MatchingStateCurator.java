@@ -79,7 +79,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       } else if (oldMarket.get().getSize() <= 0l && oldMarket.get().getFunds() <= 0l) {
         throw new OrderEventException(
             "market order for match event disagrees with filled order in the market state map, " +
-                " event wanted size " + event.getSize()
+                "event wanted size " + event.getSize()
         );
       } else {
         long newSize  = oldMarket.get().getSize()  - event.getSize();
@@ -93,8 +93,8 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         if (newSize < -1l && newFunds < -2l) {
           throw new OrderEventException(
               "market order for match event disagrees with order in the market state map, " +
-                  " event wanted size " + event.getSize() + " at price " + event.getPrice() +
-                  ", state had size " + oldMarket.get().getSize() + " and funds " + oldMarket.get().getFunds()
+                  "event wanted size " + event.getSize() + " at price " + event.getPrice() + ", " +
+                  "state had size " + oldMarket.get().getSize() + " and funds " + oldMarket.get().getFunds()
           );
         }
 
