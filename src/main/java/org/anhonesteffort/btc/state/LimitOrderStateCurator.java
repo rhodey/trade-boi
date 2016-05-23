@@ -62,8 +62,12 @@ public class LimitOrderStateCurator extends StateCurator {
         Optional<Order> oldLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
         if (!oldLimit.isPresent() && !isRebuilding()) {
           throw new OrderEventException("limit order " + event.getOrderId() + " was never in the limit rx state map");
+        } else if (oldLimit.isPresent() && Math.abs(oldLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
+          throw new OrderEventException(
+              "rx limit order for limit open event disagrees about size remaining, " +
+                  "event wants " + event.getSize() + ", state has " + oldLimit.get().getSizeRemaining()
+          );
         } else if (oldLimit.isPresent()) {
-          // todo: could test oldLimit size remaining ~= event size
           returnPooledOrder(oldLimit.get());
         }
 
