@@ -22,15 +22,11 @@ import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.compute.Computation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class LimitOrderStateCurator extends StateCurator {
-
-  private static final Logger log = LoggerFactory.getLogger(LimitOrderStateCurator.class);
 
   public LimitOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
@@ -59,8 +55,6 @@ public class LimitOrderStateCurator extends StateCurator {
         Order rxLimit = takePooledLimitOrder(event);
         if (state.getRxLimitOrders().put(rxLimit.getOrderId(), rxLimit) != null) {
           throw new OrderEventException("limit order " + rxLimit.getOrderId() + " already in the limit rx state map");
-        } else {
-          onLimitOrderRx(rxLimit);
         }
         break;
 
@@ -76,8 +70,6 @@ public class LimitOrderStateCurator extends StateCurator {
         TakeResult result    = state.getOrderBook().add(openLimit);
         if (result.getTakeSize() > 0l) {
           throw new OrderEventException("opened limit order took " + result.getTakeSize() + " from the book");
-        } else if (!isRebuilding()) {
-          onLimitOrderOpened(openLimit);
         }
         break;
 
@@ -95,18 +87,14 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (changeRxLimit.isPresent()) {
           Order newLimitChange = takePooledLimitOrderChange(event);
           state.getRxLimitOrders().put(newLimitChange.getOrderId(), newLimitChange);
-          onRxLimitOrderReduced(newLimitChange, reducedBy);
           returnPooledOrder(changeRxLimit.get());
           return;
         }
 
         if (!changeLimit.isPresent()) {
           throw new OrderEventException("order for limit change event not found on the book");
-        } else {
-          onOpenLimitOrderReduced(changeLimit.get(), reducedBy);
-          if (changeLimit.get().getSizeRemaining() <= 0l) {
-            returnPooledOrder(changeLimit.get());
-          }
+        } else if (changeLimit.get().getSizeRemaining() <= 0l) {
+          returnPooledOrder(changeLimit.get());
         }
         break;
 
@@ -136,32 +124,11 @@ public class LimitOrderStateCurator extends StateCurator {
                     event.getSize() + " vs " + doneLimit.get().getSizeRemaining()
             );
           } else {
-            onLimitOrderCanceled(doneLimit.get());
             returnPooledOrder(doneLimit.get());
           }
         }
         break;
     }
-  }
-
-  protected void onLimitOrderRx(Order order) {
-    log.debug("received new limit order " + order.getOrderId());
-  }
-
-  protected void onRxLimitOrderReduced(Order order, long reducedBy) {
-    log.warn("!!! changed received limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
-  }
-
-  protected void onLimitOrderOpened(Order order) {
-    log.debug("opened new limit order " + order.getOrderId());
-  }
-
-  protected void onOpenLimitOrderReduced(Order order, long reducedBy) {
-    log.warn("!!! changed open limit order " + order.getOrderId() + " by " + reducedBy + " !!!");
-  }
-
-  protected void onLimitOrderCanceled(Order order) {
-    log.debug("canceled limit order " + order.getOrderId());
   }
 
 }
