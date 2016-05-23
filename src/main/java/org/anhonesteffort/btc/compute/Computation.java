@@ -51,11 +51,11 @@ public abstract class Computation<T> {
     this.callback = Optional.of(callback);
   }
 
-  public void onStateChange(State state) {
-    children.forEach(child -> child.onStateChange(state));
+  public void onStateChange(State state, long nanoseconds) {
+    children.forEach(child -> child.onStateChange(state, nanoseconds));
     result = computeNextResult(state);
     onNextResult(result);
-    if (callback.isPresent()) { callback.get().onNextResult(result); }
+    if (callback.isPresent()) { callback.get().onNextResult(result, nanoseconds); }
   }
 
   public void onStateReset() {

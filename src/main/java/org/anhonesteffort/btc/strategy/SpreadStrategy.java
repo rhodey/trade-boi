@@ -45,7 +45,7 @@ public class SpreadStrategy implements Strategy, ComputeCallback<Optional<Long>>
   }
 
   @Override
-  public void onNextResult(Optional<Long> spread) {
+  public void onNextResult(Optional<Long> spread, long nanosecods) {
     if (!spread.isPresent()) {
       lastSpread = spread;
       log.warn("!!! no spread available !!!");

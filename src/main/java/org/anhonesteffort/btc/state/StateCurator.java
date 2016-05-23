@@ -80,7 +80,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       default:
         onEvent(event);
         if (!rebuilding) {
-          computations.forEach(compute -> compute.onStateChange(state));
+          computations.forEach(compute -> compute.onStateChange(state, event.getNsTime()));
         }
     }
 
