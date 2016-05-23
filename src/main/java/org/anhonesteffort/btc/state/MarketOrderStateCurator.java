@@ -21,15 +21,11 @@ import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class MarketOrderStateCurator extends LimitOrderStateCurator {
-
-  private static final Logger log = LoggerFactory.getLogger(MarketOrderStateCurator.class);
 
   public MarketOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
     super(book, pool, computations);
@@ -57,8 +53,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         MarketOrder rxMarket = takePooledMarketOrder(event);
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
           throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the market state map");
-        } else {
-          onMarketOrderRx(rxMarket);
         }
         break;
 
@@ -69,18 +63,12 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
           throw new OrderEventException("market order size and funds can only decrease");
         }
 
-        long                  sizeReduced  = event.getOldSize()  - event.getNewSize();
-        long                  fundsReduced = event.getOldFunds() - event.getNewFunds();
-        Optional<MarketOrder> changeMarket = Optional.ofNullable(
-            state.getMarketOrders().remove(event.getOrderId())
-        );
-
+        Optional<MarketOrder> changeMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
         if (!changeMarket.isPresent()) {
           throw new OrderEventException("market order for change event not found in the market state map");
         } else {
           MarketOrder newMarket = takePooledMarketOrderChange(event);
           state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
-          onMarketOrderChange(newMarket, sizeReduced, fundsReduced);
           returnPooledOrder(changeMarket.get());
         }
         break;
@@ -90,23 +78,10 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         if (!doneMarket.isPresent()) {
           throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
         } else {
-          onMarketOrderDone(doneMarket.get());
           returnPooledOrder(doneMarket.get());
         }
         break;
     }
-  }
-
-  protected void onMarketOrderRx(MarketOrder order) {
-    log.debug("received new market order " + order.getOrderId());
-  }
-
-  protected void onMarketOrderChange(MarketOrder order, long sizeReduced, long fundsReduced) {
-    log.warn("!!! changed market order " + order.getOrderId() + " by " + sizeReduced + " and " + fundsReduced + " !!!");
-  }
-
-  protected void onMarketOrderDone(MarketOrder order) {
-    log.debug("market order done " + order.getOrderId());
   }
 
 }
