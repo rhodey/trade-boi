@@ -67,7 +67,7 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (oldLimit.isPresent() && Math.abs(oldLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
           throw new OrderEventException(
               "rx limit order for limit open event disagrees about open size, " +
-                  "event wants " + event.getSize() + ", state has " + oldLimit.get().getSizeRemaining()
+                  "event wants " + event.getSize() + ", rx has " + oldLimit.get().getSizeRemaining()
           );
         } else if (oldLimit.isPresent()) {
           returnPooledOrder(oldLimit.get());
@@ -113,7 +113,7 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (doneRxLimit.isPresent() && Math.abs(doneRxLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
           throw new OrderEventException(
               "rx limit order for limit done event disagrees about size remaining, " +
-                  "event wants " + event.getSize() + ", state has " + doneRxLimit.get().getSizeRemaining()
+                  "event wants " + event.getSize() + ", rx has " + doneRxLimit.get().getSizeRemaining()
           );
         } else if (doneRxLimit.isPresent()) {
           returnPooledOrder(doneRxLimit.get());
@@ -131,8 +131,8 @@ public class LimitOrderStateCurator extends StateCurator {
             throw new OrderEventException("order for cancel order event not found on the book");
           } else if (Math.abs(event.getSize() - doneLimit.get().getSizeRemaining()) > 1l) {
             throw new OrderEventException(
-                "order for cancel order event disagrees about size remaining " +
-                    event.getSize() + " vs " + doneLimit.get().getSizeRemaining()
+                "order for cancel order event disagrees about size remaining, " +
+                    "event wants " + event.getSize() + ", order has " + doneLimit.get().getSizeRemaining()
             );
           } else {
             returnPooledOrder(doneLimit.get());
