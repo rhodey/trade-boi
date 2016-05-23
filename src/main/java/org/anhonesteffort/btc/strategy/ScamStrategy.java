@@ -25,6 +25,8 @@ import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class ScamStrategy extends Strategy {
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
@@ -34,17 +36,27 @@ public class ScamStrategy extends Strategy {
   private final SummingComputation minuteSellVolume = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), 1000 * 10);
 
   private final LongCaster caster;
+  private Optional<Long> lastSpread = Optional.empty();
 
   public ScamStrategy(LongCaster caster) {
     this.caster = caster;
     addComputations(spread, minuteBuyVolume, minuteSellVolume);
   }
 
+  private void logSpread() {
+    Optional<Long> currentSpread = spread.getResult();
+    if (!lastSpread.isPresent() && currentSpread.isPresent()) {
+      lastSpread = currentSpread;
+      log.info("spread -> " + caster.toDouble(currentSpread.get()));
+    } else if (lastSpread.isPresent() && currentSpread.isPresent() && !lastSpread.get().equals(currentSpread.get())) {
+      lastSpread = currentSpread;
+      log.info("spread -> " + caster.toDouble(currentSpread.get()));
+    }
+  }
+
   @Override
   protected void onResultsReady() {
-    if (spread.getResult().isPresent()) {
-      log.info("spread -> " + spread.getResult().get());
-    }
+    logSpread();
 
     if (minuteBuyVolume.getResult().isPresent()) {
       log.info("minute buy volume -> " + minuteBuyVolume.getResult().get());
@@ -58,6 +70,7 @@ public class ScamStrategy extends Strategy {
   @Override
   protected void onResultsInvalidated() {
     log.info("on results invalidated");
+    lastSpread = Optional.empty();
   }
 
 }
