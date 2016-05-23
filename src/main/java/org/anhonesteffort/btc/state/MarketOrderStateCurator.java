@@ -41,8 +41,14 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     }
   }
 
-  private MarketOrder takePooledMarketOrderChange(OrderEvent change) {
-    return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
+  private MarketOrder takePooledMarketOrderChange(OrderEvent change) throws OrderEventException {
+    if (change.getNewSize() < 0l || change.getNewFunds() < 0l) {
+      throw new OrderEventException("market order change event was parsed incorrectly");
+    } else if (change.getNewSize() > change.getOldSize() || change.getNewFunds() > change.getOldFunds()) {
+      throw new OrderEventException("market order size and funds can only decrease");
+    } else {
+      return pool.takeMarket(change.getOrderId(), change.getSide(), change.getNewSize(), change.getNewFunds());
+    }
   }
 
   @Override
@@ -57,12 +63,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         break;
 
       case MARKET_CHANGE:
-        if (event.getNewSize() < 0l || event.getNewFunds() < 0l) {
-          throw new OrderEventException("market order change event was parsed incorrectly");
-        } else if (event.getNewSize() > event.getOldSize() || event.getNewFunds() > event.getOldFunds()) {
-          throw new OrderEventException("market order size and funds can only decrease");
-        }
-
         Optional<MarketOrder> changeMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
         if (!changeMarket.isPresent()) {
           throw new OrderEventException("market order for change event not found in the market state map");
