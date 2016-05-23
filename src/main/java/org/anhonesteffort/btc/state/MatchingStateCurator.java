@@ -110,7 +110,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         if (newSize  < 0l) { newSize  = 0l; }
         if (newFunds < 0l) { newFunds = 0l; }
 
-        MarketOrder newMarket = pool.takeMarket(taker.getOrderId(), taker.getSide(), newSize, newFunds);
+        MarketOrder newMarket = pool.takeMarket(oldMarket.get().getOrderId(), oldMarket.get().getSide(), newSize, newFunds);
         state.getMarketOrders().put(newMarket.getOrderId(), newMarket);
 
         returnPooledOrder(taker);
@@ -125,11 +125,11 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         throw new OrderEventException("limit order for match event not found in the limit rx state map");
       }
 
-      long rxLimitTakeSize = limitTaker.get().takeSize(result.getTakeSize());
-      if (Math.abs(rxLimitTakeSize - result.getTakeSize()) > 1l) {
+      long rxLimitTakeSize = limitTaker.get().takeSize(event.getSize());
+      if (Math.abs(rxLimitTakeSize - event.getSize()) > 1l) {
         throw new OrderEventException(
             "limit order for match event disagrees with order size in the limit rx state map, " +
-                "event wanted " + result.getTakeSize() + ", state had " + rxLimitTakeSize
+                "event wanted " + event.getSize() + ", state had " + rxLimitTakeSize
         );
       } else {
         returnPooledOrder(taker);
