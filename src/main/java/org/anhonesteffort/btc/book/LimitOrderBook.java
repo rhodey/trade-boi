@@ -65,9 +65,9 @@ public class LimitOrderBook {
 
   private TakeResult resultFor(Order taker, List<Order> makers, long takeSize) {
     if (!(taker instanceof MarketOrder)) {
-      return new TakeResult(makers, (takeSize - taker.getSizeRemaining()));
+      return new TakeResult(taker, makers, (takeSize - taker.getSizeRemaining()));
     } else {
-      return new TakeResult(makers, ((MarketOrder) taker).getVolumeRemoved());
+      return new TakeResult(taker, makers, ((MarketOrder) taker).getVolumeRemoved());
     }
   }
 

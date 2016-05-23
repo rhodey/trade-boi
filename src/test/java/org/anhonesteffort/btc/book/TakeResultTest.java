@@ -27,11 +27,13 @@ public class TakeResultTest extends BaseTest {
   @Test
   public void testEmpty() {
     final List<Order> MAKERS = new LinkedList<>();
-    final TakeResult  RESULT = new TakeResult(MAKERS, 0);
+    final TakeResult  RESULT = new TakeResult(newBid(10, 20), MAKERS, 0);
 
-    assert RESULT.getTakeSize()      == 0;
-    assert RESULT.getTakeValue()     == 0;
-    assert RESULT.getMakers().size() == 0;
+    assert RESULT.getTaker().getPrice() == 10;
+    assert RESULT.getTaker().getSize()  == 20;
+    assert RESULT.getTakeSize()         == 0;
+    assert RESULT.getTakeValue()        == 0;
+    assert RESULT.getMakers().size()    == 0;
   }
 
   @Test
@@ -51,7 +53,7 @@ public class TakeResultTest extends BaseTest {
 
     final long       TAKE_SIZE  = ASK0.getSize() + ASK1.getSize() + ASK2.getSize();
     final long       TAKE_VALUE = ASK0.getValueRemoved() + ASK1.getValueRemoved() + ASK2.getValueRemoved();
-    final TakeResult RESULT     = new TakeResult(MAKERS, TAKE_SIZE);
+    final TakeResult RESULT     = new TakeResult(newBid(10, 20), MAKERS, TAKE_SIZE);
 
     assert RESULT.getTakeSize()      == TAKE_SIZE;
     assert RESULT.getTakeValue()     == TAKE_VALUE;
@@ -81,7 +83,7 @@ public class TakeResultTest extends BaseTest {
 
     final long       TAKE_SIZE  = BID0.getSize() + BID1.getSize() + BID2.getSize();
     final long       TAKE_VALUE = BID0.getValueRemoved() + BID1.getValueRemoved() + BID2.getValueRemoved();
-    final TakeResult RESULT     = new TakeResult(MAKERS, TAKE_SIZE);
+    final TakeResult RESULT     = new TakeResult(newBid(10, 20), MAKERS, TAKE_SIZE);
 
     assert RESULT.getTakeSize()      == TAKE_SIZE;
     assert RESULT.getTakeValue()     == TAKE_VALUE;

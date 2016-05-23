@@ -21,14 +21,20 @@ import java.util.List;
 
 public class TakeResult {
 
+  private final Order taker;
   private final List<Order> makers;
   private final long takeSize;
   private final long takeValue;
 
-  public TakeResult(List<Order> makers, long takeSize) {
+  public TakeResult(Order taker, List<Order> makers, long takeSize) {
+    this.taker     = taker;
     this.makers    = makers;
     this.takeSize  = takeSize;
     this.takeValue = makers.stream().mapToLong(Order::getValueRemoved).sum();
+  }
+
+  public Order getTaker() {
+    return taker;
   }
 
   public List<Order> getMakers() {
