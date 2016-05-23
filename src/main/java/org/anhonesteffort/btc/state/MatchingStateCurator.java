@@ -43,13 +43,13 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
         if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), -1l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.BID, match.getSize(), 0l);
         }
       } else {
         if (!state.getMarketOrders().containsKey(match.getTakerId())) {
           return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
         } else {
-          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), -1l);
+          return pool.takeMarket(match.getTakerId(), Order.Side.ASK, match.getSize(), 0l);
         }
       }
     } else {
