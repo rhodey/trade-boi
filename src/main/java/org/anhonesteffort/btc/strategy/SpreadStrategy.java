@@ -45,7 +45,7 @@ public class SpreadStrategy implements Strategy, ComputeCallback<Optional<Long>>
   }
 
   @Override
-  public void onResult(Optional<Long> spread) {
+  public void onNextResult(Optional<Long> spread) {
     if (!spread.isPresent()) {
       lastSpread = spread;
       log.warn("!!! no spread available !!!");
@@ -56,6 +56,11 @@ public class SpreadStrategy implements Strategy, ComputeCallback<Optional<Long>>
       lastSpread = spread;
       log.info("new spread -> " + caster.toDouble(spread.get()));
     }
+  }
+
+  @Override
+  public void onReset() {
+    lastSpread = Optional.empty();
   }
 
 }

@@ -39,9 +39,9 @@ public abstract class Computation<T> {
     this.children.addAll(Arrays.asList(children));
   }
 
-  protected abstract T computeResult(State state);
+  protected abstract T computeNextResult(State state);
 
-  protected void onResult(T result) { }
+  protected void onNextResult(T result) { }
 
   protected T getResult() {
     return result;
@@ -53,9 +53,14 @@ public abstract class Computation<T> {
 
   public void onStateChange(State state) {
     children.forEach(child -> child.onStateChange(state));
-    result = computeResult(state);
-    onResult(result);
-    if (callback.isPresent()) { callback.get().onResult(result); }
+    result = computeNextResult(state);
+    onNextResult(result);
+    if (callback.isPresent()) { callback.get().onNextResult(result); }
+  }
+
+  public void onStateReset() {
+    children.forEach(Computation::onStateReset);
+    if (callback.isPresent()) { callback.get().onReset(); }
   }
 
 }

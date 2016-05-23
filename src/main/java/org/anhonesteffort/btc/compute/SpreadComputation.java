@@ -31,7 +31,7 @@ public class SpreadComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  protected Optional<Long> computeResult(State state) {
+  protected Optional<Long> computeNextResult(State state) {
     if (ask.getResult().isPresent() && bid.getResult().isPresent()) {
       return Optional.of(
           ask.getResult().get().getPrice() - bid.getResult().get().getPrice()

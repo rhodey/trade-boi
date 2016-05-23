@@ -68,12 +68,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
         state.clear();
         pool.returnAll();
         rebuilding = true;
-        onRebuildStart();
+        log.info("rebuilding order book");
+        computations.forEach(Computation::onStateReset);
         break;
 
       case REBUILD_END:
         rebuilding = false;
-        onRebuildEnd();
+        log.info("order book rebuild complete");
         break;
 
       default:
@@ -90,8 +91,5 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       nsTimeSum += System.nanoTime() - event.getNsTime();
     }
   }
-
-  protected void onRebuildStart() { log.info("rebuilding order book"); }
-  protected void onRebuildEnd()   { log.info("order book rebuild complete"); }
 
 }

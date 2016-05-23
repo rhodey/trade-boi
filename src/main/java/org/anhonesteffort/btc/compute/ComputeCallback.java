@@ -19,6 +19,8 @@ package org.anhonesteffort.btc.compute;
 
 public interface ComputeCallback<T> {
 
-  public void onResult(T result);
+  public void onNextResult(T result);
+
+  public void onReset();
 
 }

@@ -25,7 +25,7 @@ import java.util.Optional;
 public class BestBidComputation extends Computation<Optional<Limit>> {
 
   @Override
-  protected Optional<Limit> computeResult(State state) {
+  protected Optional<Limit> computeNextResult(State state) {
     return state.getOrderBook().getBidLimits().peek();
   }
 

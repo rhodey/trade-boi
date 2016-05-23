@@ -25,7 +25,7 @@ import java.util.Optional;
 public class BestAskComputation extends Computation<Optional<Limit>> {
 
   @Override
-  protected Optional<Limit> computeResult(State state) {
+  protected Optional<Limit> computeNextResult(State state) {
     return state.getOrderBook().getAskLimits().peek();
   }
 
