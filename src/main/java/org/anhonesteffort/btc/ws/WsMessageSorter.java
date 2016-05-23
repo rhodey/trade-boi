@@ -60,7 +60,9 @@ public class WsMessageSorter {
     }
   }
 
-  public void sort(JsonNode root, long nsTime) throws WsException, InterruptedException, ExecutionException {
+  public void sort(JsonNode root, long nsTime)
+      throws WsException, InterruptedException, ExecutionException
+  {
     String type = accessor.getType(root);
     switch (type) {
       case Accessor.TYPE_RECEIVED:
