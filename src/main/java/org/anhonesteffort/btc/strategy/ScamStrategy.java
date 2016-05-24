@@ -17,7 +17,6 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.compute.SummingComputation;
@@ -55,8 +54,7 @@ public class ScamStrategy extends Strategy<Void> {
     if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
       return Optional.empty();
     } else if (buyVolumeRecent.getResult().get() < 0l || sellVolumeRecent.getResult().get() < 0l) {
-      log.error("!!! buy or sell volume sum is less than zero !!!");
-      return Optional.empty();
+      throw new RuntimeException("!!! buy or sell volume sum is less than zero !!!");
     } else if (caster.toDouble(buyVolumeRecent.getResult().get()) < BULLISH_THRESHOLD_BTC) {
       return Optional.of(-1d);
     } else if (sellVolumeRecent.getResult().get() == 0l) {
@@ -76,30 +74,29 @@ public class ScamStrategy extends Strategy<Void> {
     }
   }
 
-  private void calculateFeeStuff(State state) {
-    Limit  askFloor      = state.getOrderBook().getAskLimits().peek().get();
-    double askFloorValue = caster.toDouble(askFloor.getPrice()) * caster.toDouble(askFloor.getVolume());
-    double takeFee       = askFloorValue * 0.0025d;
-    double resell        = (askFloorValue + takeFee) / caster.toDouble(askFloor.getVolume());
-
-    log.info(
-        "wanna take the ask floor at " + caster.toDouble(askFloor.getPrice()) + " for " +
-            askFloorValue + " with fee " + takeFee + " and resell at >= " + resell
-    );
-  }
-
-  @Override
-  protected Void computeNextResult(State state, long nanoseconds) {
+  private boolean isBullish() {
     Optional<Double>  bullishScore = getBullishScore();
     Optional<Boolean> isNowBearish = isNowBearish();
 
     if (bullishScore.isPresent() && isNowBearish.isPresent()) {
-      if (bullishScore.get() >= BULLISH_THRESHOLD_SCORE && !isNowBearish.get()) {
-        calculateFeeStuff(state);
-      }
+      return bullishScore.get() >= BULLISH_THRESHOLD_SCORE && !isNowBearish.get();
+    } else {
+      return false;
     }
+  }
 
-    return null;
+  @Override
+  protected Void computeNextResult(State state, long nanoseconds) {
+    if (isBullish() && caster.toDouble(spread.getResult().get()) > 0.01d) {
+      double bidCeiling = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
+      double askFloor   = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
+      double bidPrice   = askFloor - 0.01d;
+
+      log.info("wanna raise the bid ceiling from " + bidCeiling + " to " + bidPrice);
+      return null;
+    } else {
+      return null;
+    }
   }
 
   @Override
