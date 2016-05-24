@@ -74,6 +74,17 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
+  private void checkAndReturnDoneRxLimit(OrderEvent done, Order rxLimit) throws OrderEventException {
+    if (Math.abs(rxLimit.getSizeRemaining() - done.getSize()) > 1l) {
+      throw new OrderEventException(
+          "rx limit order for limit done event disagrees about size remaining, " +
+              "event wants " + done.getSize() + ", rx has " + rxLimit.getSizeRemaining()
+      );
+    } else {
+      returnPooledOrder(rxLimit);
+    }
+  }
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
@@ -117,13 +128,8 @@ public class LimitOrderStateCurator extends StateCurator {
 
         if (doneRxLimit.isPresent() && doneLimit.isPresent()) {
           throw new OrderEventException("order for limit done event was in the limit rx state map and open on the book");
-        } else if (doneRxLimit.isPresent() && Math.abs(doneRxLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
-          throw new OrderEventException(
-              "rx limit order for limit done event disagrees about size remaining, " +
-                  "event wants " + event.getSize() + ", rx has " + doneRxLimit.get().getSizeRemaining()
-          );
         } else if (doneRxLimit.isPresent()) {
-          returnPooledOrder(doneRxLimit.get());
+          checkAndReturnDoneRxLimit(event, doneRxLimit.get());
           return;
         }
 
