@@ -40,7 +40,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void removeRxLimitForOpen(OrderEvent open) throws OrderEventException {
+  private void returnRxLimitForOpen(OrderEvent open) throws OrderEventException {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
     if (!rxLimit.isPresent() && !isRebuilding()) {
       throw new OrderEventException("limit order " + open.getOrderId() + " was never in the limit rx state map");
@@ -115,7 +115,7 @@ public class LimitOrderStateCurator extends StateCurator {
         break;
 
       case LIMIT_OPEN:
-        removeRxLimitForOpen(event);
+        returnRxLimitForOpen(event);
         Order      openLimit = takePooledLimitOrder(event);
         TakeResult result    = state.getOrderBook().add(openLimit);
         if (result.getTakeSize() > 0l) {
