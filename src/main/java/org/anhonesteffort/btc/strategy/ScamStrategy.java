@@ -32,55 +32,51 @@ public class ScamStrategy extends Strategy<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
 
-  private final SpreadComputation  spread           = new SpreadComputation();
-  private final SummingComputation minuteBuyVolume  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), 1000 * 10);
-  private final SummingComputation minuteSellVolume = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), 1000 * 10);
+  private final SpreadComputation  spread        = new SpreadComputation();
+  private final SummingComputation buyVolume30s  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), 1000 * 30);
+  private final SummingComputation buyVolume5s   = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), 1000 * 5);
+  private final SummingComputation sellVolume30s = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), 1000 * 30);
+  private final SummingComputation sellVolume5s  = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), 1000 * 5);
   private final LongCaster         caster;
-
-  private Optional<Long> lastSpread  = Optional.empty();
-  private Optional<Long> lastBuyVol  = Optional.empty();
-  private Optional<Long> lastSellVol = Optional.empty();
 
   public ScamStrategy(LongCaster caster) {
     this.caster = caster;
-    addChildren(spread, minuteBuyVolume, minuteSellVolume);
+    addChildren(spread, buyVolume30s, buyVolume5s, sellVolume30s, sellVolume5s);
   }
 
-  private boolean hasChanged(Optional<Long> last, Optional<Long> current) {
-    if (!last.isPresent() && current.isPresent()) {
-      return true;
-    } else if (last.isPresent() && current.isPresent()) {
-      return !last.get().equals(current.get());
+  private Optional<Boolean> isBullish30s() {
+    if (!buyVolume30s.getResult().isPresent() || !sellVolume30s.getResult().isPresent()) {
+      return Optional.empty();
     } else {
-      return false;
+      return Optional.of(buyVolume30s.getResult().get() > sellVolume30s.getResult().get());
+    }
+  }
+
+  private Optional<Boolean> isBearish5s() {
+    if (!buyVolume5s.getResult().isPresent() || !sellVolume5s.getResult().isPresent()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(sellVolume5s.getResult().get() > buyVolume5s.getResult().get());
     }
   }
 
   @Override
   protected Void computeNextResult(State state, long nanoseconds) {
-    if (hasChanged(lastSpread, spread.getResult())) {
-      lastSpread = spread.getResult();
-      log.info("spread -> " + caster.toDouble(spread.getResult().get()));
-    }
+    Optional<Boolean> bullish30s = isBullish30s();
+    Optional<Boolean> bearish5s  = isBearish5s();
 
-    if (hasChanged(lastBuyVol, minuteBuyVolume.getResult())) {
-      lastBuyVol = minuteBuyVolume.getResult();
-      log.info("10s buy volume  -> " + caster.toDouble(minuteBuyVolume.getResult().get()));
+    if (bullish30s.isPresent() && bearish5s.isPresent() && bullish30s.get() && !bearish5s.get()) {
+      log.info("market bullish for 30s and non-bearish in the past 5s");
+      return null;
+    } else {
+      return null;
     }
-
-    if (hasChanged(lastSellVol, minuteSellVolume.getResult())) {
-      lastSellVol = minuteSellVolume.getResult();
-      log.info("10s sell volume -> " + caster.toDouble(minuteSellVolume.getResult().get()));
-    }
-
-    return null;
   }
 
   @Override
   public void onStateReset() {
     super.onStateReset();
     log.info("on results invalidated");
-    lastSpread = Optional.empty();
   }
 
 }
