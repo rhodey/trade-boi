@@ -40,16 +40,6 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private Order takePooledRxLimitOrderChange(Order rxLimit, OrderEvent change) throws OrderEventException {
-    if (change.getPrice() != rxLimit.getPrice()) {
-      throw new OrderEventException("limit order change event disagrees with rx limit order on price");
-    } else if (change.getNewSize() >= rxLimit.getSize()) {
-      throw new OrderEventException("limit order change event new size is >= rx limit order size");
-    } else {
-      return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
-    }
-  }
-
   private void removeRxLimitForOpen(OrderEvent open) throws OrderEventException {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
     if (!rxLimit.isPresent() && !isRebuilding()) {
@@ -71,6 +61,16 @@ public class LimitOrderStateCurator extends StateCurator {
       throw new OrderEventException("limit order size can only decrease");
     } else {
       return change.getOldSize() - change.getNewSize();
+    }
+  }
+
+  private Order takePooledRxLimitOrderChange(Order rxLimit, OrderEvent change) throws OrderEventException {
+    if (change.getPrice() != rxLimit.getPrice()) {
+      throw new OrderEventException("limit order change event disagrees with rx limit order on price");
+    } else if (change.getNewSize() >= rxLimit.getSize()) {
+      throw new OrderEventException("limit order change event new size is >= rx limit order size");
+    } else {
+      return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
     }
   }
 
