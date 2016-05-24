@@ -50,6 +50,20 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
+  private void removeRxLimitForOpen(OrderEvent open) throws OrderEventException {
+    Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
+    if (!rxLimit.isPresent() && !isRebuilding()) {
+      throw new OrderEventException("limit order " + open.getOrderId() + " was never in the limit rx state map");
+    } else if (rxLimit.isPresent() && Math.abs(rxLimit.get().getSizeRemaining() - open.getSize()) > 1l) {
+      throw new OrderEventException(
+          "rx limit order for limit open event disagrees about open size, " +
+              "event wants " + open.getSize() + ", rx has " + rxLimit.get().getSizeRemaining()
+      );
+    } else if (rxLimit.isPresent()) {
+      returnPooledOrder(rxLimit.get());
+    }
+  }
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
@@ -61,17 +75,7 @@ public class LimitOrderStateCurator extends StateCurator {
         break;
 
       case LIMIT_OPEN:
-        Optional<Order> oldLimit = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
-        if (!oldLimit.isPresent() && !isRebuilding()) {
-          throw new OrderEventException("limit order " + event.getOrderId() + " was never in the limit rx state map");
-        } else if (oldLimit.isPresent() && Math.abs(oldLimit.get().getSizeRemaining() - event.getSize()) > 1l) {
-          throw new OrderEventException(
-              "rx limit order for limit open event disagrees about open size, " +
-                  "event wants " + event.getSize() + ", rx has " + oldLimit.get().getSizeRemaining()
-          );
-        } else if (oldLimit.isPresent()) {
-          returnPooledOrder(oldLimit.get());
-        }
+        removeRxLimitForOpen(event);
 
         Order      openLimit = takePooledLimitOrder(event);
         TakeResult result    = state.getOrderBook().add(openLimit);
