@@ -58,6 +58,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       take.getMakers().stream().filter(
           maker -> maker.getSizeRemaining() <= 0l
       ).forEach(this::returnPooledOrder);
+      take.getMakers().forEach(Order::clearValueRemoved);
     });
     state.getTakes().clear();
   }
