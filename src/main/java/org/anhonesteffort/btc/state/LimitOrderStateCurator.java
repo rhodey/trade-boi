@@ -93,6 +93,17 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
+  private void checkAndReturnCanceledLimit(OrderEvent done, Order cancelLimit) throws OrderEventException {
+    if (Math.abs(done.getSize() - cancelLimit.getSizeRemaining()) > 1l) {
+      throw new OrderEventException(
+          "order for cancel order event disagrees about size remaining, " +
+              "event wants " + done.getSize() + ", order has " + cancelLimit.getSizeRemaining()
+      );
+    } else {
+      returnPooledOrder(cancelLimit);
+    }
+  }
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
@@ -146,13 +157,8 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (event.getSize() > 0l) {
           if (!doneLimit.isPresent()) {
             throw new OrderEventException("order for cancel order event not found on the book");
-          } else if (Math.abs(event.getSize() - doneLimit.get().getSizeRemaining()) > 1l) {
-            throw new OrderEventException(
-                "order for cancel order event disagrees about size remaining, " +
-                    "event wants " + event.getSize() + ", order has " + doneLimit.get().getSizeRemaining()
-            );
           } else {
-            returnPooledOrder(doneLimit.get());
+            checkAndReturnCanceledLimit(event, doneLimit.get());
           }
         }
         break;
