@@ -32,9 +32,11 @@ public class ScamStrategy extends Strategy<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
 
-  private static final Integer RECENT_PERIOD_MS  = 1000 * 30;
-  private static final Integer NOW_PERIOD_MS     = 1000 *  5;
-  private static final Double  BULLISH_THRESHOLD = 1.25d;
+  private static final Integer RECENT_PERIOD_MS = 1000 * 30;
+  private static final Integer NOW_PERIOD_MS    = 1000 *  5;
+
+  private static final Double BULLISH_THRESHOLD_FACTOR = 1.25d;
+  private static final Double BULLISH_THRESHOLD_BTC    = 1.50d;
 
   private final SpreadComputation  spread           = new SpreadComputation();
   private final SummingComputation buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), RECENT_PERIOD_MS);
@@ -52,8 +54,12 @@ public class ScamStrategy extends Strategy<Void> {
     if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
       return Optional.empty();
     } else {
+      long buyVolRecent  = buyVolumeRecent.getResult().get();
+      long sellVolRecent = sellVolumeRecent.getResult().get();
+
       return Optional.of(
-          buyVolumeRecent.getResult().get() >= (sellVolumeRecent.getResult().get() * BULLISH_THRESHOLD)
+          (buyVolRecent >= (sellVolRecent * BULLISH_THRESHOLD_FACTOR)) &&
+          (caster.toDouble(buyVolRecent) > BULLISH_THRESHOLD_BTC)
       );
     }
   }
