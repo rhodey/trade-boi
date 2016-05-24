@@ -85,6 +85,16 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
+  private void checkAndReturnFilledLimit(Order doneLimit) throws OrderEventException {
+    if (doneLimit.getSizeRemaining() > 1l) {
+      throw new OrderEventException(
+          "order for filled order event was still open on the book with " + doneLimit.getSizeRemaining()
+      );
+    } else {
+      returnPooledOrder(doneLimit);
+    }
+  }
+
   @Override
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
@@ -134,10 +144,8 @@ public class LimitOrderStateCurator extends StateCurator {
         }
 
         if (event.getSize() <= 0l) {
-          if (doneLimit.isPresent() && doneLimit.get().getSizeRemaining() > 1l) {
-            throw new OrderEventException("order for filled order event was still open on the book with " + doneLimit.get().getSizeRemaining());
-          } else if (doneLimit.isPresent()) {
-            returnPooledOrder(doneLimit.get());
+          if (doneLimit.isPresent()) {
+            checkAndReturnFilledLimit(doneLimit.get());
           }
         } else {
           if (!doneLimit.isPresent()) {
