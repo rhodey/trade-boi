@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc.strategy;
 
+import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.compute.SummingComputation;
@@ -35,8 +36,8 @@ public class ScamStrategy extends Strategy<Void> {
   private static final Integer RECENT_PERIOD_MS = 1000 * 30;
   private static final Integer NOW_PERIOD_MS    = 1000 *  5;
 
-  private static final Double BULLISH_THRESHOLD_FACTOR = 1.25d;
-  private static final Double BULLISH_THRESHOLD_BTC    = 1.50d;
+  private static final Double BULLISH_THRESHOLD_BTC   = 1.50d;
+  private static final Double BULLISH_THRESHOLD_SCORE = 1.25d;
 
   private final SpreadComputation  spread           = new SpreadComputation();
   private final SummingComputation buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), RECENT_PERIOD_MS);
@@ -50,16 +51,19 @@ public class ScamStrategy extends Strategy<Void> {
     addChildren(spread, buyVolumeRecent, buyVolumeNow, sellVolumeRecent, sellVolumeNow);
   }
 
-  private Optional<Boolean> hasBeenBullish() {
+  private Optional<Double> getBullishScore() {
     if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
       return Optional.empty();
+    } else if (buyVolumeRecent.getResult().get() < 0l || sellVolumeRecent.getResult().get() < 0l) {
+      log.error("!!! buy or sell volume sum is less than zero !!!");
+      return Optional.empty();
+    } else if (caster.toDouble(buyVolumeRecent.getResult().get()) < BULLISH_THRESHOLD_BTC) {
+      return Optional.of(-1d);
+    } else if (sellVolumeRecent.getResult().get() == 0l) {
+      return Optional.of(Double.MAX_VALUE);
     } else {
-      long buyVolRecent  = buyVolumeRecent.getResult().get();
-      long sellVolRecent = sellVolumeRecent.getResult().get();
-
       return Optional.of(
-          (buyVolRecent >= (sellVolRecent * BULLISH_THRESHOLD_FACTOR)) &&
-          (caster.toDouble(buyVolRecent) > BULLISH_THRESHOLD_BTC)
+          ((double) buyVolumeRecent.getResult().get()) / ((double) sellVolumeRecent.getResult().get())
       );
     }
   }
@@ -72,17 +76,29 @@ public class ScamStrategy extends Strategy<Void> {
     }
   }
 
+  private void calculateFeeStuff(State state) {
+    Limit  askFloor      = state.getOrderBook().getAskLimits().peek().get();
+    double askFloorValue = caster.toDouble(askFloor.getPrice()) * caster.toDouble(askFloor.getVolume());
+    double takeFee       = askFloorValue * 0.0025d;
+
+    log.info(
+        "wanna take the ask floor at " + caster.toDouble(askFloor.getPrice()) + " for " +
+            askFloorValue + " with fee " + takeFee
+    );
+  }
+
   @Override
   protected Void computeNextResult(State state, long nanoseconds) {
-    Optional<Boolean> bullish30s = hasBeenBullish();
-    Optional<Boolean> bearish5s  = isNowBearish();
+    Optional<Double>  bullishScore = getBullishScore();
+    Optional<Boolean> isNowBearish = isNowBearish();
 
-    if (bullish30s.isPresent() && bearish5s.isPresent() && bullish30s.get() && !bearish5s.get()) {
-      log.info("market bullish for 30s and non-bearish in the past 5s");
-      return null;
-    } else {
-      return null;
+    if (bullishScore.isPresent() && isNowBearish.isPresent()) {
+      if (bullishScore.get() >= BULLISH_THRESHOLD_SCORE && !isNowBearish.get()) {
+        calculateFeeStuff(state);
+      }
     }
+
+    return null;
   }
 
   @Override
