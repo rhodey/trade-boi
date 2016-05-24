@@ -72,7 +72,7 @@ public class ScamStrategy extends Strategy<Void> {
     if (!buyVolumeNow.getResult().isPresent() || !sellVolumeNow.getResult().isPresent()) {
       return Optional.empty();
     } else {
-      return Optional.of(buyVolumeNow.getResult().get() <= sellVolumeNow.getResult().get());
+      return Optional.of(buyVolumeNow.getResult().get() < sellVolumeNow.getResult().get());
     }
   }
 
