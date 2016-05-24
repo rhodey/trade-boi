@@ -59,6 +59,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
           maker -> maker.getSizeRemaining() <= 0l
       ).forEach(this::returnPooledOrder);
     });
+    state.getTakes().clear();
   }
 
   protected abstract void onEvent(OrderEvent event) throws OrderEventException;
