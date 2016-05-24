@@ -80,10 +80,11 @@ public class ScamStrategy extends Strategy<Void> {
     Limit  askFloor      = state.getOrderBook().getAskLimits().peek().get();
     double askFloorValue = caster.toDouble(askFloor.getPrice()) * caster.toDouble(askFloor.getVolume());
     double takeFee       = askFloorValue * 0.0025d;
+    double resell        = (askFloorValue + takeFee) / caster.toDouble(askFloor.getVolume());
 
     log.info(
         "wanna take the ask floor at " + caster.toDouble(askFloor.getPrice()) + " for " +
-            askFloorValue + " with fee " + takeFee
+            askFloorValue + " with fee " + takeFee + " and resell at >= " + resell
     );
   }
 
