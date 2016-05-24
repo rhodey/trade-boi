@@ -53,14 +53,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     }
   }
 
-  @Override
-  protected void onEvent(OrderEvent event) throws OrderEventException {
-    super.onEvent(event);
-    if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
-
-    Order      taker  = takePooledTakerOrder(event);
-    TakeResult result = state.getOrderBook().add(taker);
-
+  private void checkEventAgainstTakeResult(OrderEvent event, Order taker, TakeResult result) throws OrderEventException {
     if (result.getMakers().isEmpty() || !result.getMakers().get(0).getOrderId().equals(event.getMakerId())) {
       throw new OrderEventException("maker id for match event not found in list of makers returned from our book");
     } else if (Math.abs(result.getTakeSize() - event.getSize()) > 1l) {
@@ -70,23 +63,35 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
       );
     } else if (taker.getSizeRemaining() > 0l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
-    } else if (state.getMarketOrders().containsKey(taker.getOrderId())) {
+    }
+  }
+
+  private void updateRxLimitOrder(String takerId, long takeSize) throws OrderEventException {
+    Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(takerId));
+    if (!limitTaker.isPresent()) {
+      throw new OrderEventException("limit order for match event not found in the limit rx state map");
+    } else if (Math.abs(limitTaker.get().takeSize(takeSize) - takeSize) > 1l) {
+      throw new OrderEventException(
+          "limit order for match event disagrees with order size in the limit rx state map"
+      );
+    }
+  }
+
+  @Override
+  protected void onEvent(OrderEvent event) throws OrderEventException {
+    super.onEvent(event);
+    if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
+
+    Order      taker  = takePooledTakerOrder(event);
+    TakeResult result = state.getOrderBook().add(taker);
+
+    checkEventAgainstTakeResult(event, taker, result);
+
+    if (state.getMarketOrders().containsKey(taker.getOrderId())) {
       state.getTakes().add(result);
     } else {
-      Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(taker.getOrderId()));
-      if (!limitTaker.isPresent()) {
-        throw new OrderEventException("limit order for match event not found in the limit rx state map");
-      }
-
-      long rxLimitTakeSize = limitTaker.get().takeSize(event.getSize());
-      if (Math.abs(rxLimitTakeSize - event.getSize()) > 1l) {
-        throw new OrderEventException(
-            "limit order for match event disagrees with order size in the limit rx state map, " +
-                "event wanted " + event.getSize() + ", state had " + rxLimitTakeSize
-        );
-      } else {
-        state.getTakes().add(result);
-      }
+      updateRxLimitOrder(taker.getOrderId(), event.getSize());
+      state.getTakes().add(result);
     }
   }
 
