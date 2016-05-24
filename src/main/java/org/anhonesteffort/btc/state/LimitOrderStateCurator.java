@@ -76,7 +76,6 @@ public class LimitOrderStateCurator extends StateCurator {
 
       case LIMIT_OPEN:
         removeRxLimitForOpen(event);
-
         Order      openLimit = takePooledLimitOrder(event);
         TakeResult result    = state.getOrderBook().add(openLimit);
         if (result.getTakeSize() > 0l) {
