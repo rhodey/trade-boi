@@ -60,9 +60,9 @@ public class SummingComputation extends Computation<Optional<Long>> {
 
   @Override
   public void onStateReset() {
+    super.onStateReset();
     history.clear();
     sum = 0l;
-    super.onStateReset();
   }
 
   private static class ChildResult {

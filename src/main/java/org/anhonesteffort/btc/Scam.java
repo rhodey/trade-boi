@@ -24,13 +24,16 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
-import org.anhonesteffort.btc.state.StateCurator;
+import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.strategy.ScamStrategy;
+import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +42,7 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE  = 16384;
+  private static final Integer WS_BUFFER_SIZE  = 16384; // todo: smaller
   private static final Integer ORDER_POOL_SIZE = 16384;
 
   private final LongCaster        caster       = new LongCaster(0.000000000001d);
@@ -47,16 +50,21 @@ public class Scam implements Runnable, FutureCallback<Void> {
   private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
   private       ShutdownProcedure shutdownProcedure;
 
+  private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
+    return new MatchingStateCurator(
+        new LimitOrderBook(16),
+        new OrderPool(ORDER_POOL_SIZE, 64),
+        new HashSet<>(Arrays.asList(strategies))
+    );
+  }
+
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
-    LimitOrderBook   book     = new LimitOrderBook(16);
-    OrderPool        pool     = new OrderPool(ORDER_POOL_SIZE, 64);
-    ScamStrategy     strategy = new ScamStrategy(caster);
-    StateCurator     state    = new MatchingStateCurator(book, pool, strategy.getComputations());
-
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE, new EventHandler[] { state }, caster
+        new BlockingWaitStrategy(), WS_BUFFER_SIZE,
+        new EventHandler[] { handlerFor(new ScamStrategy(caster)) },
+        caster
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
