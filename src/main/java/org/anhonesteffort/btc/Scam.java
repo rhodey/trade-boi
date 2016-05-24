@@ -42,8 +42,10 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE  = 16384; // todo: smaller
-  private static final Integer ORDER_POOL_SIZE = 16384;
+  private static final Integer WS_BUFFER_SIZE   =   512;
+  private static final Integer LIMIT_POOL_SIZE  = 16384;
+  private static final Integer MARKET_POOL_SIZE =    64;
+  private static final Integer LIMIT_INIT_SIZE  =    16;
 
   private final LongCaster        caster       = new LongCaster(0.000000000001d);
   private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
@@ -52,8 +54,8 @@ public class Scam implements Runnable, FutureCallback<Void> {
 
   private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
     return new MatchingStateCurator(
-        new LimitOrderBook(16),
-        new OrderPool(ORDER_POOL_SIZE, 64),
+        new LimitOrderBook(LIMIT_INIT_SIZE),
+        new OrderPool(LIMIT_POOL_SIZE, MARKET_POOL_SIZE),
         new HashSet<>(Arrays.asList(strategies))
     );
   }
