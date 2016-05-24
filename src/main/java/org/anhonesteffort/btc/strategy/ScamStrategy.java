@@ -34,36 +34,42 @@ public class ScamStrategy extends Strategy {
   private final SpreadComputation  spread           = new SpreadComputation();
   private final SummingComputation minuteBuyVolume  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), 1000 * 10);
   private final SummingComputation minuteSellVolume = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), 1000 * 10);
+  private final LongCaster         caster;
 
-  private final LongCaster caster;
-  private Optional<Long> lastSpread = Optional.empty();
+  private Optional<Long> lastSpread  = Optional.empty();
+  private Optional<Long> lastBuyVol  = Optional.empty();
+  private Optional<Long> lastSellVol = Optional.empty();
 
   public ScamStrategy(LongCaster caster) {
     this.caster = caster;
     addComputations(spread, minuteBuyVolume, minuteSellVolume);
   }
 
-  private void logSpread() {
-    Optional<Long> currentSpread = spread.getResult();
-    if (!lastSpread.isPresent() && currentSpread.isPresent()) {
-      lastSpread = currentSpread;
-      log.info("spread -> " + caster.toDouble(currentSpread.get()));
-    } else if (lastSpread.isPresent() && currentSpread.isPresent() && !lastSpread.get().equals(currentSpread.get())) {
-      lastSpread = currentSpread;
-      log.info("spread -> " + caster.toDouble(currentSpread.get()));
+  private boolean hasChanged(Optional<Long> last, Optional<Long> current) {
+    if (!last.isPresent() && current.isPresent()) {
+      return true;
+    } else if (last.isPresent() && current.isPresent()) {
+      return !last.get().equals(current.get());
+    } else {
+      return false;
     }
   }
 
   @Override
   protected void onResultsReady() {
-    logSpread();
-
-    if (minuteBuyVolume.getResult().isPresent()) {
-      log.info("minute buy volume -> " + minuteBuyVolume.getResult().get());
+    if (hasChanged(lastSpread, spread.getResult())) {
+      lastSpread = spread.getResult();
+      log.info("spread -> " + caster.toDouble(spread.getResult().get()));
     }
 
-    if (minuteSellVolume.getResult().isPresent()) {
-      log.info("minute sell volume -> " + minuteSellVolume.getResult().get());
+    if (hasChanged(lastBuyVol, minuteBuyVolume.getResult())) {
+      lastBuyVol = minuteBuyVolume.getResult();
+      log.info("10s buy volume  -> " + caster.toDouble(minuteBuyVolume.getResult().get()));
+    }
+
+    if (hasChanged(lastSellVol, minuteSellVolume.getResult())) {
+      lastSellVol = minuteSellVolume.getResult();
+      log.info("10s sell volume -> " + caster.toDouble(minuteSellVolume.getResult().get()));
     }
   }
 
