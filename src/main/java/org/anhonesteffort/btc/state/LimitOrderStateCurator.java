@@ -85,11 +85,11 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkAndReturnFilledLimit(Order doneLimit) throws OrderEventException {
-    if (doneLimit.getSizeRemaining() > 1l) {
-      throw new OrderEventException("order for filled order event was still open on the book with " + doneLimit.getSizeRemaining());
+  private void checkAndReturnFilledLimit(Order fillLimit) throws OrderEventException {
+    if (fillLimit.getSizeRemaining() > 1l) {
+      throw new OrderEventException("order for filled order event was still open on the book with " + fillLimit.getSizeRemaining());
     } else {
-      returnPooledOrder(doneLimit);
+      returnPooledOrder(fillLimit);
     }
   }
 
