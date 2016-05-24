@@ -154,12 +154,10 @@ public class LimitOrderStateCurator extends StateCurator {
 
         if (event.getSize() <= 0l && doneLimit.isPresent()) {
           checkAndReturnFilledLimit(doneLimit.get());
-        } else if (event.getSize() > 0l) {
-          if (!doneLimit.isPresent()) {
-            throw new OrderEventException("order for cancel order event not found on the book");
-          } else {
-            checkAndReturnCanceledLimit(event, doneLimit.get());
-          }
+        } else if (event.getSize() > 0l && !doneLimit.isPresent()) {
+          throw new OrderEventException("order for cancel order event not found on the book");
+        } else if (event.getSize() > 0l && doneLimit.isPresent()) {
+          checkAndReturnCanceledLimit(event, doneLimit.get());
         }
         break;
     }
