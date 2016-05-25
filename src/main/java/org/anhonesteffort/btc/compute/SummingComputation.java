@@ -25,7 +25,7 @@ import java.util.Queue;
 
 public class SummingComputation extends Computation<Optional<Long>> {
 
-  private final Queue<ChildResult> history = new ArrayDeque<>();
+  private final Queue<long[]> history = new ArrayDeque<>();
   private final Computation<Long> child;
   private final long periodNs;
   private long sum = 0l;
@@ -39,13 +39,13 @@ public class SummingComputation extends Computation<Optional<Long>> {
   @Override
   protected Optional<Long> computeNextResult(State state, long nanoseconds) {
     sum += child.getResult();
-    history.add(new ChildResult(child.getResult(), nanoseconds));
+    history.add(new long[] { nanoseconds, child.getResult() });
 
     boolean historyComplete = false;
     while (!history.isEmpty()) {
-      if ((nanoseconds - history.peek().nanoseconds) > periodNs) {
+      if ((nanoseconds - history.peek()[0]) > periodNs) {
         historyComplete = true;
-        sum -= history.remove().result;
+        sum -= history.remove()[1];
       } else {
         break;
       }
@@ -63,15 +63,6 @@ public class SummingComputation extends Computation<Optional<Long>> {
     super.onStateReset();
     history.clear();
     sum = 0l;
-  }
-
-  private static class ChildResult {
-    private final long result;
-    private final long nanoseconds;
-    public ChildResult(long result, long nanoseconds) {
-      this.result      = result;
-      this.nanoseconds = nanoseconds;
-    }
   }
 
 }
