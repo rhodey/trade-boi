@@ -86,10 +86,10 @@ public class Limit {
     }
   }
 
-  private Optional<Order> takeLiquidityFromNextMaker(Order taker) {
+  private Optional<Order> takeLiquidityFromNextMaker(Order taker, long takeSize) {
     Optional<Order> maker = Optional.ofNullable(orderQueue.peek());
     if (maker.isPresent()) {
-      long volumeRemoved = maker.get().takeSize(getTakeSize(taker));
+      long volumeRemoved = maker.get().takeSize(takeSize);
 
       if (maker.get().getSizeRemaining() <= 0l) {
         orderMap.remove(maker.get().getOrderId());
@@ -103,13 +103,15 @@ public class Limit {
   }
 
   public List<Order> takeLiquidity(Order taker) {
-    List<Order>     makers = new LinkedList<>();
-    Optional<Order> maker  = null;
+    List<Order>     makers   = new LinkedList<>();
+    Optional<Order> maker    = null;
+    long            takeSize = getTakeSize(taker);
 
-    while (getTakeSize(taker) > 0l) {
-      maker = takeLiquidityFromNextMaker(taker);
+    while (takeSize > 0l) {
+      maker = takeLiquidityFromNextMaker(taker, takeSize);
       if (maker.isPresent()) {
         makers.add(maker.get());
+        takeSize = getTakeSize(taker);
       } else {
         break;
       }
