@@ -17,43 +17,35 @@
 
 package org.anhonesteffort.btc.ws;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import okhttp3.RequestBody;
 import okhttp3.ws.WebSocket;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 public class WsSubscribeHelper {
 
   private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
-  private final ListeningExecutorService executor;
+  private final ExecutorService executor;
 
-  public WsSubscribeHelper(ListeningExecutorService executor) {
+  public WsSubscribeHelper(ExecutorService executor) {
     this.executor = executor;
   }
 
-  public ListenableFuture<Void> subscribe(WebSocket socket) {
-    return executor.submit(new Sender(socket, SUBSCRIBE));
-  }
+  public CompletableFuture<Void> subscribe(final WebSocket socket) {
+    final CompletableFuture<Void> future = new CompletableFuture<>();
 
-  private static class Sender implements Callable<Void> {
+    CompletableFuture.runAsync(() -> {
+      try {
+        socket.sendMessage(RequestBody.create(WebSocket.TEXT, SUBSCRIBE));
+        future.complete(null);
+      } catch (IOException e) {
+        future.completeExceptionally(e);
+      }
+    }, executor);
 
-    private final WebSocket socket;
-    private final String    message;
-
-    public Sender(WebSocket socket, String message) {
-      this.socket  = socket;
-      this.message = message;
-    }
-
-    @Override
-    public Void call() throws IOException {
-      socket.sendMessage(RequestBody.create(WebSocket.TEXT, message));
-      return null;
-    }
-
+    return future;
   }
 
 }

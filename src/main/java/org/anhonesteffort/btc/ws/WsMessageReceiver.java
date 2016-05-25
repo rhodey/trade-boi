@@ -19,8 +19,6 @@ package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.Response;
@@ -33,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void> {
+public class WsMessageReceiver implements WebSocketListener {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageReceiver.class);
 
@@ -55,12 +53,13 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
   @Override
   public void onOpen(WebSocket socket, Response response) {
     log.info("connection opened");
-    Futures.addCallback(helper.subscribe(socket), this);
-  }
-
-  @Override
-  public void onSuccess(Void aVoid) {
-    log.info("subscribed to market feed");
+    helper.subscribe(socket).whenComplete((ok, ex) -> {
+      if (ex == null) {
+        log.info("subscribed to market feed");
+      } else {
+        errorFuture.setException(ex);
+      }
+    });
   }
 
   @Override
@@ -78,11 +77,6 @@ public class WsMessageReceiver implements WebSocketListener, FutureCallback<Void
 
   @Override
   public void onFailure(IOException e, Response response) {
-    errorFuture.setException(e);
-  }
-
-  @Override
-  public void onFailure(Throwable e) {
     errorFuture.setException(e);
   }
 
