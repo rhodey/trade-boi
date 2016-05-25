@@ -63,20 +63,20 @@ public class LimitOrderBook {
     return makers;
   }
 
-  private TakeResult resultFor(Order taker, List<Order> makers, long takeSize) {
-    if (!(taker instanceof MarketOrder)) {
-      return new TakeResult(taker, makers, (takeSize - taker.getSizeRemaining()));
-    } else {
-      return new TakeResult(taker, makers, ((MarketOrder) taker).getVolumeRemoved());
-    }
-  }
-
   public LimitQueue getAskLimits() {
     return askLimits;
   }
 
   public LimitQueue getBidLimits() {
     return bidLimits;
+  }
+
+  private TakeResult resultFor(Order taker, List<Order> makers, long takeSize) {
+    if (!(taker instanceof MarketOrder)) {
+      return new TakeResult(taker, makers, (takeSize - taker.getSizeRemaining()));
+    } else {
+      return new TakeResult(taker, makers, ((MarketOrder) taker).getVolumeRemoved());
+    }
   }
 
   public TakeResult add(Order taker) {
