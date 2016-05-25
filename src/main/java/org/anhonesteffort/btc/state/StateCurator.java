@@ -55,10 +55,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   private void returnTakersAndMakers() {
     state.getTakes().forEach(take -> {
       returnPooledOrder(take.getTaker());
-      take.getMakers().stream().filter(
-          maker -> maker.getSizeRemaining() <= 0l
-      ).forEach(this::returnPooledOrder);
-      take.getMakers().forEach(Order::clearValueRemoved);
+      take.getMakers().forEach(maker -> {
+        if (maker.getSizeRemaining() <= 0l) {
+          returnPooledOrder(maker);
+        } else {
+          maker.clearValueRemoved();
+        }
+      });
     });
     state.getTakes().clear();
   }
