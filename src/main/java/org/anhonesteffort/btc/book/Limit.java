@@ -104,8 +104,8 @@ public class Limit {
 
   public List<Order> takeLiquidity(Order taker) {
     List<Order>     makers   = new LinkedList<>();
-    Optional<Order> maker    = null;
     long            takeSize = getTakeSize(taker);
+    Optional<Order> maker    = null;
 
     while (takeSize > 0l) {
       maker = takeLiquidityFromNextMaker(taker, takeSize);
