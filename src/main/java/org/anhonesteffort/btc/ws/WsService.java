@@ -17,8 +17,6 @@
 
 package org.anhonesteffort.btc.ws;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -41,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
+public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
 
   private static final Logger log         = LoggerFactory.getLogger(WsService.class);
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
@@ -76,7 +74,18 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
 
     wsDisruptor.handleEventsWith(handlers);
     wsDisruptor.setDefaultExceptionHandler(this);
-    Futures.addCallback(wsReceiver.getErrorFuture(), this);
+
+    wsReceiver.getErrorFuture().whenComplete((ok, ex) -> {
+      if (ex == null) {
+        if (shutdown()) {
+          log.error("websocket error future completed with unknown cause");
+        }
+      } else {
+        if (shutdown(ex)) {
+          log.error("websocket error", ex);
+        }
+      }
+    });
 
     wsDisruptor.start();
     WebSocketCall.create(
@@ -103,20 +112,6 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
   }
 
   @Override
-  public void onSuccess(Void aVoid) {
-    if (shutdown()) {
-      log.error("websocket error future completed with unknown cause");
-    }
-  }
-
-  @Override
-  public void onFailure(Throwable throwable) {
-    if (shutdown(throwable)) {
-      log.error("websocket error", throwable);
-    }
-  }
-
-  @Override
   public void handleOnStartException(Throwable throwable) {
     if (shutdown(throwable)) {
       log.error("error starting disruptor", throwable);
@@ -137,11 +132,6 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
     }
   }
 
-  @Override
-  public OrderEvent newInstance() {
-    return new OrderEvent();
-  }
-
   private static class DisruptorThreadFactory implements ThreadFactory {
     private int count = 0;
 
@@ -151,6 +141,11 @@ public class WsService implements FutureCallback<Void>, ExceptionHandler<OrderEv
       thread.setDaemon(true);
       return thread;
     }
+  }
+
+  @Override
+  public OrderEvent newInstance() {
+    return new OrderEvent();
   }
 
 }
