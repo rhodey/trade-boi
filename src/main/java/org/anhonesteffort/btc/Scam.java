@@ -17,8 +17,6 @@
 
 package org.anhonesteffort.btc;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
@@ -37,8 +35,9 @@ import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
-public class Scam implements Runnable, FutureCallback<Void> {
+public class Scam implements Runnable, BiConsumer<Void, Throwable> {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
@@ -70,20 +69,12 @@ public class Scam implements Runnable, FutureCallback<Void> {
     );
 
     shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
-    Futures.addCallback(wsService.getShutdownFuture(), this);
+    wsService.getShutdownFuture().whenComplete(this);
     wsService.start();
   }
 
   @Override
-  public void onSuccess(Void aVoid) {
-    if (!shuttingDown.getAndSet(true)) {
-      log.warn("shutdown procedure initiated");
-      shutdownPool.submit(shutdownProcedure);
-    }
-  }
-
-  @Override
-  public void onFailure(Throwable throwable) {
+  public void accept(Void aVoid, Throwable throwable) {
     if (!shuttingDown.getAndSet(true)) {
       log.warn("shutdown procedure initiated");
       shutdownPool.submit(shutdownProcedure);

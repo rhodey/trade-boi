@@ -17,10 +17,6 @@
 
 package org.anhonesteffort.btc.ws;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.SettableFuture;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.ExceptionHandler;
@@ -36,6 +32,8 @@ import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
@@ -44,9 +42,9 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private static final Logger log         = LoggerFactory.getLogger(WsService.class);
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
 
-  private final HttpClientWrapper        http           = new HttpClientWrapper();
-  private final SettableFuture<Void>     shutdownFuture = SettableFuture.create();
-  private final ListeningExecutorService executor       = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+  private final HttpClientWrapper       http           = new HttpClientWrapper();
+  private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
+  private final ExecutorService         executor       = Executors.newSingleThreadExecutor();
 
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
@@ -62,7 +60,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     );
   }
 
-  public ListenableFuture<Void> getShutdownFuture() {
+  public CompletableFuture<Void> getShutdownFuture() {
     return shutdownFuture;
   }
 
@@ -90,7 +88,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   }
 
   public boolean shutdown() {
-    if (shutdownFuture.set(null)) {
+    if (shutdownFuture.complete(null)) {
       http.shutdown();
       return true;
     } else {
@@ -99,7 +97,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   }
 
   private boolean shutdown(Throwable throwable) {
-    if (shutdownFuture.setException(throwable)) {
+    if (shutdownFuture.completeExceptionally(throwable)) {
       http.shutdown();
       return true;
     } else {
