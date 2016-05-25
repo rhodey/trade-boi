@@ -76,14 +76,10 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     wsDisruptor.setDefaultExceptionHandler(this);
 
     wsReceiver.getErrorFuture().whenComplete((ok, ex) -> {
-      if (ex == null) {
-        if (shutdown()) {
-          log.error("websocket error future completed with unknown cause");
-        }
-      } else {
-        if (shutdown(ex)) {
-          log.error("websocket error", ex);
-        }
+      if (ex == null && shutdown()) {
+        log.error("websocket error future completed with unknown cause");
+      } else if (ex != null && shutdown(ex)) {
+        log.error("websocket error", ex);
       }
     });
 
