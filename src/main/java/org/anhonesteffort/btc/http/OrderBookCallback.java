@@ -18,25 +18,25 @@
 package org.anhonesteffort.btc.http;
 
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.Call;
 import okhttp3.Response;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class OrderBookCallback extends HttpCallback<OrderBookResponse> {
 
   private final ObjectReader reader;
 
-  public OrderBookCallback(ObjectReader reader, SettableFuture<OrderBookResponse> future) {
+  public OrderBookCallback(ObjectReader reader, CompletableFuture<OrderBookResponse> future) {
     super(future);
     this.reader = reader;
   }
 
   @Override
   protected void set(Call call, Response response) throws IOException, HttpException {
-    future.set(new OrderBookResponse(
+    future.complete(new OrderBookResponse(
         reader.readTree(response.body().charStream())
     ));
   }

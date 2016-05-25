@@ -19,12 +19,11 @@ package org.anhonesteffort.btc.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpClientWrapper {
@@ -39,19 +38,19 @@ public class HttpClientWrapper {
     shutdown.set(true);
   }
 
-  private boolean setFailureIfShutdown(SettableFuture<?> future) {
+  private boolean setExceptionIfShutdown(CompletableFuture<?> future) {
     if (shutdown.get()) {
-      future.setException(new HttpException("this http client wrapper is shutdown"));
+      future.completeExceptionally(new HttpException("this http client wrapper is shutdown"));
       return true;
     } else {
       return false;
     }
   }
 
-  public ListenableFuture<OrderBookResponse> geOrderBook() {
-    SettableFuture<OrderBookResponse> future = SettableFuture.create();
+  public CompletableFuture<OrderBookResponse> geOrderBook() {
+    CompletableFuture<OrderBookResponse> future = new CompletableFuture<>();
 
-    if (!setFailureIfShutdown(future)) {
+    if (!setExceptionIfShutdown(future)) {
       client.newCall(new Request.Builder().url(
           API_BASE + "/products/BTC-USD/book?level=3"
       ).build()).enqueue(new OrderBookCallback(reader, future));

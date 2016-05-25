@@ -17,18 +17,18 @@
 
 package org.anhonesteffort.btc.http;
 
-import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class HttpCallback<T> implements Callback {
 
-  protected final SettableFuture<T> future;
+  protected final CompletableFuture<T> future;
 
-  protected HttpCallback(SettableFuture<T> future) {
+  protected HttpCallback(CompletableFuture<T> future) {
     this.future = future;
   }
 
@@ -39,13 +39,13 @@ public abstract class HttpCallback<T> implements Callback {
     try {
 
       if (!response.isSuccessful()) {
-        future.setException(new HttpException("http returned code " + response.code()));
+        future.completeExceptionally(new HttpException("http returned code " + response.code()));
       } else {
         set(call, response);
       }
 
     } catch (Throwable throwable) {
-      future.setException(throwable);
+      future.completeExceptionally(throwable);
     } finally {
       response.body().close();
     }
@@ -53,7 +53,7 @@ public abstract class HttpCallback<T> implements Callback {
 
   @Override
   public void onFailure(Call call, IOException e) {
-    future.setException(e);
+    future.completeExceptionally(e);
   }
 
 }
