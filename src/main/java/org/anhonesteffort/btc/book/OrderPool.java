@@ -65,6 +65,7 @@ public class OrderPool {
     taken.remove(order.serial);
   }
 
+  // todo: just clear and re-allocate new objects, this only happens on error
   public void returnAll() {
     taken.keySet().stream().map(taken::get).forEach(order -> {
       if (order instanceof MarketOrder) {
