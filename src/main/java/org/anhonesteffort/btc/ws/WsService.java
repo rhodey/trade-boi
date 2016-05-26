@@ -60,7 +60,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private static final String  WS_URI             = "wss://" + WS_HOST;
   private static final Integer WS_PORT            = 443;
   private static final Integer CONNECT_TIMEOUT_MS = 5000;
-  private static final Integer READ_TIMEOUT_MS    = 5000;
+  private static final Integer READ_TIMEOUT_MS    = 3000;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
   private final HttpClientWrapper       http           = new HttpClientWrapper();
@@ -107,7 +107,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
                  channel.pipeline().addLast(sslContext.newHandler(channel.alloc(), WS_HOST, WS_PORT));
                  channel.pipeline().addLast(new HttpClientCodec());
                  channel.pipeline().addLast(new HttpObjectAggregator(8192));
-                 channel.pipeline().addLast(new WebSocketClientProtocolHandler(wsHandshake, false));
+                 channel.pipeline().addLast(new WsClientProtocolHandler(wsHandshake));
                  channel.pipeline().addLast(messageReceiver);
                }
              });
