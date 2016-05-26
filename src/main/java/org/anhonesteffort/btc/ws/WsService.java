@@ -58,9 +58,9 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private static final String  WS_HOST            = "ws-feed.exchange.coinbase.com";
   private static final String  WS_URI             = "wss://" + WS_HOST;
-  private static final Integer WS_PORT            = 443;
-  private static final Integer CONNECT_TIMEOUT_MS = 5000;
-  private static final Integer READ_TIMEOUT_MS    = 3000;
+  private static final Integer WS_PORT            =    443;
+  private static final Integer CONNECT_TIMEOUT_MS =  5_000;
+  private static final Integer READ_TIMEOUT_MS    = 30_000;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
   private final HttpClientWrapper       http           = new HttpClientWrapper();
