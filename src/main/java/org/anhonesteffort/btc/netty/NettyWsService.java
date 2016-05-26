@@ -29,8 +29,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -89,8 +94,11 @@ public class NettyWsService implements ExceptionHandler<OrderEvent>, EventFactor
     WsOrderEventPublisher publisher = new WsOrderEventPublisher(wsDisruptor.getRingBuffer(), caster);
     WsMessageSorter       sorter    = new WsMessageSorter(publisher, http);
 
-    final SslContext             sslContext = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
-    final NettyWsMessageReceiver wsReceiver = new NettyWsMessageReceiver(new URI(WS_URI), sorter);
+    final SslContext                sslContext = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    final NettyWsMessageReceiver    wsReceiver = new NettyWsMessageReceiver(sorter);
+    final WebSocketClientHandshaker handshake  = WebSocketClientHandshakerFactory.newHandshaker(
+        new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
+    );
 
     bootstrap.group(nioGroup)
              .channel(NioSocketChannel.class)
@@ -102,6 +110,7 @@ public class NettyWsService implements ExceptionHandler<OrderEvent>, EventFactor
                  channel.pipeline().addLast(sslContext.newHandler(channel.alloc(), WS_HOST, WS_PORT));
                  channel.pipeline().addLast(new HttpClientCodec());
                  channel.pipeline().addLast(new HttpObjectAggregator(8192));
+                 channel.pipeline().addLast(new WebSocketClientProtocolHandler(handshake, false));
                  channel.pipeline().addLast(wsReceiver);
                }
              });

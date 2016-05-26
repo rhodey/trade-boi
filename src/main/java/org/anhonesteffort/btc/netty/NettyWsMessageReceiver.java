@@ -41,72 +41,54 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.anhonesteffort.btc.ws.WsException;
 import org.anhonesteffort.btc.ws.WsMessageSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.concurrent.ExecutionException;
 
-public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> {
+public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFrame> {
 
   private static final Logger log       = LoggerFactory.getLogger(NettyWsMessageReceiver.class);
   private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
 
-  private final ObjectReader reader = new ObjectMapper().reader();
-  private final WebSocketClientHandshaker shake;
+  private final ObjectReader    reader = new ObjectMapper().reader();
   private final WsMessageSorter sorter;
 
-  public NettyWsMessageReceiver(URI uri, WsMessageSorter sorter) {
+  public NettyWsMessageReceiver(WsMessageSorter sorter) {
     this.sorter = sorter;
-    shake       = WebSocketClientHandshakerFactory.newHandshaker(
-        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
-    );
   }
 
   @Override
   public void channelActive(ChannelHandlerContext context) {
     log.info("connection opened");
-    shake.handshake(context.channel());
   }
 
-  private WebSocketFrame getWsFrameOrThrow(Object msg) throws WsException {
-    if (msg instanceof TextWebSocketFrame  ||
-        msg instanceof CloseWebSocketFrame ||
-        msg instanceof PongWebSocketFrame)
-    {
-      return (WebSocketFrame) msg;
+  @Override
+  public void userEventTriggered(ChannelHandlerContext context, Object event) throws Exception {
+    if (event.equals(WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
+      log.info("handshake completed");
+      context.writeAndFlush(new TextWebSocketFrame(SUBSCRIBE));
     } else {
-      throw new WsException("unknown message type -> " + msg.getClass().getSimpleName());
+      super.userEventTriggered(context, event);
     }
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext context, Object msg)
+  public void messageReceived(ChannelHandlerContext context, WebSocketFrame frame)
       throws WsException, IOException, InterruptedException, ExecutionException
   {
-    if (!shake.isHandshakeComplete()) { // todo: calls out to a volatile boolean D;
-      shake.finishHandshake(context.channel(), (FullHttpResponse) msg);
-      context.writeAndFlush(new TextWebSocketFrame(SUBSCRIBE));
-      log.info("handshake completed");
-      return;
-    }
-
-    WebSocketFrame frame = getWsFrameOrThrow(msg);
-
     if (frame instanceof TextWebSocketFrame) {
-      sorter.sort(reader.readTree(((TextWebSocketFrame) frame).text()), System.nanoTime());
+      sorter.sort(reader.readTree(
+          ((TextWebSocketFrame) frame).text()),
+          System.nanoTime()
+      );
     } else if (frame instanceof CloseWebSocketFrame) {
       CloseWebSocketFrame close = (CloseWebSocketFrame) frame;
       throw new WsException(
