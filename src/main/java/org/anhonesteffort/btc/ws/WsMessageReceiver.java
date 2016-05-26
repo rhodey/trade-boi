@@ -50,13 +50,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFrame> {
 
   private static final Logger log       = LoggerFactory.getLogger(WsMessageReceiver.class);
   private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
 
-  private final ObjectReader    reader = new ObjectMapper().reader();
+  private final ObjectReader    reader  = new ObjectMapper().reader();
+  private final AtomicBoolean   closing = new AtomicBoolean(false);
   private final WsMessageSorter sorter;
 
   public WsMessageReceiver(WsMessageSorter sorter) {
@@ -98,8 +100,10 @@ public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFram
 
   @Override
   public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-    log.error("error in receive pipeline", cause);
-    context.close();
+    if (closing.compareAndSet(false, true)) {
+      log.error("error in receive pipeline", cause);
+      context.close();
+    }
   }
 
   @Override
