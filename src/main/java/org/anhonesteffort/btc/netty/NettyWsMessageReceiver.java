@@ -56,7 +56,9 @@ import java.net.URI;
 
 public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> {
 
-  private static final Logger log = LoggerFactory.getLogger(NettyWsMessageReceiver.class);
+  private static final Logger log       = LoggerFactory.getLogger(NettyWsMessageReceiver.class);
+  private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
+
   private final WebSocketClientHandshaker shake;
 
   public NettyWsMessageReceiver(URI uri) {
@@ -86,6 +88,7 @@ public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> 
   public void messageReceived(ChannelHandlerContext context, Object msg) throws WsException {
     if (!shake.isHandshakeComplete()) {
       shake.finishHandshake(context.channel(), (FullHttpResponse) msg);
+      context.writeAndFlush(new TextWebSocketFrame(SUBSCRIBE));
       log.info("handshake completed");
       return;
     }
@@ -96,7 +99,10 @@ public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> 
       log.info("look -> " + ((TextWebSocketFrame)frame).text());
     } else if (frame instanceof CloseWebSocketFrame) {
       CloseWebSocketFrame close = (CloseWebSocketFrame) frame;
-      throw new WsException("socket closed with code " + close.statusCode() + " and reason -> " + close.reasonText());
+      throw new WsException(
+          "socket closed with code " + close.statusCode() +
+              " and reason -> " + close.reasonText()
+      );
     }
   }
 
