@@ -31,7 +31,7 @@ import org.anhonesteffort.btc.ws.message.MatchAccessor;
 import org.anhonesteffort.btc.ws.message.OpenAccessor;
 import org.anhonesteffort.btc.ws.message.ReceivedAccessor;
 
-public class WsOrderEventPublisher {
+public class WsRingPublisher {
 
   private final Accessor         base    = new Accessor();
   private final ReceivedAccessor receive = new ReceivedAccessor();
@@ -44,7 +44,7 @@ public class WsOrderEventPublisher {
   private final LongCaster caster;
   private long currentSeq;
 
-  public WsOrderEventPublisher(RingBuffer<OrderEvent> ringBuffer, LongCaster caster) {
+  public WsRingPublisher(RingBuffer<OrderEvent> ringBuffer, LongCaster caster) {
     this.ringBuffer = ringBuffer;
     this.caster     = caster;
   }

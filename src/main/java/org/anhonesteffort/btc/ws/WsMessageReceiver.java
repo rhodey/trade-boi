@@ -1,94 +1,111 @@
 /*
- * Copyright (C) 2016 An Honest Effort LLC.
+ * Copyright 2012 The Netty Project
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
+//The MIT License
+//
+//Copyright (c) 2009 Carl Bystršm
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
 
 package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okhttp3.ws.WebSocket;
-import okhttp3.ws.WebSocketListener;
-import okio.Buffer;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-public class WsMessageReceiver implements WebSocketListener {
+public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFrame> {
 
-  private static final Logger log = LoggerFactory.getLogger(WsMessageReceiver.class);
+  private static final Logger log       = LoggerFactory.getLogger(WsMessageReceiver.class);
+  private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
 
-  private final ObjectReader            reader      = new ObjectMapper().reader();
-  private final CompletableFuture<Void> errorFuture = new CompletableFuture<>();
+  private final ObjectReader    reader = new ObjectMapper().reader();
+  private final WsMessageSorter sorter;
 
-  private final WsSubscribeHelper helper;
-  private final WsMessageSorter   sorter;
-
-  public WsMessageReceiver(WsSubscribeHelper helper, WsMessageSorter sorter) {
-    this.helper = helper;
+  public WsMessageReceiver(WsMessageSorter sorter) {
     this.sorter = sorter;
   }
 
-  public CompletableFuture<Void> getErrorFuture() {
-    return errorFuture;
-  }
-
   @Override
-  public void onOpen(WebSocket socket, Response response) {
+  public void channelActive(ChannelHandlerContext context) {
     log.info("connection opened");
-    helper.subscribe(socket).whenComplete((ok, ex) -> {
-      if (ex == null) {
-        log.info("subscribed to market feed");
-      } else {
-        errorFuture.completeExceptionally(ex);
-      }
-    });
   }
 
   @Override
-  public void onMessage(ResponseBody body) {
-    try {
-
-      sorter.sort(reader.readTree(body.charStream()), System.nanoTime());
-
-    } catch (Throwable e) {
-      errorFuture.completeExceptionally(e);
-    } finally {
-      body.close();
+  public void userEventTriggered(ChannelHandlerContext context, Object event) throws Exception {
+    if (event.equals(WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
+      log.info("handshake completed");
+      context.writeAndFlush(new TextWebSocketFrame(SUBSCRIBE));
+    } else {
+      super.userEventTriggered(context, event);
     }
   }
 
   @Override
-  public void onFailure(IOException e, Response response) {
-    errorFuture.completeExceptionally(e);
+  public void messageReceived(ChannelHandlerContext context, WebSocketFrame frame)
+      throws WsException, IOException, InterruptedException, ExecutionException
+  {
+    if (frame instanceof TextWebSocketFrame) {
+      sorter.sort(reader.readTree(
+          ((TextWebSocketFrame) frame).text()),
+          System.nanoTime()
+      );
+    } else if (frame instanceof CloseWebSocketFrame) {
+      CloseWebSocketFrame close = (CloseWebSocketFrame) frame;
+      throw new WsException(
+          "socket closed with code " + close.statusCode() +
+              " and reason -> " + close.reasonText()
+      );
+    }
   }
 
   @Override
-  public void onClose(int code, String reason) {
-    errorFuture.completeExceptionally(new WsException(
-        "websocket closed with code " + code + " and reason -> " + reason
-    ));
+  public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
+    log.error("error in receive pipeline", cause);
+    context.close();
   }
 
   @Override
-  public void onPong(Buffer pong) {
-    log.debug("pong received");
+  public void channelInactive(ChannelHandlerContext context) {
+    log.error("socket closed");
+    context.close();
   }
 
 }

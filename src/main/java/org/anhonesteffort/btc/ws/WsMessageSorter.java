@@ -31,13 +31,13 @@ public class WsMessageSorter {
 
   private static final Logger log = LoggerFactory.getLogger(WsMessageSorter.class);
 
-  private final Accessor accessor = new Accessor();
-  private final WsOrderEventPublisher publisher;
+  private final Accessor          accessor = new Accessor();
+  private final WsRingPublisher   publisher;
   private final HttpClientWrapper http;
 
   private Optional<Long> messageSeqLast = Optional.empty();
 
-  public WsMessageSorter(WsOrderEventPublisher publisher, HttpClientWrapper http) {
+  public WsMessageSorter(WsRingPublisher publisher, HttpClientWrapper http) {
     this.publisher = publisher;
     this.http      = http;
   }

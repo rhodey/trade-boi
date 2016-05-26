@@ -21,7 +21,7 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
-import org.anhonesteffort.btc.netty.NettyWsService;
+import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.strategy.ScamStrategy;
@@ -57,7 +57,7 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    NettyWsService wsService = new NettyWsService(
+    WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE,
         new EventHandler[] { handlerFor(new ScamStrategy(caster)) }, caster
     );

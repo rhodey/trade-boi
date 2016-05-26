@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2016 An Honest Effort LLC.
+ * Copyright 2014 The Netty Project
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.anhonesteffort.btc.ws;
 
 import com.lmax.disruptor.EventFactory;
@@ -23,38 +21,60 @@ import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import okhttp3.Request;
-import okhttp3.ws.WebSocketCall;
-import org.anhonesteffort.btc.state.OrderEvent;
-import org.anhonesteffort.btc.http.HttpClient;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
 
-  private static final Logger log         = LoggerFactory.getLogger(WsService.class);
-  private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
+  private static final Logger log = LoggerFactory.getLogger(WsService.class);
 
-  private final HttpClientWrapper       http           = new HttpClientWrapper();
+  private static final String  WS_HOST            = "ws-feed.exchange.coinbase.com";
+  private static final String  WS_URI             = "wss://" + WS_HOST;
+  private static final Integer WS_PORT            = 443;
+  private static final Integer CONNECT_TIMEOUT_MS = 5000;
+  private static final Integer READ_TIMEOUT_MS    = 5000;
+
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-  private final ExecutorService         executor       = Executors.newSingleThreadExecutor();
+  private final HttpClientWrapper       http           = new HttpClientWrapper();
 
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
   private final LongCaster                 caster;
 
+  private Channel channel;
+
   public WsService(
       WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers, LongCaster caster
   ) {
-    this.caster   = caster;
     this.handlers = handlers;
+    this.caster   = caster;
     wsDisruptor   = new Disruptor<>(
         this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
     );
@@ -65,30 +85,43 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   }
 
   @SuppressWarnings("unchecked")
-  public void start() {
-    WsOrderEventPublisher publisher  = new WsOrderEventPublisher(wsDisruptor.getRingBuffer(), caster);
-    WsMessageSorter       sorter     = new WsMessageSorter(publisher, http);
-    WsMessageReceiver     wsReceiver = new WsMessageReceiver(new WsSubscribeHelper(executor), sorter);
+  public void start() throws URISyntaxException, SSLException {
+    Bootstrap       bootstrap = new Bootstrap();
+    WsRingPublisher publisher = new WsRingPublisher(wsDisruptor.getRingBuffer(), caster);
+    WsMessageSorter sorter    = new WsMessageSorter(publisher, http);
+
+    final SslContext                sslContext  = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    final WsMessageReceiver         wsReceiver  = new WsMessageReceiver(sorter);
+    final WebSocketClientHandshaker wsHandshake = WebSocketClientHandshakerFactory.newHandshaker(
+        new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
+    );
+
+    bootstrap.group(new NioEventLoopGroup())
+             .channel(NioSocketChannel.class)
+             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MS)
+             .handler(new ChannelInitializer<SocketChannel>() {
+               @Override
+               protected void initChannel(SocketChannel channel) {
+                 channel.pipeline().addLast(new ReadTimeoutHandler(READ_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+                 channel.pipeline().addLast(sslContext.newHandler(channel.alloc(), WS_HOST, WS_PORT));
+                 channel.pipeline().addLast(new HttpClientCodec());
+                 channel.pipeline().addLast(new HttpObjectAggregator(8192));
+                 channel.pipeline().addLast(new WebSocketClientProtocolHandler(wsHandshake, false));
+                 channel.pipeline().addLast(wsReceiver);
+               }
+             });
 
     wsDisruptor.handleEventsWith(handlers);
     wsDisruptor.setDefaultExceptionHandler(this);
-
-    wsReceiver.getErrorFuture().whenComplete((ok, ex) -> {
-      if (ex == null && shutdown()) {
-        log.error("websocket error future completed with unknown cause");
-      } else if (ex != null && shutdown(ex)) {
-        log.error("websocket error", ex);
-      }
-    });
-
     wsDisruptor.start();
-    WebSocketCall.create(
-        HttpClient.getInstance(), new Request.Builder().url(WS_ENDPOINT).build()
-    ).enqueue(wsReceiver);
+
+    channel = bootstrap.connect(WS_HOST, WS_PORT).channel();
+    channel.closeFuture().addListener(close -> shutdown());
   }
 
   public boolean shutdown() {
     if (shutdownFuture.complete(null)) {
+      channel.close();
       http.shutdown();
       return true;
     } else {
@@ -98,6 +131,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private boolean shutdown(Throwable throwable) {
     if (shutdownFuture.completeExceptionally(throwable)) {
+      channel.close();
       http.shutdown();
       return true;
     } else {
