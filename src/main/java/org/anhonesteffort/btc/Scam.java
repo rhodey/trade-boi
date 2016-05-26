@@ -21,12 +21,12 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.OrderPool;
+import org.anhonesteffort.btc.netty.NettyWsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.strategy.ScamStrategy;
 import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.util.LongCaster;
-import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +34,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
-public class Scam implements Runnable, BiConsumer<Void, Throwable> {
+public class Scam implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
@@ -46,10 +44,8 @@ public class Scam implements Runnable, BiConsumer<Void, Throwable> {
   private static final Integer MARKET_POOL_SIZE =    64;
   private static final Integer LIMIT_INIT_SIZE  =    16;
 
-  private final LongCaster        caster       = new LongCaster(0.000000000001d);
-  private final ExecutorService   shutdownPool = Executors.newFixedThreadPool(2);
-  private final AtomicBoolean     shuttingDown = new AtomicBoolean(false);
-  private       ShutdownProcedure shutdownProcedure;
+  private final LongCaster       caster       = new LongCaster(0.000000000001d);
+  private final ExecutorService  shutdownPool = Executors.newFixedThreadPool(2);
 
   private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
     return new MatchingStateCurator(
@@ -62,22 +58,19 @@ public class Scam implements Runnable, BiConsumer<Void, Throwable> {
   @Override
   @SuppressWarnings("unchecked")
   public void run() {
-    WsService wsService = new WsService(
+    NettyWsService wsService = new NettyWsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE,
-        new EventHandler[] { handlerFor(new ScamStrategy(caster)) },
-        caster
+        new EventHandler[] { handlerFor(new ScamStrategy(caster)) }, caster
     );
 
-    shutdownProcedure = new ShutdownProcedure(shutdownPool, wsService);
-    wsService.getShutdownFuture().whenComplete(this);
-    wsService.start();
-  }
+    try {
 
-  @Override
-  public void accept(Void aVoid, Throwable throwable) {
-    if (!shuttingDown.getAndSet(true)) {
+      wsService.start();
+      wsService.getShutdownFuture().get();
+
+    } catch (Throwable e) {
       log.warn("shutdown procedure initiated");
-      shutdownPool.submit(shutdownProcedure);
+      shutdownPool.submit(new ShutdownProcedure(shutdownPool, wsService));
     }
   }
 

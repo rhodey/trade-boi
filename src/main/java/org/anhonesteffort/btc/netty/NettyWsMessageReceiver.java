@@ -37,6 +37,8 @@
 
 package org.anhonesteffort.btc.netty;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -49,20 +51,26 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.anhonesteffort.btc.ws.WsException;
+import org.anhonesteffort.btc.ws.WsMessageSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
 
 public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> {
 
   private static final Logger log       = LoggerFactory.getLogger(NettyWsMessageReceiver.class);
   private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
 
+  private final ObjectReader reader = new ObjectMapper().reader();
   private final WebSocketClientHandshaker shake;
+  private final WsMessageSorter sorter;
 
-  public NettyWsMessageReceiver(URI uri) {
-    shake = WebSocketClientHandshakerFactory.newHandshaker(
+  public NettyWsMessageReceiver(URI uri, WsMessageSorter sorter) {
+    this.sorter = sorter;
+    shake       = WebSocketClientHandshakerFactory.newHandshaker(
         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
   }
@@ -85,8 +93,10 @@ public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> 
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext context, Object msg) throws WsException {
-    if (!shake.isHandshakeComplete()) {
+  public void messageReceived(ChannelHandlerContext context, Object msg)
+      throws WsException, IOException, InterruptedException, ExecutionException
+  {
+    if (!shake.isHandshakeComplete()) { // todo: calls out to a volatile boolean D;
       shake.finishHandshake(context.channel(), (FullHttpResponse) msg);
       context.writeAndFlush(new TextWebSocketFrame(SUBSCRIBE));
       log.info("handshake completed");
@@ -96,7 +106,7 @@ public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> 
     WebSocketFrame frame = getWsFrameOrThrow(msg);
 
     if (frame instanceof TextWebSocketFrame) {
-      log.info("look -> " + ((TextWebSocketFrame)frame).text());
+      sorter.sort(reader.readTree(((TextWebSocketFrame) frame).text()), System.nanoTime());
     } else if (frame instanceof CloseWebSocketFrame) {
       CloseWebSocketFrame close = (CloseWebSocketFrame) frame;
       throw new WsException(
@@ -108,7 +118,7 @@ public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> 
 
   @Override
   public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-    log.error("pipeline error", cause);
+    log.error("error in receive pipeline", cause);
     context.close();
   }
 

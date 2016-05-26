@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc;
 
-import org.anhonesteffort.btc.ws.WsService;
+import org.anhonesteffort.btc.netty.NettyWsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +30,9 @@ public class ShutdownProcedure implements Runnable {
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
 
   private final ExecutorService executor;
-  private final WsService       wsService;
+  private final NettyWsService  wsService;
 
-  public ShutdownProcedure(ExecutorService executor, WsService wsService) {
+  public ShutdownProcedure(ExecutorService executor, NettyWsService wsService) {
     this.executor  = executor;
     this.wsService = wsService;
   }

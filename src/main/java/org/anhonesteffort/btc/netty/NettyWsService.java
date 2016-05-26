@@ -15,9 +15,16 @@
  */
 package org.anhonesteffort.btc.netty;
 
+import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.ExceptionHandler;
+import com.lmax.disruptor.WaitStrategy;
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -26,51 +33,142 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.util.LongCaster;
+import org.anhonesteffort.btc.ws.WsMessageSorter;
+import org.anhonesteffort.btc.ws.WsOrderEventPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
-public class NettyWsService {
+public class NettyWsService implements ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
 
-  private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
+  private static final Logger log = LoggerFactory.getLogger(NettyWsService.class);
+
+  private static final String  WS_HOST            = "ws-feed.exchange.coinbase.com";
+  private static final String  WS_URI             = "wss://" + WS_HOST;
+  private static final Integer WS_PORT            = 443;
+  private static final Integer CONNECT_TIMEOUT_MS = 5000;
+  private static final Integer READ_TIMEOUT_MS    = 5000;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-  private final SslContext ssl;
-  private final URI uri;
+  private final HttpClientWrapper       http           = new HttpClientWrapper();
 
-  public NettyWsService() throws URISyntaxException, SSLException {
-    ssl = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
-    uri = new URI(WS_ENDPOINT);
+  private final Disruptor<OrderEvent>      wsDisruptor;
+  private final EventHandler<OrderEvent>[] handlers;
+  private final LongCaster                 caster;
+
+  private Channel channel;
+
+  public NettyWsService(
+      WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers, LongCaster caster
+  ) {
+    this.handlers = handlers;
+    this.caster   = caster;
+    wsDisruptor   = new Disruptor<>(
+        this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
+    );
   }
 
   public CompletableFuture<Void> getShutdownFuture() {
     return shutdownFuture;
   }
 
-  public void start() throws InterruptedException {
-    EventLoopGroup         group       = new NioEventLoopGroup();
-    Bootstrap              bootstrap   = new Bootstrap();
-    NettyWsMessageReceiver wsMessageRx = new NettyWsMessageReceiver(uri);
+  @SuppressWarnings("unchecked")
+  public void start() throws URISyntaxException, SSLException {
+    Bootstrap             bootstrap = new Bootstrap();
+    EventLoopGroup        nioGroup  = new NioEventLoopGroup();
+    WsOrderEventPublisher publisher = new WsOrderEventPublisher(wsDisruptor.getRingBuffer(), caster);
+    WsMessageSorter       sorter    = new WsMessageSorter(publisher, http);
 
-    bootstrap.group(group)
+    final SslContext             sslContext = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    final NettyWsMessageReceiver wsReceiver = new NettyWsMessageReceiver(new URI(WS_URI), sorter);
+
+    bootstrap.group(nioGroup)
              .channel(NioSocketChannel.class)
+             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MS)
              .handler(new ChannelInitializer<SocketChannel>() {
                @Override
                protected void initChannel(SocketChannel channel) {
-                 ChannelPipeline pipeline = channel.pipeline();
-                 pipeline.addLast(ssl.newHandler(channel.alloc(), uri.getHost(), 443));
-                 pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192), wsMessageRx);
+                 channel.pipeline().addLast(new ReadTimeoutHandler(READ_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+                 channel.pipeline().addLast(sslContext.newHandler(channel.alloc(), WS_HOST, WS_PORT));
+                 channel.pipeline().addLast(new HttpClientCodec());
+                 channel.pipeline().addLast(new HttpObjectAggregator(8192));
+                 channel.pipeline().addLast(wsReceiver);
                }
              });
 
-    bootstrap.connect(uri.getHost(), 443).sync()
-             .channel().closeFuture().sync();
+    wsDisruptor.handleEventsWith(handlers);
+    wsDisruptor.setDefaultExceptionHandler(this);
+    wsDisruptor.start();
+
+    channel = bootstrap.connect(WS_HOST, WS_PORT).channel();
+    channel.closeFuture().addListener(close -> shutdown());
   }
 
-  public static void main(String[] args) throws Exception {
-    new NettyWsService().start();
+  public boolean shutdown() {
+    if (shutdownFuture.complete(null)) {
+      channel.close();
+      http.shutdown();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean shutdown(Throwable throwable) {
+    if (shutdownFuture.completeExceptionally(throwable)) {
+      channel.close();
+      http.shutdown();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public void handleOnStartException(Throwable throwable) {
+    if (shutdown(throwable)) {
+      log.error("error starting disruptor", throwable);
+    }
+  }
+
+  @Override
+  public void handleEventException(Throwable throwable, long sequence, OrderEvent event) {
+    if (shutdown(throwable)) {
+      log.error("error processing disruptor event", throwable);
+    }
+  }
+
+  @Override
+  public void handleOnShutdownException(Throwable throwable) {
+    if (shutdown(throwable)) {
+      log.error("error shutting down disruptor", throwable);
+    }
+  }
+
+  private static class DisruptorThreadFactory implements ThreadFactory {
+    private int count = 0;
+
+    @Override
+    public Thread newThread(Runnable runnable) {
+      Thread thread = new Thread(runnable, "ws-disrupt-" + (count++));
+      thread.setDaemon(true);
+      return thread;
+    }
+  }
+
+  @Override
+  public OrderEvent newInstance() {
+    return new OrderEvent();
   }
 
 }
