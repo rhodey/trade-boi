@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Scam implements Runnable {
+public class Scam {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
@@ -55,9 +55,8 @@ public class Scam implements Runnable {
     );
   }
 
-  @Override
   @SuppressWarnings("unchecked")
-  public void run() {
+  public void run() throws Exception {
     NettyWsService wsService = new NettyWsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE,
         new EventHandler[] { handlerFor(new ScamStrategy(caster)) }, caster
@@ -68,13 +67,13 @@ public class Scam implements Runnable {
       wsService.start();
       wsService.getShutdownFuture().get();
 
-    } catch (Throwable e) {
+    } finally {
       log.warn("shutdown procedure initiated");
       shutdownPool.submit(new ShutdownProcedure(shutdownPool, wsService));
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     new Scam().run();
   }
 
