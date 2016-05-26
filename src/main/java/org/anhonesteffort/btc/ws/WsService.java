@@ -86,13 +86,13 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   @SuppressWarnings("unchecked")
   public void start() throws URISyntaxException, SSLException {
-    Bootstrap       bootstrap = new Bootstrap();
-    WsRingPublisher publisher = new WsRingPublisher(wsDisruptor.getRingBuffer(), caster);
-    WsMessageSorter sorter    = new WsMessageSorter(publisher, http);
+    Bootstrap       bootstrap     = new Bootstrap();
+    WsRingPublisher ringPublisher = new WsRingPublisher(wsDisruptor.getRingBuffer(), caster);
+    WsMessageSorter messageSorter = new WsMessageSorter(ringPublisher, http);
 
-    final SslContext                sslContext  = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
-    final WsMessageReceiver         wsReceiver  = new WsMessageReceiver(sorter);
-    final WebSocketClientHandshaker wsHandshake = WebSocketClientHandshakerFactory.newHandshaker(
+    final SslContext                sslContext      = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
+    final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
         new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
 
@@ -107,7 +107,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
                  channel.pipeline().addLast(new HttpClientCodec());
                  channel.pipeline().addLast(new HttpObjectAggregator(8192));
                  channel.pipeline().addLast(new WebSocketClientProtocolHandler(wsHandshake, false));
-                 channel.pipeline().addLast(wsReceiver);
+                 channel.pipeline().addLast(messageReceiver);
                }
              });
 
