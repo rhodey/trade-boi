@@ -37,82 +37,79 @@
 
 package org.anhonesteffort.btc.netty;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import org.anhonesteffort.btc.ws.WsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
+import java.net.URI;
 
-  private final WebSocketClientHandshaker handshaker;
-  private ChannelPromise handshakeFuture;
+public class NettyWsMessageReceiver extends SimpleChannelInboundHandler<Object> {
 
-  public WebSocketClientHandler(WebSocketClientHandshaker handshaker) {
-    this.handshaker = handshaker;
-  }
+  private static final Logger log = LoggerFactory.getLogger(NettyWsMessageReceiver.class);
+  private final WebSocketClientHandshaker shake;
 
-  public ChannelFuture handshakeFuture() {
-    return handshakeFuture;
-  }
-
-  @Override
-  public void handlerAdded(ChannelHandlerContext ctx) {
-    handshakeFuture = ctx.newPromise();
-  }
-
-  @Override
-  public void channelActive(ChannelHandlerContext ctx) {
-    handshaker.handshake(ctx.channel());
+  public NettyWsMessageReceiver(URI uri) {
+    shake = WebSocketClientHandshakerFactory.newHandshaker(
+        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
+    );
   }
 
   @Override
-  public void channelInactive(ChannelHandlerContext ctx) {
-    System.out.println("WebSocket Client disconnected!");
+  public void channelActive(ChannelHandlerContext context) {
+    log.info("connection opened");
+    shake.handshake(context.channel());
+  }
+
+  private WebSocketFrame getWsFrameOrThrow(Object msg) throws WsException {
+    if (msg instanceof TextWebSocketFrame  ||
+        msg instanceof CloseWebSocketFrame ||
+        msg instanceof PongWebSocketFrame)
+    {
+      return (WebSocketFrame) msg;
+    } else {
+      throw new WsException("unknown message type -> " + msg.getClass().getSimpleName());
+    }
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext ctx, Object msg) {
-    Channel ch = ctx.channel();
-    if (!handshaker.isHandshakeComplete()) {
-      handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-      System.out.println("WebSocket Client connected!");
-      handshakeFuture.setSuccess();
+  public void messageReceived(ChannelHandlerContext context, Object msg) throws WsException {
+    if (!shake.isHandshakeComplete()) {
+      shake.finishHandshake(context.channel(), (FullHttpResponse) msg);
+      log.info("handshake completed");
       return;
     }
 
-    if (msg instanceof FullHttpResponse) {
-      FullHttpResponse response = (FullHttpResponse) msg;
-      throw new IllegalStateException(
-          "Unexpected FullHttpResponse (getStatus=" + response.status() +
-              ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
-    }
+    WebSocketFrame frame = getWsFrameOrThrow(msg);
 
-    WebSocketFrame frame = (WebSocketFrame) msg;
     if (frame instanceof TextWebSocketFrame) {
-      TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
-      System.out.println("WebSocket Client received message: " + textFrame.text());
-    } else if (frame instanceof PongWebSocketFrame) {
-      System.out.println("WebSocket Client received pong");
+      log.info("look -> " + ((TextWebSocketFrame)frame).text());
     } else if (frame instanceof CloseWebSocketFrame) {
-      System.out.println("WebSocket Client received closing");
-      ch.close();
+      CloseWebSocketFrame close = (CloseWebSocketFrame) frame;
+      throw new WsException("socket closed with code " + close.statusCode() + " and reason -> " + close.reasonText());
     }
   }
 
   @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    cause.printStackTrace();
-    if (!handshakeFuture.isDone()) {
-      handshakeFuture.setFailure(cause);
-    }
-    ctx.close();
+  public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
+    log.error("pipeline error", cause);
+    context.close();
   }
+
+  @Override
+  public void channelInactive(ChannelHandlerContext context) {
+    log.error("socket closed");
+    context.close();
+  }
+
 }

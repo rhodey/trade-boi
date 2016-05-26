@@ -22,11 +22,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
@@ -40,27 +37,22 @@ public class NettyWsService {
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-
-  private final URI uri;
   private final SslContext ssl;
+  private final URI uri;
 
   public NettyWsService() throws URISyntaxException, SSLException {
-    uri = new URI(WS_ENDPOINT);
     ssl = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    uri = new URI(WS_ENDPOINT);
   }
 
   public CompletableFuture<Void> getShutdownFuture() {
     return shutdownFuture;
   }
 
-  public void start() {
-    EventLoopGroup group     = new NioEventLoopGroup();
-    Bootstrap      bootstrap = new Bootstrap();
-
-    WebSocketClientHandler handler =
-        new WebSocketClientHandler(
-            WebSocketClientHandshakerFactory.newHandshaker(
-                uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+  public void start() throws InterruptedException {
+    EventLoopGroup         group       = new NioEventLoopGroup();
+    Bootstrap              bootstrap   = new Bootstrap();
+    NettyWsMessageReceiver wsMessageRx = new NettyWsMessageReceiver(uri);
 
     bootstrap.group(group)
              .channel(NioSocketChannel.class)
@@ -69,11 +61,12 @@ public class NettyWsService {
                protected void initChannel(SocketChannel channel) {
                  ChannelPipeline pipeline = channel.pipeline();
                  pipeline.addLast(ssl.newHandler(channel.alloc(), uri.getHost(), 443));
-                 pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192), handler);
+                 pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192), wsMessageRx);
                }
              });
 
-    bootstrap.connect(uri.getHost(), 443);
+    bootstrap.connect(uri.getHost(), 443).sync()
+             .channel().closeFuture().addListener(idk -> shutdownFuture.complete(null));
   }
 
 }
