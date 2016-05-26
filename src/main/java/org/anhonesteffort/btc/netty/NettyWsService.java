@@ -16,8 +16,6 @@
 package org.anhonesteffort.btc.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
@@ -27,75 +25,55 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import javax.net.ssl.SSLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.CompletableFuture;
 
-public final class NettyWsService {
+public class NettyWsService {
 
   private static final String WS_ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
 
-  public static void main(String[] args) throws Exception {
-    URI        uri    = new URI(WS_ENDPOINT);
-    String     host   = uri.getHost() == null ? "127.0.0.1" : uri.getHost();
-    int        port   = 443;
-    SslContext sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+  private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
-    EventLoopGroup group = new NioEventLoopGroup();
+  private final URI uri;
+  private final SslContext ssl;
 
-    try {
-
-      final WebSocketClientHandler handler =
-          new WebSocketClientHandler(
-              WebSocketClientHandshakerFactory.newHandshaker(
-                  uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
-
-      Bootstrap b = new Bootstrap();
-      b.group(group)
-          .channel(NioSocketChannel.class)
-          .handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) {
-              ChannelPipeline p = ch.pipeline();
-              p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
-              p.addLast(
-                  new HttpClientCodec(),
-                  new HttpObjectAggregator(8192),
-                  handler);
-            }
-          });
-
-      Channel ch = b.connect(uri.getHost(), port).sync().channel();
-      handler.handshakeFuture().sync();
-
-      BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-      while (true) {
-        String msg = console.readLine();
-        if (msg == null) {
-          break;
-        } else if ("bye".equals(msg.toLowerCase())) {
-          ch.writeAndFlush(new CloseWebSocketFrame());
-          ch.closeFuture().sync();
-          break;
-        } else if ("ping".equals(msg.toLowerCase())) {
-          WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[]{8, 1, 8, 1}));
-          ch.writeAndFlush(frame);
-        } else {
-          WebSocketFrame frame = new TextWebSocketFrame(msg);
-          ch.writeAndFlush(frame);
-        }
-      }
-    } finally {
-      group.shutdownGracefully();
-    }
+  public NettyWsService() throws URISyntaxException, SSLException {
+    uri = new URI(WS_ENDPOINT);
+    ssl = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
   }
+
+  public CompletableFuture<Void> getShutdownFuture() {
+    return shutdownFuture;
+  }
+
+  public void start() {
+    EventLoopGroup group     = new NioEventLoopGroup();
+    Bootstrap      bootstrap = new Bootstrap();
+
+    WebSocketClientHandler handler =
+        new WebSocketClientHandler(
+            WebSocketClientHandshakerFactory.newHandshaker(
+                uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+
+    bootstrap.group(group)
+             .channel(NioSocketChannel.class)
+             .handler(new ChannelInitializer<SocketChannel>() {
+               @Override
+               protected void initChannel(SocketChannel channel) {
+                 ChannelPipeline pipeline = channel.pipeline();
+                 pipeline.addLast(ssl.newHandler(channel.alloc(), uri.getHost(), 443));
+                 pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192), handler);
+               }
+             });
+
+    bootstrap.connect(uri.getHost(), 443);
+  }
+
 }
