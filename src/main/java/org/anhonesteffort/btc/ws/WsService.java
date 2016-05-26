@@ -36,6 +36,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
@@ -90,7 +91,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     WsRingPublisher ringPublisher = new WsRingPublisher(wsDisruptor.getRingBuffer(), caster);
     WsMessageSorter messageSorter = new WsMessageSorter(ringPublisher, http);
 
-    final SslContext                sslContext      = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+    final SslContext                sslContext      = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
     final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
     final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
         new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()

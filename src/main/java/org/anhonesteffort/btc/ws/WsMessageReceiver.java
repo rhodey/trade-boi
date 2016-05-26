@@ -40,7 +40,7 @@ package org.anhonesteffort.btc.ws;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
@@ -52,7 +52,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFrame> {
+public class WsMessageReceiver extends ChannelInboundHandlerAdapter {
 
   private static final Logger log       = LoggerFactory.getLogger(WsMessageReceiver.class);
   private static final String SUBSCRIBE = "{ \"type\": \"subscribe\", \"product_id\": \"BTC-USD\" }";
@@ -81,9 +81,11 @@ public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFram
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext context, WebSocketFrame frame)
+  public void channelRead(ChannelHandlerContext context, Object msg)
       throws WsException, IOException, InterruptedException, ExecutionException
   {
+    WebSocketFrame frame = (WebSocketFrame) msg;
+
     if (frame instanceof TextWebSocketFrame) {
       sorter.sort(reader.readTree(
           ((TextWebSocketFrame) frame).text()),
@@ -96,6 +98,8 @@ public class WsMessageReceiver extends SimpleChannelInboundHandler<WebSocketFram
               " and reason -> " + close.reasonText()
       );
     }
+
+    frame.release();
   }
 
   @Override
