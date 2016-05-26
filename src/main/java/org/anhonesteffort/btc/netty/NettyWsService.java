@@ -66,7 +66,11 @@ public class NettyWsService {
              });
 
     bootstrap.connect(uri.getHost(), 443).sync()
-             .channel().closeFuture().addListener(idk -> shutdownFuture.complete(null));
+             .channel().closeFuture().sync();
+  }
+
+  public static void main(String[] args) throws Exception {
+    new NettyWsService().start();
   }
 
 }
