@@ -90,7 +90,7 @@ public class NettyWsService implements ExceptionHandler<OrderEvent>, EventFactor
   @SuppressWarnings("unchecked")
   public void start() throws URISyntaxException, SSLException {
     Bootstrap             bootstrap = new Bootstrap();
-    EventLoopGroup        nioGroup  = new NioEventLoopGroup();
+    EventLoopGroup        eventLoop = new NioEventLoopGroup();
     WsOrderEventPublisher publisher = new WsOrderEventPublisher(wsDisruptor.getRingBuffer(), caster);
     WsMessageSorter       sorter    = new WsMessageSorter(publisher, http);
 
@@ -100,7 +100,7 @@ public class NettyWsService implements ExceptionHandler<OrderEvent>, EventFactor
         new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
 
-    bootstrap.group(nioGroup)
+    bootstrap.group(eventLoop)
              .channel(NioSocketChannel.class)
              .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MS)
              .handler(new ChannelInitializer<SocketChannel>() {
