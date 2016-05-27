@@ -36,9 +36,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   }
 
   private MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
-    if (marketRx.getSize() < 0l || marketRx.getFunds() < 0l) {
-      throw new OrderEventException("market order rx event was parsed incorrectly");
-    } else if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
+    if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
       return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
