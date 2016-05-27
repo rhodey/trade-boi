@@ -55,9 +55,7 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   private long getSizeReducedForChange(OrderEvent change) throws OrderEventException {
-    if (change.getNewSize() < 0l || change.getOldSize() < 0l) {
-      throw new OrderEventException("limit order change event was parsed incorrectly");
-    } else if (change.getNewSize() >= change.getOldSize()) {
+    if (change.getNewSize() >= change.getOldSize()) {
       throw new OrderEventException("limit order size can only decrease");
     } else {
       return change.getOldSize() - change.getNewSize();
