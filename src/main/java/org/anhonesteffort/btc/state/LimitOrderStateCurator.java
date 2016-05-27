@@ -63,9 +63,7 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   private Order takePooledRxLimitChange(Order rxLimit, OrderEvent change) throws OrderEventException {
-    if (change.getPrice() != rxLimit.getPrice()) {
-      throw new OrderEventException("limit order change event disagrees with rx limit order on price");
-    } else if (change.getNewSize() >= rxLimit.getSize()) {
+    if (change.getNewSize() >= rxLimit.getSize()) {
       throw new OrderEventException("limit order change event new size is >= rx limit order size");
     } else {
       return pool.take(change.getOrderId(), change.getSide(), change.getPrice(), change.getNewSize());
