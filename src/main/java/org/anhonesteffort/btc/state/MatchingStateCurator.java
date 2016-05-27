@@ -54,9 +54,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
   }
 
   private void checkEventAgainstTakeResult(OrderEvent match, Order taker, TakeResult result) throws OrderEventException {
-    if (result.getMakers().isEmpty() || !result.getMakers().get(0).getOrderId().equals(match.getMakerId())) {
-      throw new OrderEventException("maker id for match event not found in list of makers returned from our book");
-    } else if (Math.abs(result.getTakeSize() - match.getSize()) > 1l) {
+    if (Math.abs(result.getTakeSize() - match.getSize()) > 1l) {
       throw new OrderEventException(
           "take size for match event does not agree with our book, " +
               "event wants " + match.getSize() + ", book gave " + result.getTakeSize()
