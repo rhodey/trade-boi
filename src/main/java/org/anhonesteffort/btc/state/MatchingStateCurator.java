@@ -61,8 +61,10 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
           "take size for match event does not agree with our book, " +
               "event wants " + match.getSize() + ", book gave " + result.getTakeSize()
       );
-    } else if (taker.getSizeRemaining() > 0l) {
+    } else if (taker.getSizeRemaining() > 1l) {
       throw new OrderEventException("taker for match event was left on the book with " + taker.getSizeRemaining());
+    } else if (taker.getSizeRemaining() > 0l) {
+      state.getOrderBook().remove(taker.getSide(), taker.getPrice(), taker.getOrderId());
     }
   }
 
