@@ -20,7 +20,6 @@ package org.anhonesteffort.btc.book;
 public class Order {
 
   public enum Side { ASK, BID }
-  protected final Long serial;
 
   protected String orderId;
   protected Side   side;
@@ -29,8 +28,7 @@ public class Order {
   protected long   sizeRemaining;
   protected long   valueRemoved;
 
-  public Order(Long serial, String orderId, Side side, long price, long size) {
-    this.serial = serial;
+  public Order(String orderId, Side side, long price, long size) {
     init(orderId, side, price, size);
   }
 

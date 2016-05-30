@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.compute.Computation;
 
@@ -37,16 +36,16 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     we can only really begin to trust the rx limit and market state after some
     time has passed since rebuilding
    */
-  public MatchingStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
-    super(book, pool, computations);
+  public MatchingStateCurator(LimitOrderBook book, Set<Computation> computations) {
+    super(book, computations);
   }
 
   private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
-        return pool.take(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
+        return new Order(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
       } else {
-        return pool.take(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
+        return new Order(match.getTakerId(), Order.Side.ASK, match.getPrice(), match.getSize());
       }
     } else {
       throw new OrderEventException("match event has invalid taker price or size");

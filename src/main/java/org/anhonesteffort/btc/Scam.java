@@ -20,7 +20,6 @@ package org.anhonesteffort.btc;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
@@ -39,10 +38,8 @@ public class Scam {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE   =   512;
-  private static final Integer LIMIT_POOL_SIZE  = 16384;
-  private static final Integer MARKET_POOL_SIZE =    64;
-  private static final Integer LIMIT_INIT_SIZE  =    16;
+  private static final Integer WS_BUFFER_SIZE  = 512;
+  private static final Integer LIMIT_INIT_SIZE =  16;
 
   private final LongCaster       caster       = new LongCaster(0.000000000001d);
   private final ExecutorService  shutdownPool = Executors.newFixedThreadPool(2);
@@ -50,7 +47,6 @@ public class Scam {
   private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
     return new MatchingStateCurator(
         new LimitOrderBook(LIMIT_INIT_SIZE),
-        new OrderPool(LIMIT_POOL_SIZE, MARKET_POOL_SIZE),
         new HashSet<>(Arrays.asList(strategies))
     );
   }

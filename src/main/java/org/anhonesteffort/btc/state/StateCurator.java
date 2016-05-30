@@ -20,7 +20,6 @@ package org.anhonesteffort.btc.state;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +31,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
   protected final State            state;
-  protected final OrderPool        pool;
   protected final Set<Computation> computations;
 
   private boolean rebuilding    = false;
   private long    nanosecondSum = 0l;
 
-  public StateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
+  public StateCurator(LimitOrderBook book, Set<Computation> computations) {
     state             = new State(book);
-    this.pool         = pool;
     this.computations = computations;
   }
 
@@ -48,21 +45,12 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     return rebuilding;
   }
 
-  protected void returnPooledOrder(Order order) {
-    pool.returnOrder(order);
-  }
-
-  private void returnTakersAndMakers() {
-    state.getTakes().forEach(take -> {
-      returnPooledOrder(take.getTaker());
-      take.getMakers().forEach(maker -> {
-        if (maker.getSizeRemaining() <= 0l) {
-          returnPooledOrder(maker);
-        } else {
-          maker.clearValueRemoved();
-        }
-      });
-    });
+  private void cleanupTakersAndMakers() {
+    state.getTakes().forEach(take ->
+            take.getMakers().stream()
+                            .filter(make -> make.getSizeRemaining() > 0l)
+                            .forEach(Order::clearValueRemoved)
+    );
     state.getTakes().clear();
   }
 
@@ -73,7 +61,6 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();
-        pool.returnAll();
         rebuilding = true;
         log.info("rebuilding order book");
         computations.forEach(Computation::onStateReset);
@@ -89,7 +76,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
         if (!rebuilding) {
           computations.forEach(compute -> compute.onStateChange(state, event.getNanoseconds()));
         }
-        returnTakersAndMakers();
+        cleanupTakersAndMakers();
     }
 
     if ((sequence % 50l) == 0l) {

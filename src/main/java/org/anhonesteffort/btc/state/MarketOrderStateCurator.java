@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
-import org.anhonesteffort.btc.book.OrderPool;
 import org.anhonesteffort.btc.compute.Computation;
 
 import java.util.Optional;
@@ -31,13 +30,13 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   coinbase lies about market orders in receive messages
   https://community.coinbase.com/t/why-is-this-market-order-filled-without-having-any-fills/10001
    */
-  public MarketOrderStateCurator(LimitOrderBook book, OrderPool pool, Set<Computation> computations) {
-    super(book, pool, computations);
+  public MarketOrderStateCurator(LimitOrderBook book, Set<Computation> computations) {
+    super(book, computations);
   }
 
   private MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
     if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
-      return pool.takeMarket(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
+      return new MarketOrder(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
       throw new OrderEventException("market order rx event has no size or funds");
     }
@@ -58,8 +57,6 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
         Optional<MarketOrder> doneMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
         if (!doneMarket.isPresent()) {
           throw new OrderEventException("market order " + event.getOrderId() + " was never in the market state map");
-        } else {
-          returnPooledOrder(doneMarket.get());
         }
         break;
     }
