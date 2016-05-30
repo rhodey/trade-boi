@@ -31,7 +31,7 @@ public class LimitOrderStateCurator extends StateCurator {
     super(book, computations);
   }
 
-  private Order takePooledLimitOrder(OrderEvent event) throws OrderEventException {
+  private Order newOrderForEvent(OrderEvent event) throws OrderEventException {
     if (event.getPrice() > 0l && event.getSize() > 0l) {
       return new Order(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
@@ -39,7 +39,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void returnRxLimitForOpen(OrderEvent open) throws OrderEventException {
+  private void checkRxLimitOrderForOpen(OrderEvent open) throws OrderEventException {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
     if (!rxLimit.isPresent() && !isRebuilding()) {
       throw new OrderEventException("limit order " + open.getOrderId() + " was never in the limit rx state map");
@@ -59,7 +59,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private Order takePooledRxLimitChange(Order rxLimit, OrderEvent change) throws OrderEventException {
+  private Order newRxLimitOrderChange(Order rxLimit, OrderEvent change) throws OrderEventException {
     if (change.getNewSize() >= rxLimit.getSize()) {
       throw new OrderEventException("limit order change event new size is >= rx limit order size");
     } else {
@@ -67,7 +67,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkAndReturnDoneRxLimit(OrderEvent done, Order rxLimit) throws OrderEventException {
+  private void checkDoneRxLimitOrder(OrderEvent done, Order rxLimit) throws OrderEventException {
     if (Math.abs(rxLimit.getSizeRemaining() - done.getSize()) > 1l) {
       throw new OrderEventException(
           "rx limit order for limit done event disagrees about size remaining, " +
@@ -76,13 +76,13 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkAndReturnFilledLimit(Order fillLimit) throws OrderEventException {
+  private void checkFilledLimitOrder(Order fillLimit) throws OrderEventException {
     if (fillLimit.getSizeRemaining() > 1l) {
       throw new OrderEventException("order for filled order event was still open on the book with " + fillLimit.getSizeRemaining());
     }
   }
 
-  private void checkAndReturnCanceledLimit(OrderEvent done, Order cancelLimit) throws OrderEventException {
+  private void checkCanceledLimitOrder(OrderEvent done, Order cancelLimit) throws OrderEventException {
     if (Math.abs(done.getSize() - cancelLimit.getSizeRemaining()) > 1l) {
       throw new OrderEventException(
           "order for cancel order event disagrees about size remaining, " +
@@ -95,15 +95,15 @@ public class LimitOrderStateCurator extends StateCurator {
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
       case LIMIT_RX:
-        Order rxLimit = takePooledLimitOrder(event);
+        Order rxLimit = newOrderForEvent(event);
         if (state.getRxLimitOrders().put(rxLimit.getOrderId(), rxLimit) != null) {
           throw new OrderEventException("limit order " + rxLimit.getOrderId() + " already in the limit rx state map");
         }
         break;
 
       case LIMIT_OPEN:
-        returnRxLimitForOpen(event);
-        Order      openLimit = takePooledLimitOrder(event);
+        checkRxLimitOrderForOpen(event);
+        Order      openLimit = newOrderForEvent(event);
         TakeResult result    = state.getOrderBook().add(openLimit);
         if (result.getTakeSize() > 0l) {
           throw new OrderEventException("opened limit order took " + result.getTakeSize() + " from the book");
@@ -118,7 +118,7 @@ public class LimitOrderStateCurator extends StateCurator {
         if (changedRxLimit.isPresent() && changedLimit.isPresent()) {
           throw new OrderEventException("order for limit change event was in the limit rx state map and open on the book");
         } else if (changedRxLimit.isPresent()) {
-          Order newRxLimit = takePooledRxLimitChange(changedRxLimit.get(), event);
+          Order newRxLimit = newRxLimitOrderChange(changedRxLimit.get(), event);
           state.getRxLimitOrders().put(newRxLimit.getOrderId(), newRxLimit);
         } else if (!changedLimit.isPresent()) {
           throw new OrderEventException("order for limit change event not found on the book");
@@ -132,16 +132,16 @@ public class LimitOrderStateCurator extends StateCurator {
         if (doneRxLimit.isPresent() && doneLimit.isPresent()) {
           throw new OrderEventException("order for limit done event was in the limit rx state map and open on the book");
         } else if (doneRxLimit.isPresent()) {
-          checkAndReturnDoneRxLimit(event, doneRxLimit.get());
+          checkDoneRxLimitOrder(event, doneRxLimit.get());
           return;
         }
 
         if (event.getSize() <= 0l && doneLimit.isPresent()) {
-          checkAndReturnFilledLimit(doneLimit.get());
+          checkFilledLimitOrder(doneLimit.get());
         } else if (event.getSize() > 0l && !doneLimit.isPresent()) {
           throw new OrderEventException("order for cancel order event not found on the book");
         } else if (event.getSize() > 0l && doneLimit.isPresent()) {
-          checkAndReturnCanceledLimit(event, doneLimit.get());
+          checkCanceledLimitOrder(event, doneLimit.get());
         }
         break;
     }
