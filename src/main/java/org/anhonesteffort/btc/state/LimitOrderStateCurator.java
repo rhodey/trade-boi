@@ -31,7 +31,7 @@ public class LimitOrderStateCurator extends StateCurator {
     super(book, computations);
   }
 
-  private Order newOrderForEvent(OrderEvent event) throws OrderEventException {
+  private Order newLimitOrderForEvent(OrderEvent event) throws OrderEventException {
     if (event.getPrice() > 0l && event.getSize() > 0l) {
       return new Order(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
@@ -95,7 +95,7 @@ public class LimitOrderStateCurator extends StateCurator {
   protected void onEvent(OrderEvent event) throws OrderEventException {
     switch (event.getType()) {
       case LIMIT_RX:
-        Order rxLimit = newOrderForEvent(event);
+        Order rxLimit = newLimitOrderForEvent(event);
         if (state.getRxLimitOrders().put(rxLimit.getOrderId(), rxLimit) != null) {
           throw new OrderEventException("limit order " + rxLimit.getOrderId() + " already in the limit rx state map");
         }
@@ -103,7 +103,7 @@ public class LimitOrderStateCurator extends StateCurator {
 
       case LIMIT_OPEN:
         checkRxLimitOrderForOpen(event);
-        Order      openLimit = newOrderForEvent(event);
+        Order      openLimit = newLimitOrderForEvent(event);
         TakeResult result    = state.getOrderBook().add(openLimit);
         if (result.getTakeSize() > 0l) {
           throw new OrderEventException("opened limit order took " + result.getTakeSize() + " from the book");
