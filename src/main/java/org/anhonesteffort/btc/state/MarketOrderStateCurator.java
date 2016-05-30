@@ -34,7 +34,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super(book, computations);
   }
 
-  private MarketOrder takePooledMarketOrder(OrderEvent marketRx) throws OrderEventException {
+  private MarketOrder newMarketOrder(OrderEvent marketRx) throws OrderEventException {
     if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
       return new MarketOrder(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
@@ -47,7 +47,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
-        MarketOrder rxMarket = takePooledMarketOrder(event);
+        MarketOrder rxMarket = newMarketOrder(event);
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
           throw new OrderEventException("market order " + rxMarket.getOrderId() + " already in the market state map");
         }
