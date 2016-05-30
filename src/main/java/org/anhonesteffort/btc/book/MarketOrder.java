@@ -19,19 +19,12 @@ package org.anhonesteffort.btc.book;
 
 public class MarketOrder extends Order {
 
-  private long funds;
-  private long fundsRemaining;
-  private long volumeRemoved;
+  private final long funds;
+  private       long fundsRemaining;
+  private       long volumeRemoved;
 
   public MarketOrder(String orderId, Side side, long size, long funds) {
     super(orderId, side, 0l, size);
-    this.funds          = funds;
-    this.fundsRemaining = funds;
-    volumeRemoved       = 0l;
-  }
-
-  protected void initMarket(String orderId, Side side, long size, long funds) {
-    super.init(orderId, side, 0l, size);
     this.funds          = funds;
     this.fundsRemaining = funds;
     volumeRemoved       = 0l;

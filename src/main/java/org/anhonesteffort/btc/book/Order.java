@@ -21,18 +21,14 @@ public class Order {
 
   public enum Side { ASK, BID }
 
-  protected String orderId;
-  protected Side   side;
-  protected long   price;
-  protected long   size;
-  protected long   sizeRemaining;
-  protected long   valueRemoved;
+  protected final String orderId;
+  protected final Side   side;
+  protected final long   price;
+  protected final long   size;
+  protected       long   sizeRemaining;
+  protected       long   valueRemoved;
 
   public Order(String orderId, Side side, long price, long size) {
-    init(orderId, side, price, size);
-  }
-
-  protected void init(String orderId, Side side, long price, long size) {
     this.orderId       = orderId;
     this.side          = side;
     this.price         = price;
