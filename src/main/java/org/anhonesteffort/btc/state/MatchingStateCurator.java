@@ -40,7 +40,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     super(book, computations);
   }
 
-  private Order takePooledTakerOrder(OrderEvent match) throws OrderEventException {
+  private Order newTakerOrder(OrderEvent match) throws OrderEventException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
         return new Order(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
@@ -81,7 +81,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     super.onEvent(event);
     if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 
-    Order      taker  = takePooledTakerOrder(event);
+    Order      taker  = newTakerOrder(event);
     TakeResult result = state.getOrderBook().add(taker);
 
     checkEventAgainstTakeResult(event, taker, result);
