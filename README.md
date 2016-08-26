@@ -2,6 +2,16 @@
 
 messing around with coinbase trading.
 
+## Build
+```
+$ mvn package
+```
+
+## Run
+```
+$ java -jar target/coinbase-0.1.jar
+```
+
 ## License
 
 Copyright 2016 An Honest Effort LLC

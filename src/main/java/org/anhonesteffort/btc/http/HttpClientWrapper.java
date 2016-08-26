@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.anhonesteffort.btc.http.response.OrderBookCallback;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
 import java.util.concurrent.CompletableFuture;

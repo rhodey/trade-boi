@@ -15,11 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.http;
+package org.anhonesteffort.btc.http.response;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import okhttp3.Call;
 import okhttp3.Response;
+import org.anhonesteffort.btc.http.HttpCallback;
+import org.anhonesteffort.btc.http.HttpException;
 import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
 import java.io.IOException;
