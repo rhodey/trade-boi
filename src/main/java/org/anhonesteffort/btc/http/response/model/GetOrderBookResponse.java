@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.http.response;
+package org.anhonesteffort.btc.http.response.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.book.Order;
@@ -25,13 +25,13 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Queue;
 
-public class OrderBookResponse {
+public class GetOrderBookResponse {
 
-  private final Queue<OrderResponse> asks = new ArrayDeque<>(500);
-  private final Queue<OrderResponse> bids = new ArrayDeque<>(500);
+  private final Queue<GetOrderBookResponseEntry> asks = new ArrayDeque<>(500);
+  private final Queue<GetOrderBookResponseEntry> bids = new ArrayDeque<>(500);
   private final long sequence;
 
-  public OrderBookResponse(JsonNode root) throws HttpException {
+  public GetOrderBookResponse(JsonNode root) throws HttpException {
     if (root.get("sequence") != null && root.get("sequence").isNumber()) {
       this.sequence = root.get("sequence").longValue();
     } else {
@@ -43,10 +43,10 @@ public class OrderBookResponse {
 
     if (root.path("asks").isArray() && root.path("bids").isArray()) {
       while (asks.hasNext()) {
-        this.asks.add(new OrderResponse(Order.Side.ASK, asks.next()));
+        this.asks.add(new GetOrderBookResponseEntry(Order.Side.ASK, asks.next()));
       }
       while (bids.hasNext()) {
-        this.bids.add(new OrderResponse(Order.Side.BID, bids.next()));
+        this.bids.add(new GetOrderBookResponseEntry(Order.Side.BID, bids.next()));
       }
     } else {
       throw new HttpException("json root has invalid asks and/or bids tag(s)");
@@ -57,11 +57,11 @@ public class OrderBookResponse {
     return sequence;
   }
 
-  public Queue<OrderResponse> getAsks() {
+  public Queue<GetOrderBookResponseEntry> getAsks() {
     return asks;
   }
 
-  public Queue<OrderResponse> getBids() {
+  public Queue<GetOrderBookResponseEntry> getBids() {
     return bids;
   }
 

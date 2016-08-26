@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.http.response;
+package org.anhonesteffort.btc.http.response.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpException;
 
-public class OrderResponse {
+public class GetOrderBookResponseEntry {
 
   private final Order.Side side;
   private final String orderId;
   private final double price;
   private final double size;
 
-  public OrderResponse(Order.Side side, JsonNode node) throws HttpException {
+  public GetOrderBookResponseEntry(Order.Side side, JsonNode node) throws HttpException {
     this.side = side;
     orderId   = node.get(2).textValue();
     try {

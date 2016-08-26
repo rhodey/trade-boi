@@ -17,30 +17,21 @@
 
 package org.anhonesteffort.btc.http.response;
 
-import com.fasterxml.jackson.databind.ObjectReader;
 import okhttp3.Call;
 import okhttp3.Response;
 import org.anhonesteffort.btc.http.HttpCallback;
-import org.anhonesteffort.btc.http.HttpException;
-import org.anhonesteffort.btc.http.response.OrderBookResponse;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class OrderBookCallback extends HttpCallback<OrderBookResponse> {
+public class GetAccountsCallback extends HttpCallback<Response> {
 
-  private final ObjectReader reader;
-
-  public OrderBookCallback(ObjectReader reader, CompletableFuture<OrderBookResponse> future) {
+  public GetAccountsCallback(CompletableFuture<Response> future) {
     super(future);
-    this.reader = reader;
   }
 
   @Override
-  protected void set(Call call, Response response) throws IOException, HttpException {
-    future.complete(new OrderBookResponse(
-        reader.readTree(response.body().charStream())
-    ));
+  protected void set(Call call, Response response) {
+    future.complete(response);
   }
 
 }

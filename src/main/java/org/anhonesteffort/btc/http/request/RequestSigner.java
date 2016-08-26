@@ -58,18 +58,24 @@ public class RequestSigner {
   }
 
   private String signatureFor(String timestamp, String method, String path, Optional<RequestBody> body)
-      throws IOException, InvalidKeyException, CloneNotSupportedException
+      throws IOException
   {
-    String        plaintext = timestamp + method + path + (body.isPresent() ? toString(body.get()) : "");
-    SecretKeySpec hmacSpec  = new SecretKeySpec(secretKey, "HmacSHA256");
-    Mac           hmac      = (Mac) this.hmac.clone();
+    try {
 
-    hmac.init(hmacSpec);
-    return Base64.getEncoder().encodeToString(hmac.doFinal(plaintext.getBytes()));
+      String        plaintext = timestamp + method + path + (body.isPresent() ? toString(body.get()) : "");
+      SecretKeySpec hmacSpec  = new SecretKeySpec(secretKey, "HmacSHA256");
+      Mac           hmac      = (Mac) this.hmac.clone();
+
+      hmac.init(hmacSpec);
+      return Base64.getEncoder().encodeToString(hmac.doFinal(plaintext.getBytes()));
+
+    } catch (InvalidKeyException | CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void sign(Request.Builder builder, String method, String path, Optional<RequestBody> body)
-      throws IOException, InvalidKeyException, CloneNotSupportedException
+      throws IOException
   {
     String timestamp = ((Long) Instant.now().getEpochSecond()).toString();
 

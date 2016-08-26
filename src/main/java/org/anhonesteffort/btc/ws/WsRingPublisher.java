@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.lmax.disruptor.RingBuffer;
 import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.response.OrderBookResponse;
-import org.anhonesteffort.btc.http.response.OrderResponse;
+import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
+import org.anhonesteffort.btc.http.response.model.GetOrderBookResponseEntry;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.message.ChangeAccessor;
 import org.anhonesteffort.btc.ws.message.DoneAccessor;
@@ -140,7 +140,7 @@ public class WsRingPublisher {
     publishCurrentEvent();
   }
 
-  private void publishBookOrder(OrderResponse order, long nanoseconds) {
+  private void publishBookOrder(GetOrderBookResponseEntry order, long nanoseconds) {
     OrderEvent event = takeNextEvent();
     event.initLimitOpen(
         nanoseconds, order.getOrderId(), order.getSide(),
@@ -149,7 +149,7 @@ public class WsRingPublisher {
     publishCurrentEvent();
   }
 
-  public void publishBook(OrderBookResponse book, long nanoseconds) {
+  public void publishBook(GetOrderBookResponse book, long nanoseconds) {
     OrderEvent event = takeNextEvent();
     event.initRebuildStart(nanoseconds);
     publishCurrentEvent();

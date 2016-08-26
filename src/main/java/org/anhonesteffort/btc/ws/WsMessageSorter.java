@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.http.response.OrderBookResponse;
+import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 import org.anhonesteffort.btc.ws.message.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class WsMessageSorter {
       throws WsException, InterruptedException, ExecutionException
   {
     if (!messageSeqLast.isPresent()) {
-      OrderBookResponse orderBook = http.geOrderBook().get();
+      GetOrderBookResponse orderBook = http.geOrderBook().get();
       messageSeqLast = Optional.of(orderBook.getSequence());
       publisher.publishBook(orderBook, System.nanoTime());
     } else if (sequence == (messageSeqLast.get() + 1l)) {
@@ -54,7 +54,7 @@ public class WsMessageSorter {
       publisher.publishMessage(root, type, nanoseconds);
     } else if (sequence > messageSeqLast.get()) {
       log.warn("received out of order seq -> " + sequence + ", expected -> " + (messageSeqLast.get() + 1));
-      OrderBookResponse orderBook = http.geOrderBook().get();
+      GetOrderBookResponse orderBook = http.geOrderBook().get();
       messageSeqLast = Optional.of(orderBook.getSequence());
       publisher.publishBook(orderBook, System.nanoTime());
     }

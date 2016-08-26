@@ -20,7 +20,7 @@ package org.anhonesteffort.btc;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.http.request.OrderRequestFactory;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
@@ -55,12 +55,13 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    RequestSigner       signer   = new RequestSigner("9b934b9ea6b87a16613a6b608bddd73e", "nYAbNSqJsIzKe6d27lLJOIbetmYck4PY4OE8noAe1Jap4iLoU6cjGJa6qlatGux6bApw+K8/viE70nwlvwO4lw==", "temp1020");
-    OrderRequestFactory requests = new OrderRequestFactory(signer);
+    RequestSigner     signer = new RequestSigner("9b934b9ea6b87a16613a6b608bddd73e", "nYAbNSqJsIzKe6d27lLJOIbetmYck4PY4OE8noAe1Jap4iLoU6cjGJa6qlatGux6bApw+K8/viE70nwlvwO4lw==", "temp1020");
+    HttpClientWrapper http   = new HttpClientWrapper(signer);
 
     WsService wsService = new WsService(
         new BlockingWaitStrategy(), WS_BUFFER_SIZE,
-        new EventHandler[] { handlerFor(new ScamStrategy(requests, caster)) }, caster
+        new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
+        http, caster
     );
 
     try {

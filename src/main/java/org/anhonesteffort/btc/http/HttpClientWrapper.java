@@ -19,21 +19,41 @@ package org.anhonesteffort.btc.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.anhonesteffort.btc.http.response.OrderBookCallback;
-import org.anhonesteffort.btc.http.response.OrderBookResponse;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.anhonesteffort.btc.http.response.GetAccountsCallback;
+import org.anhonesteffort.btc.http.response.PostOrderCallback;
+import org.anhonesteffort.btc.http.request.PostOrderRequest;
+import org.anhonesteffort.btc.http.request.RequestSigner;
+import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
+import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 
+import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpClientWrapper {
 
-  private static final String API_BASE = "https://api.exchange.coinbase.com";
+  private static final MediaType TYPE_JSON         = MediaType.parse("application/json; charset=utf-8");
+  private static final String    API_BASE          = "https://api.exchange.coinbase.com";
+  private static final String    API_PATH_BOOK     = "/products/BTC-USD/book?level=3";
+  private static final String    API_PATH_ORDERS   = "/orders";
+  private static final String    API_PATH_ACCOUNTS = "/accounts";
 
   private final OkHttpClient  client   = HttpClient.getInstance();
   private final ObjectReader  reader   = new ObjectMapper().reader();
+  private final ObjectWriter  writer   = new ObjectMapper().writer();
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
+  private final RequestSigner signer;
+
+  public HttpClientWrapper(RequestSigner signer) {
+    this.signer = signer;
+  }
 
   public void shutdown() {
     shutdown.set(true);
@@ -48,13 +68,38 @@ public class HttpClientWrapper {
     }
   }
 
-  public CompletableFuture<OrderBookResponse> geOrderBook() {
-    CompletableFuture<OrderBookResponse> future = new CompletableFuture<>();
+  public CompletableFuture<GetOrderBookResponse> geOrderBook() {
+    CompletableFuture<GetOrderBookResponse> future = new CompletableFuture<>();
 
     if (!setExceptionIfShutdown(future)) {
       client.newCall(new Request.Builder().url(
-          API_BASE + "/products/BTC-USD/book?level=3"
-      ).build()).enqueue(new OrderBookCallback(reader, future));
+          API_BASE + API_PATH_BOOK
+      ).build()).enqueue(new GetOrderBookCallback(reader, future));
+    }
+
+    return future;
+  }
+
+  public CompletableFuture<Response> getAccounts() throws IOException {
+    CompletableFuture<Response> future = new CompletableFuture<>();
+
+    if (!setExceptionIfShutdown(future)) {
+      Request.Builder request = new Request.Builder().url(API_BASE + API_PATH_ACCOUNTS).get();
+      signer.sign(request, "GET", API_PATH_ACCOUNTS, Optional.empty());
+      client.newCall(request.build()).enqueue(new GetAccountsCallback(future));
+    }
+
+    return future;
+  }
+
+  public CompletableFuture<Response> postOrder(PostOrderRequest order) throws IOException {
+    CompletableFuture<Response> future = new CompletableFuture<>();
+
+    if (!setExceptionIfShutdown(future)) {
+      RequestBody     body    = RequestBody.create(TYPE_JSON, writer.writeValueAsString(order));
+      Request.Builder request = new Request.Builder().url(API_BASE + API_PATH_ORDERS).post(body);
+      signer.sign(request, "POST", API_PATH_ORDERS, Optional.of(body));
+      client.newCall(request.build()).enqueue(new PostOrderCallback(future));
     }
 
     return future;

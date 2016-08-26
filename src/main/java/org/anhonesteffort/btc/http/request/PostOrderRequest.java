@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.http.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrderRequest {
+public class PostOrderRequest {
 
   @JsonProperty private final String product_id;
   @JsonProperty private final String client_oid;
@@ -30,7 +30,7 @@ public class OrderRequest {
   @JsonProperty private final String stp;
   @JsonProperty private final String post_only;
 
-  public OrderRequest(String clientOid, String side, String price, String size) {
+  public PostOrderRequest(String clientOid, String side, String price, String size) {
     product_id = "BTC-USD";
     type       = "limit";
     stp        = "cb";

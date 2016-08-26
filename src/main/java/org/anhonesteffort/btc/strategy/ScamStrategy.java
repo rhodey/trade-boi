@@ -17,23 +17,17 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.compute.SummingComputation;
 import org.anhonesteffort.btc.compute.TakeVolumeComputation;
-import org.anhonesteffort.btc.http.HttpClient;
-import org.anhonesteffort.btc.http.request.OrderRequestFactory;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.util.Optional;
 
 public class ScamStrategy extends Strategy<Void> {
@@ -52,12 +46,12 @@ public class ScamStrategy extends Strategy<Void> {
   private final SummingComputation sellVolumeRecent = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), RECENT_PERIOD_MS);
   private final SummingComputation sellVolumeNow    = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), NOW_PERIOD_MS);
 
-  private final OrderRequestFactory requests;
+  private final HttpClientWrapper http;
   private final LongCaster caster;
 
-  public ScamStrategy(OrderRequestFactory requests, LongCaster caster) {
-    this.requests = requests;
-    this.caster   = caster;
+  public ScamStrategy(HttpClientWrapper http, LongCaster caster) {
+    this.http   = http;
+    this.caster = caster;
     addChildren(spread, buyVolumeRecent, buyVolumeNow, sellVolumeRecent, sellVolumeNow);
   }
 
@@ -116,21 +110,16 @@ public class ScamStrategy extends Strategy<Void> {
     log.info("on results invalidated");
     try {
 
-      HttpClient.getInstance().newCall(requests.requestAccounts()).enqueue(
-          new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-              log.info("on failure", e);
-            }
+      http.getAccounts().whenComplete((ok, err) -> {
+        if (err == null) {
+          try                   { log.info("got accounts -> " + ok.body().string()); }
+          catch (IOException e) { log.error("error writing accounts response to string", e);}
+        } else {
+          log.error("error getting accounts", err);
+        }
+      });
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-              log.info("on response -> " + response.body().string());
-            }
-          }
-      );
-
-    } catch (IOException | InvalidKeyException | CloneNotSupportedException e) {
+    } catch (IOException e) {
       log.error("error requesting account list", e);
     }
   }

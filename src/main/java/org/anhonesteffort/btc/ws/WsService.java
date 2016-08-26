@@ -61,18 +61,20 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private static final Integer READ_TIMEOUT_MS    = 30_000;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-  private final HttpClientWrapper       http           = new HttpClientWrapper();
 
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
+  private final HttpClientWrapper          http;
   private final LongCaster                 caster;
 
   private Channel channel;
 
   public WsService(
-      WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers, LongCaster caster
+      WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers,
+      HttpClientWrapper http, LongCaster caster
   ) {
     this.handlers = handlers;
+    this.http     = http;
     this.caster   = caster;
     wsDisruptor   = new Disruptor<>(
         this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
