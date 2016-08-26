@@ -37,7 +37,7 @@ public class GetOrderBookCallback extends HttpCallback<GetOrderBookResponse> {
   }
 
   @Override
-  protected void set(Call call, Response response) throws IOException, HttpException {
+  protected void complete(Call call, Response response) throws IOException, HttpException {
     future.complete(new GetOrderBookResponse(
         reader.readTree(response.body().charStream())
     ));

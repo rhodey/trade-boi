@@ -30,6 +30,7 @@ import org.anhonesteffort.btc.http.response.PostOrderCallback;
 import org.anhonesteffort.btc.http.request.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
+import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 
 import java.io.IOException;
@@ -80,13 +81,13 @@ public class HttpClientWrapper {
     return future;
   }
 
-  public CompletableFuture<Response> getAccounts() throws IOException {
-    CompletableFuture<Response> future = new CompletableFuture<>();
+  public CompletableFuture<GetAccountsResponse> getAccounts() throws IOException {
+    CompletableFuture<GetAccountsResponse> future = new CompletableFuture<>();
 
     if (!setExceptionIfShutdown(future)) {
       Request.Builder request = new Request.Builder().url(API_BASE + API_PATH_ACCOUNTS).get();
       signer.sign(request, "GET", API_PATH_ACCOUNTS, Optional.empty());
-      client.newCall(request.build()).enqueue(new GetAccountsCallback(future));
+      client.newCall(request.build()).enqueue(new GetAccountsCallback(reader, future));
     }
 
     return future;

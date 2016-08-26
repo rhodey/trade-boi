@@ -32,7 +32,7 @@ public abstract class HttpCallback<T> implements Callback {
     this.future = future;
   }
 
-  protected abstract void set(Call call, Response response) throws Exception;
+  protected abstract void complete(Call call, Response response) throws Exception;
 
   @Override
   public void onResponse(Call call, Response response) {
@@ -41,7 +41,7 @@ public abstract class HttpCallback<T> implements Callback {
       if (!response.isSuccessful()) {
         future.completeExceptionally(new HttpException("http returned code " + response.code()));
       } else {
-        set(call, response);
+        complete(call, response);
       }
 
     } catch (Throwable throwable) {

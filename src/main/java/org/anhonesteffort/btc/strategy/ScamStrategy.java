@@ -112,8 +112,7 @@ public class ScamStrategy extends Strategy<Void> {
 
       http.getAccounts().whenComplete((ok, err) -> {
         if (err == null) {
-          try                   { log.info("got accounts -> " + ok.body().string()); }
-          catch (IOException e) { log.error("error writing accounts response to string", e);}
+          log.info("got accounts -> " + ok.getAccounts().size());
         } else {
           log.error("error getting accounts", err);
         }

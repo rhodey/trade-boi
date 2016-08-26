@@ -30,7 +30,7 @@ public class PostOrderCallback extends HttpCallback<Response> {
   }
 
   @Override
-  protected void set(Call call, Response response) {
+  protected void complete(Call call, Response response) {
     future.complete(response);
   }
 
