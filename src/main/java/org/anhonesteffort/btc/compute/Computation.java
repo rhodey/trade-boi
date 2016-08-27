@@ -37,6 +37,10 @@ public abstract class Computation<T> {
     this.children.addAll(Arrays.asList(children));
   }
 
+  protected void removeChildren(Computation ... children) {
+    this.children.removeAll(Arrays.asList(children));
+  }
+
   protected abstract T computeNextResult(State state, long nanoseconds);
 
   public T getResult() {

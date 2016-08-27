@@ -27,18 +27,16 @@ import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
 
 public class ScamStrategy extends Strategy<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
 
-  private static final Integer RECENT_PERIOD_MS = 1000 * 30;
-  private static final Integer NOW_PERIOD_MS    = 1000 *  5;
-
-  private static final Double BULLISH_THRESHOLD_BTC   = 1.50d;
-  private static final Double BULLISH_THRESHOLD_SCORE = 1.25d;
+  private static final Integer RECENT_PERIOD_MS        = 1000 * 30;
+  private static final Integer NOW_PERIOD_MS           = 1000 *  5;
+  private static final Double  BULLISH_THRESHOLD_BTC   = 1.50d;
+  private static final Double  BULLISH_THRESHOLD_SCORE = 1.25d;
 
   private final SpreadComputation  spread           = new SpreadComputation();
   private final SummingComputation buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), RECENT_PERIOD_MS);
@@ -47,7 +45,16 @@ public class ScamStrategy extends Strategy<Void> {
   private final SummingComputation sellVolumeNow    = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), NOW_PERIOD_MS);
 
   private final HttpClientWrapper http;
-  private final LongCaster caster;
+  private final LongCaster        caster;
+
+  private ScamState state = ScamState.WAITING;
+  private PositionOpenStrategy openStrategy;
+  private PositionHoldStrategy holdStrategy;
+  private PositionCloseStrategy closeStrategy;
+
+  private enum ScamState {
+    WAITING, OPENING, OPEN, CLOSING, CLOSED
+  }
 
   public ScamStrategy(HttpClientWrapper http, LongCaster caster) {
     this.http   = http;
@@ -90,37 +97,62 @@ public class ScamStrategy extends Strategy<Void> {
     }
   }
 
+  private void handleWaiting(State state) {
+    if (isBullish() && caster.toDouble(spread.getResult().get()) > 0.01d) {
+      double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
+      double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
+      double bidPrice   = askCeiling - 0.01d;
+
+      log.info("wanna open ask position at " + bidPrice + " & hope bid floor raises from " + bidFloor);
+      openStrategy = new PositionOpenStrategy(http);
+      addChildren(openStrategy);
+      this.state = ScamState.OPENING;
+    }
+  }
+
   @Override
   protected Void computeNextResult(State state, long nanoseconds) {
-    if (isBullish() && caster.toDouble(spread.getResult().get()) > 0.01d) {
-      double bidCeiling = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
-      double askFloor   = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-      double bidPrice   = askFloor - 0.01d;
+    switch (this.state) {
+      case WAITING:
+        handleWaiting(state);
+        break;
 
-      log.info("wanna raise the bid ceiling from " + bidCeiling + " to " + bidPrice);
-      return null;
-    } else {
-      return null;
+      case OPENING:
+        if (openStrategy.getResult()) {
+          log.info("position opened!");
+          holdStrategy = new PositionHoldStrategy(http);
+          removeChildren(openStrategy);
+          addChildren(holdStrategy);
+          this.state = ScamState.OPEN;
+        }
+        break;
+
+      case OPEN:
+        if (holdStrategy.getResult()) {
+          log.info("position held!");
+          closeStrategy = new PositionCloseStrategy(http);
+          removeChildren(holdStrategy);
+          addChildren(closeStrategy);
+          this.state = ScamState.CLOSING;
+        }
+        break;
+
+      case CLOSING:
+        if (closeStrategy.getResult()) {
+          log.info("position closed!");
+          removeChildren(closeStrategy);
+          this.state = ScamState.CLOSED;
+        }
+        break;
     }
+
+    return null;
   }
 
   @Override
   public void onStateReset() {
     super.onStateReset();
     log.info("on results invalidated");
-    try {
-
-      http.getAccounts().whenComplete((ok, err) -> {
-        if (err == null) {
-          log.info("got accounts -> " + ok.getAccounts().size());
-        } else {
-          log.error("error getting accounts", err);
-        }
-      });
-
-    } catch (IOException e) {
-      log.error("error requesting account list", e);
-    }
   }
 
 }

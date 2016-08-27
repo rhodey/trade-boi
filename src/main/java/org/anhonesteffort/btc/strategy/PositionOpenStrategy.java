@@ -17,16 +17,36 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
+import org.anhonesteffort.btc.state.State;
 
+import java.io.IOException;
 import java.util.Optional;
 
-public abstract class Strategy<T> extends Computation<T> {
+public class PositionOpenStrategy extends Strategy<Boolean> {
 
-  protected Optional<Throwable> error = Optional.empty();
+  private Optional<GetAccountsResponse> accounts = Optional.empty();
 
-  public Optional<Throwable> getError() {
-    return error;
+  public PositionOpenStrategy(HttpClientWrapper http) {
+    try {
+
+      http.getAccounts().whenComplete((ok, err) -> {
+        if (err == null) {
+          accounts = Optional.of(ok);
+        } else {
+          error = Optional.of(err);
+        }
+      });
+
+    } catch (IOException e) {
+      error = Optional.of(e);
+    }
+  }
+
+  @Override
+  protected Boolean computeNextResult(State state, long nanoseconds) {
+    return accounts.isPresent();
   }
 
 }

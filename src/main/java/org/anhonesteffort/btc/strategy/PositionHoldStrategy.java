@@ -17,16 +17,18 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.state.State;
 
-import java.util.Optional;
+public class PositionHoldStrategy extends Strategy<Boolean> {
 
-public abstract class Strategy<T> extends Computation<T> {
+  public PositionHoldStrategy(HttpClientWrapper http) {
 
-  protected Optional<Throwable> error = Optional.empty();
+  }
 
-  public Optional<Throwable> getError() {
-    return error;
+  @Override
+  protected Boolean computeNextResult(State state, long nanoseconds) {
+    return Boolean.FALSE;
   }
 
 }
