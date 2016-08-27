@@ -59,7 +59,7 @@ public class SummingComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  public void onStateReset() {
+  public void onStateReset() throws ComputeException {
     super.onStateReset();
     history.clear();
     sum = 0l;

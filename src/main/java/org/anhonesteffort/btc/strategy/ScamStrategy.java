@@ -18,6 +18,7 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.compute.SummingComputation;
 import org.anhonesteffort.btc.compute.TakeVolumeComputation;
@@ -111,7 +112,7 @@ public class ScamStrategy extends Strategy<Void> {
   }
 
   @Override
-  protected Void computeNextResult(State state, long nanoseconds) {
+  protected Void advanceStrategy(State state, long nanoseconds) throws StrategyException {
     switch (this.state) {
       case WAITING:
         handleWaiting(state);
@@ -150,7 +151,7 @@ public class ScamStrategy extends Strategy<Void> {
   }
 
   @Override
-  public void onStateReset() {
+  public void onStateReset() throws ComputeException {
     super.onStateReset();
     log.info("on results invalidated");
   }

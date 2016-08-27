@@ -21,6 +21,7 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.compute.ComputeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,13 +58,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   protected abstract void onEvent(OrderEvent event) throws OrderEventException;
 
   @Override
-  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException {
+  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException, ComputeException {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();
         rebuilding = true;
         log.info("rebuilding order book");
-        computations.forEach(Computation::onStateReset);
+        for (Computation compute : computations) { compute.onStateReset(); }
         break;
 
       case REBUILD_END:
@@ -74,7 +75,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       default:
         onEvent(event);
         if (!rebuilding) {
-          computations.forEach(compute -> compute.onStateChange(state, event.getNanoseconds()));
+          for (Computation compute : computations) { compute.onStateChange(state, event.getNanoseconds()); }
         }
         cleanupTakersAndMakers();
     }

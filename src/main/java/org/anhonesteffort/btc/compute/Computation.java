@@ -41,19 +41,19 @@ public abstract class Computation<T> {
     this.children.removeAll(Arrays.asList(children));
   }
 
-  protected abstract T computeNextResult(State state, long nanoseconds);
+  protected abstract T computeNextResult(State state, long nanoseconds) throws ComputeException;
 
   public T getResult() {
     return result;
   }
 
-  public void onStateChange(State state, long nanoseconds) {
-    children.forEach(child -> child.onStateChange(state, nanoseconds));
+  public void onStateChange(State state, long nanoseconds) throws ComputeException {
+    for (Computation child : children) { child.onStateChange(state, nanoseconds); }
     result = computeNextResult(state, nanoseconds);
   }
 
-  public void onStateReset() {
-    children.forEach(Computation::onStateReset);
+  public void onStateReset() throws ComputeException {
+    for (Computation child : children) { child.onStateReset(); }
   }
 
 }

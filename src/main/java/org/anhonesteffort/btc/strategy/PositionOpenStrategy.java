@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc.strategy;
 
+import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
 import org.anhonesteffort.btc.state.State;
@@ -35,18 +36,24 @@ public class PositionOpenStrategy extends Strategy<Boolean> {
         if (err == null) {
           accounts = Optional.of(ok);
         } else {
-          error = Optional.of(err);
+          handleAsyncError(new StrategyException("api request completed with error", err));
         }
       });
 
     } catch (IOException e) {
-      error = Optional.of(e);
+      handleAsyncError(new StrategyException("error encoding api request", e));
     }
   }
 
   @Override
-  protected Boolean computeNextResult(State state, long nanoseconds) {
+  protected Boolean advanceStrategy(State state, long nanoseconds) {
     return accounts.isPresent();
+  }
+
+  @Override
+  public void onStateReset() throws ComputeException {
+    super.onStateReset();
+    throw new StrategyException("unable to handle state reset");
   }
 
 }

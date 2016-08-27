@@ -17,16 +17,16 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.compute.ComputeException;
 
-public class PositionCloseStrategy extends Strategy<Boolean> {
+public class StrategyException extends ComputeException {
 
-  public PositionCloseStrategy(HttpClientWrapper http) { }
+  public StrategyException(String message) {
+    super(message);
+  }
 
-  @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
-    return Boolean.FALSE;
+  public StrategyException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

@@ -22,12 +22,10 @@ import org.anhonesteffort.btc.state.State;
 
 public class PositionHoldStrategy extends Strategy<Boolean> {
 
-  public PositionHoldStrategy(HttpClientWrapper http) {
-
-  }
+  public PositionHoldStrategy(HttpClientWrapper http) { }
 
   @Override
-  protected Boolean computeNextResult(State state, long nanoseconds) {
+  protected Boolean advanceStrategy(State state, long nanoseconds) {
     return Boolean.FALSE;
   }
 

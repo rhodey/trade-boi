@@ -15,18 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.strategy;
+package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.state.State;
+public class ComputeException extends Exception {
 
-public class PositionCloseStrategy extends Strategy<Boolean> {
+  public ComputeException(String message) {
+    super(message);
+  }
 
-  public PositionCloseStrategy(HttpClientWrapper http) { }
-
-  @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
-    return Boolean.FALSE;
+  public ComputeException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }
