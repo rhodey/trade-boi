@@ -37,6 +37,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import org.anhonesteffort.btc.ScamConfig;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.util.LongCaster;
@@ -54,14 +55,13 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private static final Logger log = LoggerFactory.getLogger(WsService.class);
 
-  private static final String  WS_HOST            = "ws-feed.exchange.coinbase.com";
-  private static final String  WS_URI             = "wss://" + WS_HOST;
-  private static final Integer WS_PORT            =    443;
-  private static final Integer CONNECT_TIMEOUT_MS =  5_000;
-  private static final Integer READ_TIMEOUT_MS    = 30_000;
+  private static final String  WS_HOST = "ws-feed.exchange.coinbase.com";
+  private static final String  WS_URI  = "wss://" + WS_HOST;
+  private static final Integer WS_PORT =    443;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
+  private final ScamConfig                 config;
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
   private final HttpClientWrapper          http;
@@ -70,14 +70,15 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private Channel channel;
 
   public WsService(
-      WaitStrategy waitStrategy, int bufferSize, EventHandler<OrderEvent>[] handlers,
+      ScamConfig config, WaitStrategy waitStrategy, EventHandler<OrderEvent>[] handlers,
       HttpClientWrapper http, LongCaster caster
   ) {
+    this.config   = config;
     this.handlers = handlers;
     this.http     = http;
     this.caster   = caster;
     wsDisruptor   = new Disruptor<>(
-        this, bufferSize, new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
+        this, config.getWsBufferSize(), new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
     );
   }
 
@@ -99,11 +100,11 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
     bootstrap.group(new NioEventLoopGroup())
              .channel(NioSocketChannel.class)
-             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MS)
+             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getWsConnectTimeoutMs())
              .handler(new ChannelInitializer<SocketChannel>() {
                @Override
                protected void initChannel(SocketChannel channel) {
-                 channel.pipeline().addLast(new ReadTimeoutHandler(READ_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+                 channel.pipeline().addLast(new ReadTimeoutHandler(config.getWsReadTimeoutMs(), TimeUnit.MILLISECONDS));
                  channel.pipeline().addLast(sslContext.newHandler(channel.alloc(), WS_HOST, WS_PORT));
                  channel.pipeline().addLast(new HttpClientCodec());
                  channel.pipeline().addLast(new HttpObjectAggregator(8192));

@@ -40,11 +40,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpClientWrapper {
 
-  private static final MediaType TYPE_JSON         = MediaType.parse("application/json; charset=utf-8");
-  private static final String    API_BASE          = "https://api.exchange.coinbase.com";
-  private static final String    API_PATH_BOOK     = "/products/BTC-USD/book?level=3";
-  private static final String    API_PATH_ORDERS   = "/orders";
-  private static final String    API_PATH_ACCOUNTS = "/accounts";
+  private static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
+
+  private static final String API_BASE          = "https://api.exchange.coinbase.com";
+  private static final String API_PATH_BOOK     = "/products/BTC-USD/book?level=3";
+  private static final String API_PATH_ORDERS   = "/orders";
+  private static final String API_PATH_ACCOUNTS = "/accounts";
 
   private final OkHttpClient  client   = HttpClient.getInstance();
   private final ObjectReader  reader   = new ObjectMapper().reader();

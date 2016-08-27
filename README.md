@@ -7,6 +7,11 @@ messing around with coinbase trading.
 $ mvn package
 ```
 
+## Config
+```
+$ cp example-scam.properties scam.properties
+```
+
 ## Run
 ```
 $ java -jar target/coinbase-0.1.jar

@@ -31,6 +31,7 @@ import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
@@ -40,26 +41,28 @@ public class Scam {
 
   private static final Logger log = LoggerFactory.getLogger(Scam.class);
 
-  private static final Integer WS_BUFFER_SIZE  = 512;
-  private static final Integer LIMIT_INIT_SIZE =  16;
+  private final LongCaster caster = new LongCaster(0.000000000001d);
+  private final ExecutorService shutdownPool = Executors.newFixedThreadPool(2);
+  private final ScamConfig config;
 
-  private final LongCaster       caster       = new LongCaster(0.000000000001d);
-  private final ExecutorService  shutdownPool = Executors.newFixedThreadPool(2);
+  public Scam() throws IOException {
+    config = new ScamConfig();
+  }
 
   private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
     return new MatchingStateCurator(
-        new LimitOrderBook(LIMIT_INIT_SIZE),
+        new LimitOrderBook(config.getLimitInitSize()),
         new HashSet<>(Arrays.asList(strategies))
     );
   }
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    RequestSigner     signer = new RequestSigner("9b934b9ea6b87a16613a6b608bddd73e", "nYAbNSqJsIzKe6d27lLJOIbetmYck4PY4OE8noAe1Jap4iLoU6cjGJa6qlatGux6bApw+K8/viE70nwlvwO4lw==", "temp1020");
+    RequestSigner     signer = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
     HttpClientWrapper http   = new HttpClientWrapper(signer);
 
     WsService wsService = new WsService(
-        new BlockingWaitStrategy(), WS_BUFFER_SIZE,
+        config, new BlockingWaitStrategy(),
         new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
         http, caster
     );
