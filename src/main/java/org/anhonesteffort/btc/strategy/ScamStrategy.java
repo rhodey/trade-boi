@@ -23,6 +23,8 @@ import org.anhonesteffort.btc.compute.SpreadComputation;
 import org.anhonesteffort.btc.compute.SummingComputation;
 import org.anhonesteffort.btc.compute.TakeVolumeComputation;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.http.request.PostOrderRequest;
+import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ public class ScamStrategy extends Strategy<Void> {
   private static final Double  BULLISH_THRESHOLD_BTC   = 1.50d;
   private static final Double  BULLISH_THRESHOLD_SCORE = 1.25d;
 
+  private final RequestFactory     requests         = new RequestFactory();
   private final SpreadComputation  spread           = new SpreadComputation();
   private final SummingComputation buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), RECENT_PERIOD_MS);
   private final SummingComputation buyVolumeNow     = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), NOW_PERIOD_MS);
@@ -104,8 +107,10 @@ public class ScamStrategy extends Strategy<Void> {
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
       double bidPrice   = askCeiling - 0.01d;
 
-      log.info("wanna open ask position at " + bidPrice + " & hope bid floor raises from " + bidFloor);
-      openStrategy = new PositionOpenStrategy(http);
+      PostOrderRequest order = requests.newOrder(Order.Side.BID, 400.015d, 0.015d);
+      log.info("opening " + order.getSide() + " order for " + order.getSize() + " at " + order.getPrice());
+
+      openStrategy = new PositionOpenStrategy(http, order);
       addChildren(openStrategy);
       this.state = ScamState.OPENING;
     }
@@ -119,8 +124,8 @@ public class ScamStrategy extends Strategy<Void> {
         break;
 
       case OPENING:
-        if (openStrategy.getResult()) {
-          log.info("position opened!");
+        if (openStrategy.getResult().isPresent()) {
+          log.info("position opened with id " + openStrategy.getResult().get() + "!");
           holdStrategy = new PositionHoldStrategy(http);
           removeChildren(openStrategy);
           addChildren(holdStrategy);

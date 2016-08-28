@@ -38,6 +38,14 @@ public class ReceivedAccessor extends Accessor {
     }
   }
 
+  public String getClientOid(JsonNode root) {
+    if (root.get("client_oid") != null && root.get("client_oid").isTextual()) {
+      return root.get("client_oid").textValue();
+    } else {
+      return null;
+    }
+  }
+
   public double getSize(JsonNode root) {
     return doubleValueOrZero(root, "size");
   }

@@ -29,8 +29,9 @@ import java.util.Set;
 
 public class State {
 
-  private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
+  private final Map<String, String>      orderIdMap    = new HashMap<>();
   private final Map<String, Order>       rxLimitOrders = new HashMap<>();
+  private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
   private final Set<TakeResult>          takes         = new HashSet<>();
 
   private final LimitOrderBook orderBook;
@@ -43,8 +44,8 @@ public class State {
     return orderBook;
   }
 
-  public Set<TakeResult> getTakes() {
-    return takes;
+  public Map<String, String> getOrderIdMap() {
+    return orderIdMap;
   }
 
   public Map<String, Order> getRxLimitOrders() {
@@ -55,11 +56,16 @@ public class State {
     return marketOrders;
   }
 
+  public Set<TakeResult> getTakes() {
+    return takes;
+  }
+
   public void clear() {
+    orderIdMap.clear();
     orderBook.clear();
-    takes.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
+    takes.clear();
   }
 
 }

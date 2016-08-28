@@ -19,23 +19,23 @@ package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
+import org.anhonesteffort.btc.http.request.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
 
 import java.io.IOException;
 import java.util.Optional;
 
-public class PositionOpenStrategy extends Strategy<Boolean> {
+public class PositionOpenStrategy extends Strategy<Optional<String>> {
 
-  private Optional<GetAccountsResponse> accounts = Optional.empty();
+  private final String clientOid;
+  private Optional<String> serverOid = Optional.empty();
 
-  public PositionOpenStrategy(HttpClientWrapper http) {
+  public PositionOpenStrategy(HttpClientWrapper http, PostOrderRequest order) {
+    clientOid = order.getClientOid();
     try {
 
-      http.getAccounts().whenComplete((ok, err) -> {
-        if (err == null) {
-          accounts = Optional.of(ok);
-        } else {
+      http.postOrder(order).whenComplete((ok, err) -> {
+        if (err != null) {
           handleAsyncError(new StrategyException("api request completed with error", err));
         }
       });
@@ -46,8 +46,9 @@ public class PositionOpenStrategy extends Strategy<Boolean> {
   }
 
   @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
-    return accounts.isPresent();
+  protected Optional<String> advanceStrategy(State state, long nanoseconds) {
+    if (!serverOid.isPresent()) { serverOid = Optional.ofNullable(state.getOrderIdMap().get(clientOid)); }
+    return serverOid;
   }
 
   @Override

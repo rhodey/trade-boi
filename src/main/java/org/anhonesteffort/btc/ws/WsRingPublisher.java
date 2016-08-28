@@ -78,7 +78,7 @@ public class WsRingPublisher {
       case Accessor.TYPE_RECEIVED:
         if (receive.getOrderType(root).equals("limit")) {
           event.initLimitRx(
-              nanoseconds, receive.getOrderId(root), side,
+              nanoseconds, receive.getOrderId(root), receive.getClientOid(root), side,
               caster.fromDouble(receive.getPrice(root)), caster.fromDouble(receive.getSize(root))
           );
         } else if (receive.getOrderType(root).equals("market")) {

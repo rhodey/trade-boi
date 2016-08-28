@@ -41,4 +41,20 @@ public class PostOrderRequest {
     this.size  = size;
   }
 
+  public String getClientOid() {
+    return client_oid;
+  }
+
+  public String getSide() {
+    return side;
+  }
+
+  public String getPrice() {
+    return price;
+  }
+
+  public String getSize() {
+    return size;
+  }
+
 }
