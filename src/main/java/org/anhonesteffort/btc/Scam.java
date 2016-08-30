@@ -28,22 +28,20 @@ import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.strategy.ScamStrategy;
 import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.util.LongCaster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Scam {
 
-  private static final Logger log = LoggerFactory.getLogger(Scam.class);
-
-  private final LongCaster caster = new LongCaster(0.000000000001d);
-  private final ExecutorService shutdownPool = Executors.newFixedThreadPool(2);
-  private final ScamConfig config;
+  private final LongCaster      caster       = new LongCaster(0.000000000001d);
+  private final ExecutorService shutdownPool = Executors.newFixedThreadPool(1);
+  private final ScamConfig      config;
 
   public Scam() throws IOException {
     config = new ScamConfig();
@@ -58,8 +56,9 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    RequestSigner     signer = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
-    HttpClientWrapper http   = new HttpClientWrapper(signer);
+    RequestSigner     signer   = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
+    HttpClientWrapper http     = new HttpClientWrapper(signer);
+    AtomicBoolean     shutdown = new AtomicBoolean(false);
 
     WsService wsService = new WsService(
         config, new BlockingWaitStrategy(),
@@ -67,14 +66,21 @@ public class Scam {
         http, caster
     );
 
-    try {
+    try (Scanner console = new Scanner(System.in)) {
 
       wsService.start();
-      wsService.getShutdownFuture().get();
+      wsService.getShutdownFuture().whenComplete((ok, err) -> {
+        if (!shutdown.getAndSet(true)) {
+          shutdownPool.submit(new ShutdownProcedure(wsService));
+        }
+      });
+
+      while (console.hasNextLine()) { console.nextLine(); }
 
     } finally {
-      log.warn("shutdown procedure initiated");
-      shutdownPool.submit(new ShutdownProcedure(shutdownPool, wsService));
+      if (!shutdown.getAndSet(true)) {
+        shutdownPool.submit(new ShutdownProcedure(wsService));
+      }
     }
   }
 

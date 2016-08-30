@@ -21,19 +21,12 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-
 public class ShutdownProcedure implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
-
-  private final ExecutorService executor;
   private final WsService wsService;
 
-  public ShutdownProcedure(ExecutorService executor, WsService wsService) {
-    this.executor  = executor;
+  public ShutdownProcedure(WsService wsService) {
     this.wsService = wsService;
   }
 
@@ -41,8 +34,9 @@ public class ShutdownProcedure implements Runnable {
   public void run() {
     try {
 
+      log.warn("shutdown procedure initiated");
       wsService.shutdown();
-      executor.submit(new OrderCloser()).get(10, TimeUnit.SECONDS);
+      Thread.sleep(1000); // todo: close orders
       log.info("successfully closed open orders, exiting");
 
     } catch (Throwable e) {
@@ -50,17 +44,6 @@ public class ShutdownProcedure implements Runnable {
     }
 
     System.exit(1);
-  }
-
-  private static class OrderCloser implements Callable<Void> {
-
-    @Override
-    public Void call() throws InterruptedException {
-      // todo: close all open orders
-      Thread.sleep(1000);
-      return null;
-    }
-
   }
 
 }
