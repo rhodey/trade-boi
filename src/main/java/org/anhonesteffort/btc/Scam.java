@@ -47,7 +47,7 @@ public class Scam {
   public Scam() throws IOException, NoSuchAlgorithmException {
     config = new ScamConfig();
     http   = new HttpClientWrapper(new RequestSigner(
-        config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword()
+        config.getGdaxAccessKey(), config.getGdaxSecretKey(), config.getGdaxPassword()
     ));
   }
 

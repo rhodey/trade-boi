@@ -30,9 +30,9 @@ public class ScamConfig {
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
   private final Long    wsReadTimeoutMs;
-  private final String  coinbaseAccessKey;
-  private final String  coinbaseSecretKey;
-  private final String  coinbaseKeyPassword;
+  private final String  gdaxAccessKey;
+  private final String  gdaxSecretKey;
+  private final String  gdaxPassword;
   private final Boolean statsEnabled;
   private final Integer statsPort;
 
@@ -40,15 +40,15 @@ public class ScamConfig {
     Properties properties = new Properties();
     properties.load(new FileInputStream("scam.properties"));
 
-    limitInitSize       = Integer.parseInt(properties.getProperty("limit_initial_size"));
-    wsBufferSize        = Integer.parseInt(properties.getProperty("ws_buffer_size"));
-    wsConnectTimeoutMs  = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
-    wsReadTimeoutMs     = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
-    coinbaseAccessKey   = properties.getProperty("coinbase_access_key");
-    coinbaseSecretKey   = properties.getProperty("coinbase_secret_key");
-    coinbaseKeyPassword = properties.getProperty("coinbase_key_password");
-    statsEnabled        = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
-    statsPort           = Integer.parseInt(properties.getProperty("stats_port"));
+    limitInitSize      = Integer.parseInt(properties.getProperty("limit_init_size"));
+    wsBufferSize       = Integer.parseInt(properties.getProperty("ws_buffer_size"));
+    wsConnectTimeoutMs = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
+    wsReadTimeoutMs    = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
+    gdaxAccessKey      = properties.getProperty("gdax_access_key");
+    gdaxSecretKey      = properties.getProperty("gdax_secret_key");
+    gdaxPassword       = properties.getProperty("gdax_key_password");
+    statsEnabled       = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
+    statsPort          = Integer.parseInt(properties.getProperty("stats_port"));
   }
 
   public Integer getLimitInitSize() {
@@ -71,16 +71,16 @@ public class ScamConfig {
     return new BlockingWaitStrategy();
   }
 
-  public String getCoinbaseAccessKey() {
-    return coinbaseAccessKey;
+  public String getGdaxAccessKey() {
+    return gdaxAccessKey;
   }
 
-  public String getCoinbaseSecretKey() {
-    return coinbaseSecretKey;
+  public String getGdaxSecretKey() {
+    return gdaxSecretKey;
   }
 
-  public String getCoinbaseKeyPassword() {
-    return coinbaseKeyPassword;
+  public String getGdaxPassword() {
+    return gdaxPassword;
   }
 
   public Boolean getStatsEnabled() {
