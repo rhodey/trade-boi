@@ -32,15 +32,13 @@ import org.anhonesteffort.btc.util.LongCaster;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Scam {
 
-  private final LongCaster      caster       = new LongCaster(0.000000000001d);
-  private final ExecutorService shutdownPool = Executors.newFixedThreadPool(1);
+  private final LongCaster      caster = new LongCaster(0.000000000001d);
+  private final ExecutorService pool   = Executors.newFixedThreadPool(2);
   private final ScamConfig      config;
 
   public Scam() throws IOException {
@@ -56,32 +54,16 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    RequestSigner     signer   = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
-    HttpClientWrapper http     = new HttpClientWrapper(signer);
-    AtomicBoolean     shutdown = new AtomicBoolean(false);
-
-    WsService wsService = new WsService(
+    RequestSigner     signer    = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
+    HttpClientWrapper http      = new HttpClientWrapper(signer);
+    WsService         wsService = new WsService(
         config, new BlockingWaitStrategy(),
         new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
         http, caster
     );
 
-    try (Scanner console = new Scanner(System.in)) {
-
-      wsService.start();
-      wsService.getShutdownFuture().whenComplete((ok, err) -> {
-        if (!shutdown.getAndSet(true)) {
-          shutdownPool.submit(new ShutdownProcedure(wsService));
-        }
-      });
-
-      while (console.hasNextLine()) { console.nextLine(); }
-
-    } finally {
-      if (!shutdown.getAndSet(true)) {
-        shutdownPool.submit(new ShutdownProcedure(wsService));
-      }
-    }
+    wsService.start();
+    pool.submit(new ShutdownProcedure(pool, wsService)).get();
   }
 
   public static void main(String[] args) throws Exception {

@@ -21,29 +21,53 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShutdownProcedure implements Runnable {
+import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class ShutdownProcedure implements Callable<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
+  private final ExecutorService pool;
   private final WsService wsService;
 
-  public ShutdownProcedure(WsService wsService) {
+  public ShutdownProcedure(ExecutorService pool, WsService wsService) {
+    this.pool      = pool;
     this.wsService = wsService;
   }
 
   @Override
-  public void run() {
-    try {
+  public Void call() {
+    AtomicBoolean shutdown = new AtomicBoolean(false);
+    Scanner       console  = new Scanner(System.in);
 
-      log.warn("shutdown procedure initiated");
-      wsService.shutdown();
-      Thread.sleep(1000); // todo: close orders
-      log.info("successfully closed open orders, exiting");
+    wsService.getShutdownFuture().whenComplete((ok, err) -> {
+      if (!shutdown.getAndSet(true)) { pool.submit(new OrderClosingRunnable()); }
+    });
 
-    } catch (Throwable e) {
-      log.error("failed to close open orders, exiting", e);
+    while (console.hasNextLine()) { console.nextLine(); }
+    if (!shutdown.getAndSet(true)) { pool.submit(new OrderClosingRunnable()); }
+    console.close();
+
+    return null;
+  }
+
+  private static class OrderClosingRunnable implements Runnable {
+    @Override
+    public void run() {
+      try {
+
+        log.warn("shutdown procedure initiated");
+        Thread.sleep(1000); // todo: close orders
+        log.info("successfully closed open orders, exiting");
+
+      } catch (Throwable e) {
+        log.error("failed to close open orders, exiting", e);
+      }
+
+      System.exit(1);
     }
-
-    System.exit(1);
   }
 
 }
