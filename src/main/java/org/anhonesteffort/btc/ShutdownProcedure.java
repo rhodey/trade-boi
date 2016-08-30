@@ -52,10 +52,7 @@ public class ShutdownProcedure implements Callable<Void> {
   @Override
   public Void call() {
     wsService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
-
-    if (statService.isPresent()) {
-      statService.get().getShutdownFuture().whenComplete((ok, err) -> shutdown());
-    }
+    if (statService.isPresent()) { statService.get().getShutdownFuture().whenComplete((ok, err) -> shutdown()); }
 
     Scanner console = new Scanner(System.in);
     while (console.hasNextLine()) { console.nextLine(); }
