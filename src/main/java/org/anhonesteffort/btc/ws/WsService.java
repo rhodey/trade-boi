@@ -124,7 +124,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   public boolean shutdown() {
     if (shutdownFuture.complete(null)) {
       channel.close();
-      http.shutdown();
+      http.close();
       return true;
     } else {
       return false;
@@ -134,7 +134,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private boolean shutdown(Throwable throwable) {
     if (shutdownFuture.completeExceptionally(throwable)) {
       channel.close();
-      http.shutdown();
+      http.close();
       return true;
     } else {
       return false;

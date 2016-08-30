@@ -33,12 +33,13 @@ import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
 import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class HttpClientWrapper {
+public class HttpClientWrapper implements Closeable {
 
   private static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -55,10 +56,6 @@ public class HttpClientWrapper {
 
   public HttpClientWrapper(RequestSigner signer) {
     this.signer = signer;
-  }
-
-  public void shutdown() {
-    shutdown.set(true);
   }
 
   private boolean setExceptionIfShutdown(CompletableFuture<?> future) {
@@ -105,6 +102,11 @@ public class HttpClientWrapper {
     }
 
     return future;
+  }
+
+  @Override
+  public void close() {
+    shutdown.set(true);
   }
 
 }
