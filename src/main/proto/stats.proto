@@ -1,28 +1,40 @@
 syntax = "proto3";
 
-option java_package = "org.anhonesteffort.btc.stat";
-option java_outer_classname = "StatProtos";
+option java_package         = "org.anhonesteffort.btc.stats";
+option java_outer_classname = "StatsProto";
 
-
-message Person {
-  string name = 1;
-  int32 id = 2;
-  string email = 3;
-
-  enum PhoneType {
-    MOBILE = 0;
-    HOME = 1;
-    WORK = 2;
+message BaseMessage {
+  enum Type {
+    ERROR      = 0;
+    TAKE_EVENT = 1;
   }
 
-  message PhoneNumber {
-    string number = 1;
-    PhoneType type = 2;
-  }
-
-  repeated PhoneNumber phone = 4;
+  Type      type      = 1;
+  Error     error     = 2;
+  TakeEvent takeEvent = 3;
 }
 
-message AddressBook {
-  repeated Person person = 1;
+message Error {
+  string message = 1;
+}
+
+message Order {
+  enum Side {
+    ASK = 0;
+    BID = 1;
+  }
+
+  string orderId       = 1;
+  Side   side          = 2;
+  int64  price         = 3;
+  int64  size          = 4;
+  int64  sizeRemaining = 5;
+  int64  valueRemoved  = 6;
+}
+
+message TakeEvent {
+           Order taker     = 1;
+  repeated Order makers    = 2;
+           int64 takeSize  = 3;
+           int64 takeValue = 4;
 }

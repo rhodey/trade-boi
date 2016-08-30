@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc;
 
-import org.anhonesteffort.btc.stat.StatService;
+import org.anhonesteffort.btc.stats.StatsService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +35,9 @@ public class ShutdownProcedure implements Callable<Void> {
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final ExecutorService pool;
   private final WsService wsService;
-  private final Optional<StatService> statService;
+  private final Optional<StatsService> statService;
 
-  public ShutdownProcedure(ExecutorService pool, WsService wsService, Optional<StatService> statService) {
+  public ShutdownProcedure(ExecutorService pool, WsService wsService, Optional<StatsService> statService) {
     this.pool        = pool;
     this.wsService   = wsService;
     this.statService = statService;

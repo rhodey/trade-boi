@@ -22,7 +22,7 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
-import org.anhonesteffort.btc.stat.StatService;
+import org.anhonesteffort.btc.stats.StatsService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
@@ -61,18 +61,18 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    StatService statService = new StatService(config, caster);
-    WsService   wsService   = new WsService(
+    StatsService statsService = new StatsService(config, caster);
+    WsService    wsService    = new WsService(
         config, new BlockingWaitStrategy(),
         new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
         http, caster
     );
 
     wsService.start();
-    statService.start();
+    statsService.start();
 
     pool.submit(
-        new ShutdownProcedure(pool, wsService, Optional.of(statService))
+        new ShutdownProcedure(pool, wsService, Optional.of(statsService))
     ).get();
   }
 

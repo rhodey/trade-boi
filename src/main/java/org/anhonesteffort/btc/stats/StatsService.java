@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.anhonesteffort.btc.stat;
+package org.anhonesteffort.btc.stats;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-public class StatService {
+public class StatsService {
 
-  private static final Logger log = LoggerFactory.getLogger(StatService.class);
+  private static final Logger log = LoggerFactory.getLogger(StatsService.class);
   private static final Integer SERVER_PORT = 3133;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
@@ -45,7 +45,7 @@ public class StatService {
 
   private Channel channel;
 
-  public StatService(ScamConfig config, LongCaster caster) {
+  public StatsService(ScamConfig config, LongCaster caster) {
     this.config = config;
     this.caster = caster;
     bossGroup   = new NioEventLoopGroup();
