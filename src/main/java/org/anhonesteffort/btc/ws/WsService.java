@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.ws;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.ExceptionHandler;
-import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.netty.bootstrap.Bootstrap;
@@ -71,7 +70,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private Channel channel;
 
   public WsService(
-      ScamConfig config, WaitStrategy waitStrategy, EventHandler<OrderEvent>[] handlers,
+      ScamConfig config, EventHandler<OrderEvent>[] handlers,
       HttpClientWrapper http, LongCaster caster
   ) {
     this.config   = config;
@@ -79,7 +78,8 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     this.http     = http;
     this.caster   = caster;
     wsDisruptor   = new Disruptor<>(
-        this, config.getWsBufferSize(), new DisruptorThreadFactory(), ProducerType.SINGLE, waitStrategy
+        this, config.getWsBufferSize(), new DisruptorThreadFactory(),
+        ProducerType.SINGLE, config.getWaitStrategy()
     );
   }
 

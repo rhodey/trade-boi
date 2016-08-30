@@ -24,6 +24,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.anhonesteffort.btc.ScamConfig;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
@@ -34,7 +36,6 @@ import java.util.concurrent.CompletableFuture;
 public class StatsService {
 
   private static final Logger log = LoggerFactory.getLogger(StatsService.class);
-  private static final Integer SERVER_PORT = 3133;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
@@ -60,25 +61,24 @@ public class StatsService {
     ServerBootstrap bootstrap = new ServerBootstrap();
     bootstrap.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .option(ChannelOption.SO_BACKLOG, 128)
              .childOption(ChannelOption.SO_KEEPALIVE, true)
              .childOption(ChannelOption.TCP_NODELAY, true)
              .childHandler(new ChannelInitializer<SocketChannel>() {
                @Override
                public void initChannel(SocketChannel ch) {
-                 ch.pipeline().addLast("encoder", null);
-                 ch.pipeline().addLast("decoder", null);
-                 ch.pipeline().addLast("handler", null);
+                 ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
+                 ch.pipeline().addLast("msgEncoder",   new ProtobufEncoder());
+                 ch.pipeline().addLast("handler",      null);
                }
              });
 
-    channel = bootstrap.bind(SERVER_PORT).sync().channel();
+    channel = bootstrap.bind(config.getStatsPort()).sync().channel();
     channel.closeFuture().addListener(close -> {
       if (close.cause() != null) { shutdown(close.cause()); }
       else                       { shutdown(); }
     });
 
-    log.info("bound to port " + SERVER_PORT);
+    log.info("bound to port " + config.getStatsPort());
   }
 
   public boolean shutdown() {

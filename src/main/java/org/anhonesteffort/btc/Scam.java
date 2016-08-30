@@ -17,7 +17,6 @@
 
 package org.anhonesteffort.btc;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
@@ -61,19 +60,18 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    StatsService statsService = new StatsService(config, caster);
-    WsService    wsService    = new WsService(
-        config, new BlockingWaitStrategy(),
-        new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
-        http, caster
+    WsService wsService = new WsService(
+        config, new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) }, http, caster
     );
-
     wsService.start();
-    statsService.start();
 
-    pool.submit(
-        new ShutdownProcedure(pool, wsService, Optional.of(statsService))
-    ).get();
+    Optional<StatsService> statsService = Optional.empty();
+    if (config.getStatsEnabled()) {
+      statsService = Optional.of(new StatsService(config, caster));
+      statsService.get().start();
+    }
+
+    pool.submit(new ShutdownProcedure(pool, wsService, statsService)).get();
   }
 
   public static void main(String[] args) throws Exception {

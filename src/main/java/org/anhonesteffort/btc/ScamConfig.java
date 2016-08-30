@@ -17,31 +17,42 @@
 
 package org.anhonesteffort.btc;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.WaitStrategy;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class ScamConfig {
 
+  private final Integer limitInitSize;
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
-  private final Integer wsReadTimeoutMs;
-  private final Integer limitInitSize;
+  private final Long    wsReadTimeoutMs;
   private final String  coinbaseAccessKey;
   private final String  coinbaseSecretKey;
   private final String  coinbaseKeyPassword;
+  private final Boolean statsEnabled;
+  private final Integer statsPort;
 
   public ScamConfig() throws IOException {
     Properties properties = new Properties();
     properties.load(new FileInputStream("scam.properties"));
 
+    limitInitSize       = Integer.parseInt(properties.getProperty("limit_initial_size"));
     wsBufferSize        = Integer.parseInt(properties.getProperty("ws_buffer_size"));
     wsConnectTimeoutMs  = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
-    wsReadTimeoutMs     = Integer.parseInt(properties.getProperty("ws_read_timeout_ms"));
-    limitInitSize       = Integer.parseInt(properties.getProperty("limit_initial_size"));
+    wsReadTimeoutMs     = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
     coinbaseAccessKey   = properties.getProperty("coinbase_access_key");
     coinbaseSecretKey   = properties.getProperty("coinbase_secret_key");
     coinbaseKeyPassword = properties.getProperty("coinbase_key_password");
+    statsEnabled        = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
+    statsPort           = Integer.parseInt(properties.getProperty("stats_port"));
+  }
+
+  public Integer getLimitInitSize() {
+    return limitInitSize;
   }
 
   public Integer getWsBufferSize() {
@@ -52,12 +63,12 @@ public class ScamConfig {
     return wsConnectTimeoutMs;
   }
 
-  public Integer getWsReadTimeoutMs() {
+  public Long getWsReadTimeoutMs() {
     return wsReadTimeoutMs;
   }
 
-  public Integer getLimitInitSize() {
-    return limitInitSize;
+  public WaitStrategy getWaitStrategy() {
+    return new BlockingWaitStrategy();
   }
 
   public String getCoinbaseAccessKey() {
@@ -70,6 +81,14 @@ public class ScamConfig {
 
   public String getCoinbaseKeyPassword() {
     return coinbaseKeyPassword;
+  }
+
+  public Boolean getStatsEnabled() {
+    return statsEnabled;
+  }
+
+  public Integer getStatsPort() {
+    return statsPort;
   }
 
 }
