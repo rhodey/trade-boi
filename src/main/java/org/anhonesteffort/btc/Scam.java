@@ -22,6 +22,7 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
+import org.anhonesteffort.btc.stat.StatService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
@@ -30,19 +31,25 @@ import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Scam {
 
-  private final LongCaster      caster = new LongCaster(0.000000000001d);
-  private final ExecutorService pool   = Executors.newFixedThreadPool(2);
-  private final ScamConfig      config;
+  private final LongCaster        caster = new LongCaster(0.000000000001d);
+  private final ExecutorService   pool   = Executors.newFixedThreadPool(2);
+  private final ScamConfig        config;
+  private final HttpClientWrapper http;
 
-  public Scam() throws IOException {
+  public Scam() throws IOException, NoSuchAlgorithmException {
     config = new ScamConfig();
+    http   = new HttpClientWrapper(new RequestSigner(
+        config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword()
+    ));
   }
 
   private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
@@ -54,16 +61,17 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    RequestSigner     signer    = new RequestSigner(config.getCoinbaseAccessKey(), config.getCoinbaseSecretKey(), config.getCoinbaseKeyPassword());
-    HttpClientWrapper http      = new HttpClientWrapper(signer);
-    WsService         wsService = new WsService(
+    StatService statService = new StatService(config, caster);
+    WsService   wsService   = new WsService(
         config, new BlockingWaitStrategy(),
         new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) },
         http, caster
     );
 
     wsService.start();
-    pool.submit(new ShutdownProcedure(pool, wsService)).get();
+    statService.start();
+
+    pool.submit(new ShutdownProcedure(pool, wsService, Optional.of(statService))).get();
   }
 
   public static void main(String[] args) throws Exception {

@@ -17,10 +17,12 @@
 
 package org.anhonesteffort.btc;
 
+import org.anhonesteffort.btc.stat.StatService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -29,27 +31,37 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ShutdownProcedure implements Callable<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
+
+  private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final ExecutorService pool;
   private final WsService wsService;
+  private final Optional<StatService> statService;
 
-  public ShutdownProcedure(ExecutorService pool, WsService wsService) {
-    this.pool      = pool;
-    this.wsService = wsService;
+  public ShutdownProcedure(ExecutorService pool, WsService wsService, Optional<StatService> statService) {
+    this.pool        = pool;
+    this.wsService   = wsService;
+    this.statService = statService;
+  }
+
+  private void shutdown() {
+    if (!shutdown.getAndSet(true)) {
+      pool.submit(new OrderClosingRunnable());
+    }
   }
 
   @Override
   public Void call() {
-    AtomicBoolean shutdown = new AtomicBoolean(false);
-    Scanner       console  = new Scanner(System.in);
+    wsService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
 
-    wsService.getShutdownFuture().whenComplete((ok, err) -> {
-      if (!shutdown.getAndSet(true)) { pool.submit(new OrderClosingRunnable()); }
-    });
+    if (statService.isPresent()) {
+      statService.get().getShutdownFuture().whenComplete((ok, err) -> shutdown());
+    }
 
+    Scanner console = new Scanner(System.in);
     while (console.hasNextLine()) { console.nextLine(); }
-    if (!shutdown.getAndSet(true)) { pool.submit(new OrderClosingRunnable()); }
-    console.close();
+    shutdown();
 
+    console.close();
     return null;
   }
 
