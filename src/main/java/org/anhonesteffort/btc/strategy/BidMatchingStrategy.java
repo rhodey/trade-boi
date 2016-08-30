@@ -15,23 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.http.request;
+package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.btc.compute.ComputeException;
+import org.anhonesteffort.btc.state.State;
 
-import java.util.Locale;
-import java.util.UUID;
+public class BidMatchingStrategy extends Strategy<Boolean> {
 
-public class RequestFactory {
+  private final String orderId;
 
-  public PostOrderRequest newOrder(Order.Side side, Double price, Double size) {
-    return new PostOrderRequest(
-        UUID.randomUUID().toString(),
-        (side == Order.Side.BID) ? "buy" : "sell",
-        String.format(Locale.US, "%.2f", price),
-        String.format(Locale.US, "%.2f", size)
-    );
+  public BidMatchingStrategy(String orderId) {
+    this.orderId = orderId;
+  }
+
+  @Override
+  protected Boolean advanceStrategy(State state, long nanoseconds) {
+    return Boolean.FALSE;
+  }
+
+  @Override
+  public void onStateReset() throws ComputeException {
+    super.onStateReset();
+    throw new StrategyException("unable to handle state reset");
   }
 
 }

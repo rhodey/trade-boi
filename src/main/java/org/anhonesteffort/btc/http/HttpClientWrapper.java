@@ -27,7 +27,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.anhonesteffort.btc.http.response.GetAccountsCallback;
 import org.anhonesteffort.btc.http.response.PostOrderCallback;
-import org.anhonesteffort.btc.http.request.PostOrderRequest;
+import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
 import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;

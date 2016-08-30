@@ -17,16 +17,18 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
 
-public class PositionHoldStrategy extends Strategy<Boolean> {
+import java.util.Optional;
 
-  public PositionHoldStrategy(HttpClientWrapper http) { }
+public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
+
+  public AskIdentifyingStrategy() { }
 
   @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
-    return Boolean.FALSE;
+  protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
+    return Optional.empty();
   }
 
 }

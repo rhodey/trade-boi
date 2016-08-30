@@ -17,14 +17,8 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.compute.ComputeException;
-import org.anhonesteffort.btc.compute.SpreadComputation;
-import org.anhonesteffort.btc.compute.SummingComputation;
-import org.anhonesteffort.btc.compute.TakeVolumeComputation;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.http.request.PostOrderRequest;
-import org.anhonesteffort.btc.http.request.RequestFactory;
+import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
@@ -35,130 +29,102 @@ import java.util.Optional;
 public class ScamStrategy extends Strategy<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
-
-  private static final Integer RECENT_PERIOD_MS        = 1000 * 30;
-  private static final Integer NOW_PERIOD_MS           = 1000 *  5;
-  private static final Double  BULLISH_THRESHOLD_BTC   = 1.50d;
-  private static final Double  BULLISH_THRESHOLD_SCORE = 1.25d;
-
-  private final RequestFactory     requests         = new RequestFactory();
-  private final SpreadComputation  spread           = new SpreadComputation();
-  private final SummingComputation buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), RECENT_PERIOD_MS);
-  private final SummingComputation buyVolumeNow     = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), NOW_PERIOD_MS);
-  private final SummingComputation sellVolumeRecent = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), RECENT_PERIOD_MS);
-  private final SummingComputation sellVolumeNow    = new SummingComputation(new TakeVolumeComputation(Order.Side.ASK), NOW_PERIOD_MS);
-
   private final HttpClientWrapper http;
-  private final LongCaster        caster;
+  private final LongCaster caster;
 
-  private ScamState state = ScamState.WAITING;
-  private PositionOpenStrategy openStrategy;
-  private PositionHoldStrategy holdStrategy;
-  private PositionCloseStrategy closeStrategy;
+  private OrderOpeningStrategy    orderOpenStrategy;
+  private BidIdentifyingStrategy  bidIdStrategy;
+  private BidMatchingStrategy     bidMatchingStrategy;
+  private AskIdentifyingStrategy  askIdStrategy;
+  private AskMatchingStrategy     askMatchingStrategy;
+  private ScamState               state;
 
   private enum ScamState {
-    WAITING, OPENING, OPEN, CLOSING, CLOSED
+    WAIT_TO_BID, BIDDING, MATCHING_BID,
+    WAIT_TO_ASK, ASKING,  MATCHING_ASK,
+    COMPLETE
   }
 
   public ScamStrategy(HttpClientWrapper http, LongCaster caster) {
     this.http   = http;
     this.caster = caster;
-    addChildren(spread, buyVolumeRecent, buyVolumeNow, sellVolumeRecent, sellVolumeNow);
-  }
-
-  private Optional<Double> getBullishScore() {
-    if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
-      return Optional.empty();
-    } else if (buyVolumeRecent.getResult().get() < 0l || sellVolumeRecent.getResult().get() < 0l) {
-      throw new RuntimeException("!!! buy or sell volume sum is less than zero !!!");
-    } else if (caster.toDouble(buyVolumeRecent.getResult().get()) < BULLISH_THRESHOLD_BTC) {
-      return Optional.of(-1d);
-    } else if (sellVolumeRecent.getResult().get() == 0l) {
-      return Optional.of(Double.MAX_VALUE);
-    } else {
-      return Optional.of(
-          ((double) buyVolumeRecent.getResult().get()) / ((double) sellVolumeRecent.getResult().get())
-      );
-    }
-  }
-
-  private Optional<Boolean> isNowBearish() {
-    if (!buyVolumeNow.getResult().isPresent() || !sellVolumeNow.getResult().isPresent()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(buyVolumeNow.getResult().get() < sellVolumeNow.getResult().get());
-    }
-  }
-
-  private boolean isBullish() {
-    Optional<Double>  bullishScore = getBullishScore();
-    Optional<Boolean> isNowBearish = isNowBearish();
-
-    if (bullishScore.isPresent() && isNowBearish.isPresent()) {
-      return bullishScore.get() >= BULLISH_THRESHOLD_SCORE && !isNowBearish.get();
-    } else {
-      return false;
-    }
-  }
-
-  private void handleWaiting(State state) {
-    if (isBullish() && caster.toDouble(spread.getResult().get()) > 0.01d) {
-      double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
-      double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-      double bidPrice   = askCeiling - 0.01d;
-
-      PostOrderRequest order = requests.newOrder(Order.Side.BID, 400.015d, 0.015d);
-      log.info("opening " + order.getSide() + " order for " + order.getSize() + " at " + order.getPrice());
-
-      openStrategy = new PositionOpenStrategy(http, order);
-      addChildren(openStrategy);
-      this.state = ScamState.OPENING;
-    }
+    state       = ScamState.COMPLETE;
   }
 
   @Override
   protected Void advanceStrategy(State state, long nanoseconds) throws StrategyException {
     switch (this.state) {
-      case WAITING:
-        handleWaiting(state);
+      case COMPLETE:
+        log.info("awaiting buy opportunity");
+        bidIdStrategy = new BidIdentifyingStrategy(caster);
+        addChildren(bidIdStrategy);
+        this.state = ScamState.WAIT_TO_BID;
         break;
 
-      case OPENING:
-        if (openStrategy.getResult().isPresent()) {
-          log.info("position opened with id " + openStrategy.getResult().get() + "!");
-          holdStrategy = new PositionHoldStrategy(http);
-          removeChildren(openStrategy);
-          addChildren(holdStrategy);
-          this.state = ScamState.OPEN;
+      case WAIT_TO_BID:
+        Optional<PostOrderRequest> bid = bidIdStrategy.getResult();
+        if (bid.isPresent()) {
+          log.info("opening bid for " + bid.get().getSize() + " at " + bid.get().getPrice());
+          removeChildren(bidIdStrategy);
+          orderOpenStrategy = new OrderOpeningStrategy(http, bid.get());
+          addChildren(orderOpenStrategy);
+          this.state = ScamState.BIDDING;
         }
         break;
 
-      case OPEN:
-        if (holdStrategy.getResult()) {
-          log.info("position held!");
-          closeStrategy = new PositionCloseStrategy(http);
-          removeChildren(holdStrategy);
-          addChildren(closeStrategy);
-          this.state = ScamState.CLOSING;
+      case BIDDING:
+        Optional<String> bidId = orderOpenStrategy.getResult();
+        if (bidId.isPresent()) {
+          log.info("bid opened with id " + bidId.get() + ", waiting to match");
+          removeChildren(orderOpenStrategy);
+          bidMatchingStrategy = new BidMatchingStrategy(bidId.get());
+          addChildren(bidMatchingStrategy);
+          this.state = ScamState.MATCHING_BID;
         }
         break;
 
-      case CLOSING:
-        if (closeStrategy.getResult()) {
-          log.info("position closed!");
-          removeChildren(closeStrategy);
-          this.state = ScamState.CLOSED;
+      case MATCHING_BID:
+        if (bidMatchingStrategy.getResult()) {
+          log.info("bid matched with ask, awaiting sell opportunity");
+          removeChildren(bidMatchingStrategy);
+          askIdStrategy = new AskIdentifyingStrategy();
+          addChildren(askIdStrategy);
+          this.state = ScamState.WAIT_TO_ASK;
+        }
+        break;
+
+      case WAIT_TO_ASK:
+        Optional<PostOrderRequest> ask = askIdStrategy.getResult();
+        if (ask.isPresent()) {
+          log.info("opening ask for " + ask.get().getSize() + " at " + ask.get().getPrice());
+          removeChildren(askIdStrategy);
+          orderOpenStrategy = new OrderOpeningStrategy(http, ask.get());
+          addChildren(orderOpenStrategy);
+          this.state = ScamState.ASKING;
+        }
+        break;
+
+      case ASKING:
+        Optional<String> askId = orderOpenStrategy.getResult();
+        if (askId.isPresent()) {
+          log.info("ask opened with id " + askId.get() + ", waiting to match");
+          removeChildren(orderOpenStrategy);
+          askMatchingStrategy = new AskMatchingStrategy(askId.get());
+          addChildren(askMatchingStrategy);
+          this.state = ScamState.MATCHING_ASK;
+        }
+        break;
+
+      case MATCHING_ASK:
+        if (askMatchingStrategy.getResult()) {
+          log.info("ask matched with bid, strategy complete");
+          removeChildren(askMatchingStrategy);
+          this.state = ScamState.COMPLETE;
         }
         break;
     }
 
     return null;
-  }
-
-  @Override
-  public void onStateReset() throws ComputeException {
-    super.onStateReset();
-    log.info("on results invalidated");
   }
 
 }

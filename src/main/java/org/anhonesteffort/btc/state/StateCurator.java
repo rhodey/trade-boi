@@ -81,7 +81,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     }
 
     if ((sequence % 50l) == 0l) {
-      if (!rebuilding) { log.info("avg latency -> " + (nanosecondSum / 50d) + "ns"); }
+      if (!rebuilding) { log.debug("avg latency -> " + (nanosecondSum / 50d) + "ns"); }
       nanosecondSum = System.nanoTime() - event.getNanoseconds();
     } else {
       nanosecondSum += System.nanoTime() - event.getNanoseconds();

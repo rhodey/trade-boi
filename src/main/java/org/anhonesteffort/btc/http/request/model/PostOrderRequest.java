@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.http.request;
+package org.anhonesteffort.btc.http.request.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

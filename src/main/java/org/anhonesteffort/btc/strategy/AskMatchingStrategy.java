@@ -17,16 +17,26 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.state.State;
 
-public class PositionCloseStrategy extends Strategy<Boolean> {
+public class AskMatchingStrategy extends Strategy<Boolean> {
 
-  public PositionCloseStrategy(HttpClientWrapper http) { }
+  private final String orderId;
+
+  public AskMatchingStrategy(String orderId) {
+    this.orderId = orderId;
+  }
 
   @Override
   protected Boolean advanceStrategy(State state, long nanoseconds) {
     return Boolean.FALSE;
+  }
+
+  @Override
+  public void onStateReset() throws ComputeException {
+    super.onStateReset();
+    throw new StrategyException("unable to handle state reset");
   }
 
 }

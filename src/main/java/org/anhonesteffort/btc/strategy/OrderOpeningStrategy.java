@@ -19,18 +19,18 @@ package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.http.request.PostOrderRequest;
+import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
 
 import java.io.IOException;
 import java.util.Optional;
 
-public class PositionOpenStrategy extends Strategy<Optional<String>> {
+public class OrderOpeningStrategy extends Strategy<Optional<String>> {
 
   private final String clientOid;
   private Optional<String> serverOid = Optional.empty();
 
-  public PositionOpenStrategy(HttpClientWrapper http, PostOrderRequest order) {
+  public OrderOpeningStrategy(HttpClientWrapper http, PostOrderRequest order) {
     clientOid = order.getClientOid();
     try {
 
