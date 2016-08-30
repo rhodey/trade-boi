@@ -27,7 +27,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.anhonesteffort.btc.ScamConfig;
-import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,19 +35,16 @@ import java.util.concurrent.CompletableFuture;
 public class StatsService {
 
   private static final Logger log = LoggerFactory.getLogger(StatsService.class);
-
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
   private final ScamConfig     config;
-  private final LongCaster     caster;
   private final EventLoopGroup bossGroup;
   private final EventLoopGroup workerGroup;
 
   private Channel channel;
 
-  public StatsService(ScamConfig config, LongCaster caster) {
+  public StatsService(ScamConfig config) {
     this.config = config;
-    this.caster = caster;
     bossGroup   = new NioEventLoopGroup();
     workerGroup = new NioEventLoopGroup();
   }
@@ -68,7 +64,7 @@ public class StatsService {
                public void initChannel(SocketChannel ch) {
                  ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
                  ch.pipeline().addLast("msgEncoder",   new ProtobufEncoder());
-                 ch.pipeline().addLast("handler",      null);
+                 ch.pipeline().addLast("handler",      new ServerHandler());
                }
              });
 

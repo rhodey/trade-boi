@@ -67,7 +67,7 @@ public class Scam {
 
     Optional<StatsService> statsService = Optional.empty();
     if (config.getStatsEnabled()) {
-      statsService = Optional.of(new StatsService(config, caster));
+      statsService = Optional.of(new StatsService(config));
       statsService.get().start();
     }
 
