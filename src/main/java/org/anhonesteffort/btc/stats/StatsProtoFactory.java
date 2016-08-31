@@ -17,15 +17,49 @@
 
 package org.anhonesteffort.btc.stats;
 
+import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.book.TakeResult;
+
+import java.util.stream.Collectors;
+
 import static org.anhonesteffort.btc.stats.StatsProto.BaseMessage;
 import static org.anhonesteffort.btc.stats.StatsProto.Error;
+import static org.anhonesteffort.btc.stats.StatsProto.TakeEvent;
 
 public class StatsProtoFactory {
 
-  public BaseMessage error(String message) {
-    return BaseMessage.newBuilder().setType(BaseMessage.Type.ERROR).setError(
-        Error.newBuilder().setMessage(message)
-    ).build();
+  public BaseMessage errorMsg(String message) {
+    return BaseMessage.newBuilder()
+        .setType(BaseMessage.Type.ERROR)
+        .setError(Error.newBuilder().setMessage(message))
+        .build();
+  }
+
+  private StatsProto.Order order(Order order) {
+    return StatsProto.Order.newBuilder()
+        .setOrderId(order.getOrderId())
+        .setSide((order.getSide() == Order.Side.ASK) ? StatsProto.Order.Side.ASK : StatsProto.Order.Side.BID)
+        .setPrice(order.getPrice())
+        .setSize(order.getSize())
+        .setSizeRemaining(order.getSizeRemaining())
+        .setValueRemoved(order.getValueRemoved())
+        .build();
+  }
+
+  private TakeEvent takeEvent(TakeResult takeResult) {
+    return TakeEvent.newBuilder()
+        .setTaker(order(takeResult.getTaker()))
+        .addAllMakers(takeResult.getMakers().stream().map(this::order).collect(Collectors.toList()))
+        .setTakeSize(takeResult.getTakeSize())
+        .setTakeValue(takeResult.getTakeValue())
+        .build();
+  }
+
+  public BaseMessage takeEventMsg(TakeResult takeResult) {
+    return BaseMessage.newBuilder()
+        .setType(BaseMessage.Type.TAKE_EVENT)
+        .setTakeEvent(takeEvent(takeResult))
+        .build();
   }
 
 }

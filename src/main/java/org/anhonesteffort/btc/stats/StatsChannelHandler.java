@@ -47,27 +47,28 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   @Override
   public void onStateChange(State state, long nanoseconds) {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.error("lol, idk " + nanoseconds));
+      state.getTakes().forEach(take -> context.get().write(proto.takeEventMsg(take)));
+      if (!state.getTakes().isEmpty()) { context.get().flush(); }
     }
   }
 
   @Override
   public void onStateReset() {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.error("lol, reset"));
+      context.get().writeAndFlush(proto.errorMsg("lol, reset"));
     }
   }
 
   @Override
   public void channelRead(ChannelHandlerContext context, Object msg) {
     log.warn("received unexpected message from client, closing");
-    context.writeAndFlush(proto.error("don't talk to me.")).addListener(future -> context.close());
+    context.writeAndFlush(proto.errorMsg("don't talk to me.")).addListener(future -> context.close());
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
     log.error("caught unexpected exception, closing", cause);
-    context.writeAndFlush(proto.error("what did you do?")).addListener(future -> context.close());
+    context.writeAndFlush(proto.errorMsg("what did you do?")).addListener(future -> context.close());
   }
 
   @Override
