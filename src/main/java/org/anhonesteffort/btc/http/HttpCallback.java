@@ -39,7 +39,12 @@ public abstract class HttpCallback<T> implements Callback {
     try {
 
       if (!response.isSuccessful()) {
-        future.completeExceptionally(new HttpException("http returned code " + response.code()));
+        future.completeExceptionally(new HttpException(
+            "http returned " +
+                "code: " + response.code() + ", " +
+                "msg: " + (response.message() == null ? "''" : response.message()) + ", " +
+                "body: " + response.body().string()
+        ));
       } else {
         complete(call, response);
       }
