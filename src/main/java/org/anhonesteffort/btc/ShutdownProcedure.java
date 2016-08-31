@@ -22,7 +22,6 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -35,9 +34,10 @@ public class ShutdownProcedure implements Callable<Void> {
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final ExecutorService pool;
   private final WsService wsService;
-  private final Optional<StatsService> statService;
+  private final StatsService statService;
 
-  public ShutdownProcedure(ExecutorService pool, WsService wsService, Optional<StatsService> statService) {
+  // todo: manage http
+  public ShutdownProcedure(ExecutorService pool, WsService wsService, StatsService statService) {
     this.pool        = pool;
     this.wsService   = wsService;
     this.statService = statService;
@@ -45,6 +45,8 @@ public class ShutdownProcedure implements Callable<Void> {
 
   private void shutdown() {
     if (!shutdown.getAndSet(true)) {
+      wsService.shutdown();
+      statService.shutdown();
       pool.submit(new OrderClosingRunnable());
     }
   }
@@ -52,7 +54,7 @@ public class ShutdownProcedure implements Callable<Void> {
   @Override
   public Void call() {
     wsService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
-    if (statService.isPresent()) { statService.get().getShutdownFuture().whenComplete((ok, err) -> shutdown()); }
+    statService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
 
     Scanner console = new Scanner(System.in);
     while (console.hasNextLine()) { console.nextLine(); }

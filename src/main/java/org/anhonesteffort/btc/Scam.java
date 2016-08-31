@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -60,16 +59,16 @@ public class Scam {
 
   @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    WsService wsService = new WsService(
-        config, new EventHandler[] { handlerFor(new ScamStrategy(http, caster)) }, http, caster
+    StatsService statsService = new StatsService(config);
+    WsService    wsService    = new WsService(
+        config, new EventHandler[] {
+          handlerFor(new ScamStrategy(http, caster)),
+          handlerFor(statsService.getStateListener())
+        }, http, caster
     );
-    wsService.start();
 
-    Optional<StatsService> statsService = Optional.empty();
-    if (config.getStatsEnabled()) {
-      statsService = Optional.of(new StatsService(config));
-      statsService.get().start();
-    }
+    wsService.start();
+    statsService.start();
 
     pool.submit(new ShutdownProcedure(pool, wsService, statsService)).get();
   }

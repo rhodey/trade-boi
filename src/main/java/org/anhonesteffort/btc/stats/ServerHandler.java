@@ -24,32 +24,55 @@ import org.anhonesteffort.btc.state.StateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class ServerHandler extends ChannelInboundHandlerAdapter implements StateListener {
 
   private static final Logger log = LoggerFactory.getLogger(ServerHandler.class);
-  private final StatsProtoFactory proto = new StatsProtoFactory();
 
-  @Override
-  public void channelActive(ChannelHandlerContext context) {
-    context.writeAndFlush(proto.error("lol idk"));
+  private final StatsProtoFactory proto = new StatsProtoFactory();
+  private final ChannelHandlerFactory parent;
+  private Optional<ChannelHandlerContext> context = Optional.empty();
+
+  public ServerHandler(ChannelHandlerFactory parent) {
+    this.parent = parent;
   }
 
   @Override
-  public void onStateChange(State state, long nanoseconds) { }
+  public void channelActive(ChannelHandlerContext context) {
+    this.context = Optional.of(context);
+    parent.onChannelActive(this);
+  }
 
   @Override
-  public void onStateReset() { }
+  public void onStateChange(State state, long nanoseconds) {
+    if (context.isPresent()) {
+      context.get().writeAndFlush(proto.error("lol, idk " + nanoseconds));
+    }
+  }
 
   @Override
-  public void channelRead(ChannelHandlerContext context, Object request) {
+  public void onStateReset() {
+    if (context.isPresent()) {
+      context.get().writeAndFlush(proto.error("lol, reset"));
+    }
+  }
+
+  @Override
+  public void channelRead(ChannelHandlerContext context, Object msg) {
     log.warn("received unexpected message from client, closing");
-    context.close();
+    context.writeAndFlush(proto.error("don't talk to me.")).addListener(future -> context.close());
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
     log.error("caught unexpected exception, closing", cause);
-    context.close();
+    context.writeAndFlush(proto.error("what did you do?")).addListener(future -> context.close());
+  }
+
+  @Override
+  public void channelInactive(ChannelHandlerContext context) {
+    parent.onChannelInactive(this);
   }
 
 }

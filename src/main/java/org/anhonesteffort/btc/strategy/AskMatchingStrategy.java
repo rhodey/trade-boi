@@ -34,6 +34,7 @@ public class AskMatchingStrategy extends Strategy<Boolean> {
     return Boolean.FALSE;
   }
 
+  @Override
   public void onStateReset() throws StateProcessingException {
     throw new CriticalStateProcessingException("unable to handle state reset");
   }
