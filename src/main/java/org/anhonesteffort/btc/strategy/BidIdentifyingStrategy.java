@@ -27,7 +27,6 @@ import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.util.LongCaster;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -90,7 +89,6 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
     if (isBullish() && caster.toDouble(spread.getResult().get()) >= 0.02d) {
-      double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
       double bidPrice   = askCeiling - 0.01d;
 

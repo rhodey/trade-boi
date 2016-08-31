@@ -17,21 +17,44 @@
 
 package org.anhonesteffort.btc.strategy;
 
+import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.state.StateProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AskMatchingStrategy extends Strategy<Boolean> {
+import java.util.Optional;
 
+public class OrderMatchingStrategy extends Strategy<Optional<Order>> {
+
+  private static final Logger log = LoggerFactory.getLogger(OrderMatchingStrategy.class);
   private final String orderId;
 
-  public AskMatchingStrategy(String orderId) {
+  public OrderMatchingStrategy(String orderId) {
     this.orderId = orderId;
   }
 
   @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
-    return Boolean.FALSE;
+  protected Optional<Order> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+    if (!state.getTake().isPresent()) {
+      return Optional.empty();
+    } else if (state.getTake().get().getTaker().getOrderId().equals(orderId)) {
+      throw new CriticalStateProcessingException("order took from the book");
+    }
+
+    Optional<Order> order = state.getTake().get().getMakers().stream()
+                                 .filter(maker -> maker.getOrderId().equals(orderId))
+                                 .findAny();
+
+    if (!order.isPresent()) {
+      return Optional.empty();
+    } else if (order.get().getSizeRemaining() > 0l) {
+      log.info("order partially matched, " + order.get().getSizeRemaining() + " remaining");
+      return Optional.empty();
+    } else {
+      return order;
+    }
   }
 
   @Override

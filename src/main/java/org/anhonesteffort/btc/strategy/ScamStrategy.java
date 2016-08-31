@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc.strategy;
 
+import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
@@ -32,12 +33,11 @@ public class ScamStrategy extends Strategy<Void> {
   private final HttpClientWrapper http;
   private final LongCaster caster;
 
-  private OrderOpeningStrategy    orderOpenStrategy;
-  private BidIdentifyingStrategy  bidIdStrategy;
-  private BidMatchingStrategy     bidMatchingStrategy;
-  private AskIdentifyingStrategy  askIdStrategy;
-  private AskMatchingStrategy     askMatchingStrategy;
-  private ScamState               state;
+  private OrderOpeningStrategy   orderOpenStrategy;
+  private BidIdentifyingStrategy bidIdStrategy;
+  private OrderMatchingStrategy  orderMatchingStrategy;
+  private AskIdentifyingStrategy askIdStrategy;
+  private ScamState              state;
 
   private enum ScamState {
     WAIT_TO_BID, BIDDING, MATCHING_BID,
@@ -77,17 +77,18 @@ public class ScamStrategy extends Strategy<Void> {
         if (bidId.isPresent()) {
           log.info("bid opened with id " + bidId.get() + ", waiting to match");
           removeChildren(orderOpenStrategy);
-          bidMatchingStrategy = new BidMatchingStrategy(bidId.get());
-          addChildren(bidMatchingStrategy);
+          orderMatchingStrategy = new OrderMatchingStrategy(bidId.get());
+          addChildren(orderMatchingStrategy);
           this.state = ScamState.MATCHING_BID;
         }
         break;
 
       case MATCHING_BID:
-        if (bidMatchingStrategy.getResult()) {
+        Optional<Order> matchedBid = orderMatchingStrategy.getResult();
+        if (matchedBid.isPresent()) {
           log.info("bid matched with ask, awaiting sell opportunity");
-          removeChildren(bidMatchingStrategy);
-          askIdStrategy = new AskIdentifyingStrategy();
+          removeChildren(orderMatchingStrategy);
+          askIdStrategy = new AskIdentifyingStrategy(caster, matchedBid.get());
           addChildren(askIdStrategy);
           this.state = ScamState.WAIT_TO_ASK;
         }
@@ -98,7 +99,7 @@ public class ScamStrategy extends Strategy<Void> {
         if (ask.isPresent()) {
           log.info("opening ask for " + ask.get().getSize() + " at " + ask.get().getPrice());
           removeChildren(askIdStrategy);
-          orderOpenStrategy = new OrderOpeningStrategy(http, ask.get());
+          orderOpenStrategy = new OrderOpeningStrategy(null, ask.get());
           addChildren(orderOpenStrategy);
           this.state = ScamState.ASKING;
         }
@@ -109,16 +110,16 @@ public class ScamStrategy extends Strategy<Void> {
         if (askId.isPresent()) {
           log.info("ask opened with id " + askId.get() + ", waiting to match");
           removeChildren(orderOpenStrategy);
-          askMatchingStrategy = new AskMatchingStrategy(askId.get());
-          addChildren(askMatchingStrategy);
+          orderMatchingStrategy = new OrderMatchingStrategy(askId.get());
+          addChildren(orderMatchingStrategy);
           this.state = ScamState.MATCHING_ASK;
         }
         break;
 
       case MATCHING_ASK:
-        if (askMatchingStrategy.getResult()) {
+        if (orderMatchingStrategy.getResult().isPresent()) {
           log.info("ask matched with bid, strategy complete");
-          removeChildren(askMatchingStrategy);
+          removeChildren(orderMatchingStrategy);
           this.state = ScamState.COMPLETE;
         }
         break;
