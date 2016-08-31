@@ -17,13 +17,13 @@
 
 package org.anhonesteffort.btc.state;
 
-public class OrderEventException extends Exception {
+public class StateProcessingException extends Exception {
 
-  public OrderEventException(String message) {
+  public StateProcessingException(String message) {
     super(message);
   }
 
-  public OrderEventException(String message, Throwable cause) {
+  public StateProcessingException(String message, Throwable cause) {
     super(message, cause);
   }
 

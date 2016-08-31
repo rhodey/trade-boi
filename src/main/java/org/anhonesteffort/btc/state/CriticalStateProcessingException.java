@@ -15,17 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.strategy;
+package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.compute.ComputeException;
+public class CriticalStateProcessingException extends StateProcessingException {
 
-public class StrategyException extends ComputeException {
-
-  public StrategyException(String message) {
+  public CriticalStateProcessingException(String message) {
     super(message);
   }
 
-  public StrategyException(String message, Throwable cause) {
+  public CriticalStateProcessingException(String message, Throwable cause) {
     super(message, cause);
   }
 

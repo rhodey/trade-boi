@@ -17,10 +17,11 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -36,12 +37,12 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
 
       http.postOrder(order).whenComplete((ok, err) -> {
         if (err != null) {
-          handleAsyncError(new StrategyException("api request completed with error", err));
+          handleAsyncError(new CriticalStateProcessingException("api request completed with error", err));
         }
       });
 
     } catch (IOException e) {
-      handleAsyncError(new StrategyException("error encoding api request", e));
+      handleAsyncError(new CriticalStateProcessingException("error encoding api request", e));
     }
   }
 
@@ -52,9 +53,8 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
   }
 
   @Override
-  public void onStateReset() throws ComputeException {
-    super.onStateReset();
-    throw new StrategyException("unable to handle state reset");
+  public void onStateReset() throws StateProcessingException {
+    throw new CriticalStateProcessingException("unable to handle state reset");
   }
 
 }

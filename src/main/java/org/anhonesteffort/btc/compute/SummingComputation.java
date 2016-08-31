@@ -18,6 +18,7 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class SummingComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  public void onStateReset() throws ComputeException {
+  public void onStateReset() throws StateProcessingException {
     super.onStateReset();
     history.clear();
     sum = 0l;

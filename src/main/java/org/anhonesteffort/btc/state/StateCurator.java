@@ -53,10 +53,10 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     state.getTakes().clear();
   }
 
-  protected abstract void onEvent(OrderEvent event) throws OrderEventException;
+  protected abstract void onEvent(OrderEvent event) throws StateProcessingException;
 
   @Override
-  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException, StateListenerException {
+  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws StateProcessingException {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();

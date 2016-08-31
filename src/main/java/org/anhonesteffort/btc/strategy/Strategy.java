@@ -18,23 +18,23 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.compute.Computation;
-import org.anhonesteffort.btc.compute.ComputeException;
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.util.Optional;
 
 public abstract class Strategy<T> extends Computation<T> {
 
-  private Optional<StrategyException> error = Optional.empty();
+  private Optional<StateProcessingException> error = Optional.empty();
 
-  protected void handleAsyncError(StrategyException error) {
+  protected void handleAsyncError(StateProcessingException error) {
     this.error = Optional.of(error);
   }
 
-  protected abstract T advanceStrategy(State state, long nanoseconds) throws StrategyException;
+  protected abstract T advanceStrategy(State state, long nanoseconds) throws StateProcessingException;
 
   @Override
-  protected T computeNextResult(State state, long nanoseconds) throws StrategyException {
+  protected T computeNextResult(State state, long nanoseconds) throws StateProcessingException {
     if (error.isPresent()) {
       throw error.get();
     } else {
@@ -43,7 +43,7 @@ public abstract class Strategy<T> extends Computation<T> {
   }
 
   @Override
-  public void onStateReset() throws ComputeException {
+  public void onStateReset() throws StateProcessingException {
     super.onStateReset();
     if (error.isPresent()) { throw error.get(); }
   }

@@ -17,8 +17,9 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.compute.ComputeException;
+import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
 
 public class BidMatchingStrategy extends Strategy<Boolean> {
 
@@ -34,9 +35,8 @@ public class BidMatchingStrategy extends Strategy<Boolean> {
   }
 
   @Override
-  public void onStateReset() throws ComputeException {
-    super.onStateReset();
-    throw new StrategyException("unable to handle state reset");
+  public void onStateReset() throws StateProcessingException {
+    throw new CriticalStateProcessingException("unable to handle state reset");
   }
 
 }

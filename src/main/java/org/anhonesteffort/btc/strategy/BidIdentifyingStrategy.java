@@ -23,7 +23,9 @@ import org.anhonesteffort.btc.compute.SummingComputation;
 import org.anhonesteffort.btc.compute.TakeVolumeComputation;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestFactory;
+import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Optional;
@@ -49,11 +51,11 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
     addChildren(spread, buyVolumeRecent, buyVolumeNow, sellVolumeRecent, sellVolumeNow);
   }
 
-  private Optional<Double> getBullishScore() throws StrategyException {
+  private Optional<Double> getBullishScore() throws CriticalStateProcessingException {
     if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
       return Optional.empty();
     } else if (buyVolumeRecent.getResult().get() < 0l || sellVolumeRecent.getResult().get() < 0l) {
-      throw new StrategyException("!!! buy or sell volume sum is less than zero !!!");
+      throw new CriticalStateProcessingException("!!! buy or sell volume sum is less than zero !!!");
     } else if (caster.toDouble(buyVolumeRecent.getResult().get()) < BULLISH_THRESHOLD_BTC) {
       return Optional.of(-1d);
     } else if (sellVolumeRecent.getResult().get() == 0l) {
@@ -73,7 +75,7 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
     }
   }
 
-  private boolean isBullish() throws StrategyException {
+  private boolean isBullish() throws StateProcessingException {
     Optional<Double>  bullishScore = getBullishScore();
     Optional<Boolean> isNowBearish = isNowBearish();
 
@@ -85,7 +87,7 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
   }
 
   @Override
-  protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) throws StrategyException {
+  protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
     if (isBullish() && caster.toDouble(spread.getResult().get()) >= 0.02d) {
       double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());

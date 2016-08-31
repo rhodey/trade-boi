@@ -19,8 +19,8 @@ package org.anhonesteffort.btc.state;
 
 public interface StateListener {
 
-  void onStateChange(State state, long nanoseconds) throws StateListenerException;
+  void onStateChange(State state, long nanoseconds) throws StateProcessingException;
 
-  void onStateReset() throws StateListenerException;
+  void onStateReset() throws StateProcessingException;
 
 }
