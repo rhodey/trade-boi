@@ -21,12 +21,12 @@ import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
+import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.stats.StatsService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.strategy.ScamStrategy;
-import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.io.IOException;
@@ -51,10 +51,10 @@ public class Scam {
     ));
   }
 
-  private EventHandler<OrderEvent> handlerFor(Strategy ... strategies) {
+  private EventHandler<OrderEvent> handlerFor(StateListener... listeners) {
     return new MatchingStateCurator(
         new LimitOrderBook(config.getLimitInitSize()),
-        new HashSet<>(Arrays.asList(strategies))
+        new HashSet<>(Arrays.asList(listeners))
     );
   }
 

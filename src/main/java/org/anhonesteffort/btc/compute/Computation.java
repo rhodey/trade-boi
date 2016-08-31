@@ -18,12 +18,13 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateListener;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class Computation<T> {
+public abstract class Computation<T> implements StateListener {
 
   private final Set<Computation> children = new HashSet<>();
   protected T result;
@@ -47,11 +48,13 @@ public abstract class Computation<T> {
     return result;
   }
 
+  @Override
   public void onStateChange(State state, long nanoseconds) throws ComputeException {
     for (Computation child : children) { child.onStateChange(state, nanoseconds); }
     result = computeNextResult(state, nanoseconds);
   }
 
+  @Override
   public void onStateReset() throws ComputeException {
     for (Computation child : children) { child.onStateReset(); }
   }

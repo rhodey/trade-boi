@@ -19,10 +19,12 @@ package org.anhonesteffort.btc.stats;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerHandler extends ChannelInboundHandlerAdapter implements StateListener {
 
   private static final Logger log = LoggerFactory.getLogger(ServerHandler.class);
   private final StatsProtoFactory proto = new StatsProtoFactory();
@@ -31,6 +33,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
   public void channelActive(ChannelHandlerContext context) {
     context.writeAndFlush(proto.error("lol idk"));
   }
+
+  @Override
+  public void onStateChange(State state, long nanoseconds) { }
+
+  @Override
+  public void onStateReset() { }
 
   @Override
   public void channelRead(ChannelHandlerContext context, Object request) {

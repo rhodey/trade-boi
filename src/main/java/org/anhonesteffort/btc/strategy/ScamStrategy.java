@@ -52,7 +52,7 @@ public class ScamStrategy extends Strategy<Void> {
   }
 
   @Override
-  protected Void advanceStrategy(State state, long nanoseconds) throws StrategyException {
+  protected Void advanceStrategy(State state, long nanoseconds) {
     switch (this.state) {
       case COMPLETE:
         log.info("awaiting buy opportunity");

@@ -20,15 +20,14 @@ package org.anhonesteffort.btc.state;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.TakeResult;
-import org.anhonesteffort.btc.compute.Computation;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class LimitOrderStateCurator extends StateCurator {
 
-  public LimitOrderStateCurator(LimitOrderBook book, Set<Computation> computations) {
-    super(book, computations);
+  public LimitOrderStateCurator(LimitOrderBook book, Set<StateListener> listeners) {
+    super(book, listeners);
   }
 
   private Order newLimitOrderForEvent(OrderEvent event) throws OrderEventException {

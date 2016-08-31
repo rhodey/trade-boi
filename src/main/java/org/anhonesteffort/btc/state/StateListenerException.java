@@ -15,17 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.compute;
+package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.state.StateListenerException;
+public class StateListenerException extends Exception {
 
-public class ComputeException extends StateListenerException {
-
-  public ComputeException(String message) {
+  public StateListenerException(String message) {
     super(message);
   }
 
-  public ComputeException(String message, Throwable cause) {
+  public StateListenerException(String message, Throwable cause) {
     super(message, cause);
   }
 

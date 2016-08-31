@@ -20,7 +20,6 @@ package org.anhonesteffort.btc.state;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.TakeResult;
-import org.anhonesteffort.btc.compute.Computation;
 
 import java.util.Optional;
 import java.util.Set;
@@ -36,8 +35,8 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     we can only really begin to trust the rx limit and market state after some
     time has passed since rebuilding
    */
-  public MatchingStateCurator(LimitOrderBook book, Set<Computation> computations) {
-    super(book, computations);
+  public MatchingStateCurator(LimitOrderBook book, Set<StateListener> listeners) {
+    super(book, listeners);
   }
 
   private Order newTakerOrder(OrderEvent match) throws OrderEventException {

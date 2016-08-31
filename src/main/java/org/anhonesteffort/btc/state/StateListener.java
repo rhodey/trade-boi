@@ -15,18 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.compute;
+package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.state.StateListenerException;
+public interface StateListener {
 
-public class ComputeException extends StateListenerException {
+  void onStateChange(State state, long nanoseconds) throws StateListenerException;
 
-  public ComputeException(String message) {
-    super(message);
-  }
-
-  public ComputeException(String message, Throwable cause) {
-    super(message, cause);
-  }
+  void onStateReset() throws StateListenerException;
 
 }

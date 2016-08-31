@@ -19,7 +19,6 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
-import org.anhonesteffort.btc.compute.Computation;
 
 import java.util.Optional;
 import java.util.Set;
@@ -30,8 +29,8 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   coinbase lies about market orders in receive messages
   https://community.coinbase.com/t/why-is-this-market-order-filled-without-having-any-fills/10001
    */
-  public MarketOrderStateCurator(LimitOrderBook book, Set<Computation> computations) {
-    super(book, computations);
+  public MarketOrderStateCurator(LimitOrderBook book, Set<StateListener> listeners) {
+    super(book, listeners);
   }
 
   private MarketOrder newMarketOrder(OrderEvent marketRx) throws OrderEventException {

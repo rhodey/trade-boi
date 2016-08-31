@@ -20,8 +20,6 @@ package org.anhonesteffort.btc.state;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.compute.Computation;
-import org.anhonesteffort.btc.compute.ComputeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +29,15 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
-  protected final State            state;
-  protected final Set<Computation> computations;
+  protected final State state;
+  protected final Set<StateListener> listeners;
 
   private boolean rebuilding    = false;
   private long    nanosecondSum = 0l;
 
-  public StateCurator(LimitOrderBook book, Set<Computation> computations) {
-    state             = new State(book);
-    this.computations = computations;
+  public StateCurator(LimitOrderBook book, Set<StateListener> listeners) {
+    state          = new State(book);
+    this.listeners = listeners;
   }
 
   protected boolean isRebuilding() {
@@ -58,13 +56,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   protected abstract void onEvent(OrderEvent event) throws OrderEventException;
 
   @Override
-  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException, ComputeException {
+  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws OrderEventException, StateListenerException {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();
         rebuilding = true;
         log.info("rebuilding order book");
-        for (Computation compute : computations) { compute.onStateReset(); }
+        for (StateListener listener : listeners) { listener.onStateReset(); }
         break;
 
       case REBUILD_END:
@@ -75,7 +73,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
       default:
         onEvent(event);
         if (!rebuilding) {
-          for (Computation compute : computations) { compute.onStateChange(state, event.getNanoseconds()); }
+          for (StateListener listener : listeners) { listener.onStateChange(state, event.getNanoseconds()); }
         }
         cleanupTakersAndMakers();
     }
