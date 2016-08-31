@@ -39,7 +39,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     super(book, listeners);
   }
 
-  private Order newTakerOrder(OrderEvent match) throws CriticalStateProcessingException {
+  private Order newTakerOrder(OrderEvent match) throws StateProcessingException {
     if (match.getPrice() > 0l && match.getSize() > 0l) {
       if (match.getSide().equals(Order.Side.ASK)) {
         return new Order(match.getTakerId(), Order.Side.BID, match.getPrice(), match.getSize());
@@ -51,7 +51,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     }
   }
 
-  private void checkEventAgainstTakeResult(OrderEvent match, Order taker, TakeResult result) throws CriticalStateProcessingException {
+  private void checkEventAgainstTakeResult(OrderEvent match, Order taker, TakeResult result) throws StateProcessingException {
     if (Math.abs(result.getTakeSize() - match.getSize()) > 1l) {
       throw new CriticalStateProcessingException(
           "take size for match event does not agree with our book, " +
@@ -64,7 +64,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     }
   }
 
-  private void updateRxLimitOrder(String takerId, long takeSize) throws CriticalStateProcessingException {
+  private void updateRxLimitOrder(String takerId, long takeSize) throws StateProcessingException {
     Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(takerId));
     if (!limitTaker.isPresent()) {
       throw new CriticalStateProcessingException("limit order for match event not found in the limit rx state map");
@@ -76,7 +76,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
   }
 
   @Override
-  protected void onEvent(OrderEvent event) throws CriticalStateProcessingException {
+  protected void onEvent(OrderEvent event) throws StateProcessingException {
     super.onEvent(event);
     if (!event.getType().equals(OrderEvent.Type.MATCH)) { return; }
 

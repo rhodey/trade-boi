@@ -30,7 +30,7 @@ public class LimitOrderStateCurator extends StateCurator {
     super(book, listeners);
   }
 
-  private Order newLimitOrderForEvent(OrderEvent event) throws CriticalStateProcessingException {
+  private Order newLimitOrderForEvent(OrderEvent event) throws StateProcessingException {
     if (event.getPrice() > 0l && event.getSize() > 0l) {
       return new Order(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
@@ -38,7 +38,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkRxLimitOrderForOpen(OrderEvent open) throws CriticalStateProcessingException {
+  private void checkRxLimitOrderForOpen(OrderEvent open) throws StateProcessingException {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
     if (!rxLimit.isPresent() && !isRebuilding()) {
       throw new CriticalStateProcessingException("limit order " + open.getOrderId() + " was never in the limit rx state map");
@@ -50,7 +50,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private long getSizeReducedForChange(OrderEvent change) throws CriticalStateProcessingException {
+  private long getSizeReducedForChange(OrderEvent change) throws StateProcessingException {
     if (change.getNewSize() >= change.getOldSize()) {
       throw new CriticalStateProcessingException("limit order size can only decrease");
     } else {
@@ -58,7 +58,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private Order newRxLimitOrderChange(Order rxLimit, OrderEvent change) throws CriticalStateProcessingException {
+  private Order newRxLimitOrderChange(Order rxLimit, OrderEvent change) throws StateProcessingException {
     if (change.getNewSize() >= rxLimit.getSize()) {
       throw new CriticalStateProcessingException("limit order change event new size is >= rx limit order size");
     } else {
@@ -66,7 +66,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkDoneRxLimitOrder(OrderEvent done, Order rxLimit) throws CriticalStateProcessingException {
+  private void checkDoneRxLimitOrder(OrderEvent done, Order rxLimit) throws StateProcessingException {
     if (Math.abs(rxLimit.getSizeRemaining() - done.getSize()) > 1l) {
       throw new CriticalStateProcessingException(
           "rx limit order for limit done event disagrees about size remaining, " +
@@ -75,13 +75,13 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private void checkFilledLimitOrder(Order fillLimit) throws CriticalStateProcessingException {
+  private void checkFilledLimitOrder(Order fillLimit) throws StateProcessingException {
     if (fillLimit.getSizeRemaining() > 1l) {
       throw new CriticalStateProcessingException("order for filled order event was still open on the book with " + fillLimit.getSizeRemaining());
     }
   }
 
-  private void checkCanceledLimitOrder(OrderEvent done, Order cancelLimit) throws CriticalStateProcessingException {
+  private void checkCanceledLimitOrder(OrderEvent done, Order cancelLimit) throws StateProcessingException {
     if (Math.abs(done.getSize() - cancelLimit.getSizeRemaining()) > 1l) {
       throw new CriticalStateProcessingException(
           "order for cancel order event disagrees about size remaining, " +
@@ -91,7 +91,7 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   @Override
-  protected void onEvent(OrderEvent event) throws CriticalStateProcessingException {
+  protected void onEvent(OrderEvent event) throws StateProcessingException {
     switch (event.getType()) {
       case LIMIT_RX:
         Order rxOrder = newLimitOrderForEvent(event);

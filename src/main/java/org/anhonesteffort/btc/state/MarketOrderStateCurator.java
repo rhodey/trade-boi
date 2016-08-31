@@ -33,7 +33,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super(book, listeners);
   }
 
-  private MarketOrder newMarketOrder(OrderEvent marketRx) throws CriticalStateProcessingException {
+  private MarketOrder newMarketOrder(OrderEvent marketRx) throws StateProcessingException {
     if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
       return new MarketOrder(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
@@ -42,7 +42,7 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
   }
 
   @Override
-  protected void onEvent(OrderEvent event) throws CriticalStateProcessingException {
+  protected void onEvent(OrderEvent event) throws StateProcessingException {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
