@@ -23,7 +23,7 @@ import org.anhonesteffort.btc.book.TakeResult;
 import java.util.stream.Collectors;
 
 import static org.anhonesteffort.btc.stats.StatsProto.BaseMessage;
-import static org.anhonesteffort.btc.stats.StatsProto.Error;
+import static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent;
 import static org.anhonesteffort.btc.stats.StatsProto.TakeEvent;
 
 public class StatsProtoFactory {
@@ -31,7 +31,7 @@ public class StatsProtoFactory {
   public BaseMessage errorMsg(String message) {
     return BaseMessage.newBuilder()
         .setType(BaseMessage.Type.ERROR)
-        .setError(Error.newBuilder().setMessage(message))
+        .setError(ErrorEvent.newBuilder().setMessage(message))
         .build();
   }
 
@@ -61,10 +61,17 @@ public class StatsProtoFactory {
         .build();
   }
 
-  public BaseMessage takeEventMsg(TakeResult takeResult) {
+  public BaseMessage takeMsg(TakeResult takeResult) {
     return BaseMessage.newBuilder()
         .setType(BaseMessage.Type.TAKE)
-        .setTakeEvent(takeEvent(takeResult))
+        .setTake(takeEvent(takeResult))
+        .build();
+  }
+
+  public BaseMessage latencyMsg(Long mod, Long nanoseconds) {
+    return BaseMessage.newBuilder()
+        .setType(BaseMessage.Type.LATENCY)
+        .setLatency(StatsProto.LatencyEvent.newBuilder().setMod(mod).setNanoseconds(nanoseconds))
         .build();
   }
 

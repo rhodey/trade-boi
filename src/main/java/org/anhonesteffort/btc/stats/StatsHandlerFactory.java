@@ -18,37 +18,42 @@
 package org.anhonesteffort.btc.stats;
 
 import io.netty.channel.ChannelInboundHandler;
+import org.anhonesteffort.btc.compute.Computation;
+import org.anhonesteffort.btc.compute.LatencyComputation;
 import org.anhonesteffort.btc.state.State;
-import org.anhonesteffort.btc.state.StateListener;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class StatsHandlerFactory implements StateListener {
+public class StatsHandlerFactory extends Computation<Void> {
 
-  private final Set<StatsChannelHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+  private final Set<StatsChannelHandler> handlers = new HashSet<>();
+  private final LatencyComputation       latency  = new LatencyComputation(50l);
+
+  public StatsHandlerFactory() {
+    addChildren(latency);
+  }
 
   public ChannelInboundHandler newHandler() {
     return new StatsChannelHandler(this);
   }
 
   protected void onChannelActive(StatsChannelHandler handler) {
+    addChildren(handler);
     handlers.add(handler);
   }
 
   protected void onChannelInactive(StatsChannelHandler handler) {
+    removeChildren(handler);
     handlers.remove(handler);
   }
 
   @Override
-  public void onStateChange(State state, long nanoseconds) {
-    for (StatsChannelHandler handler : handlers) { handler.onStateChange(state, nanoseconds); }
-  }
-
-  @Override
-  public void onStateReset() {
-    handlers.forEach(StatsChannelHandler::onStateReset);
+  protected Void computeNextResult(State state, long nanoseconds) {
+    if (latency.getResult().isPresent()) {
+      handlers.forEach(handler -> handler.onLatencyMeasured(latency.getMod(), latency.getResult().get()));
+    }
+    return null;
   }
 
 }

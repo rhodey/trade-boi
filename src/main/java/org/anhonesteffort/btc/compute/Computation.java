@@ -27,19 +27,19 @@ import java.util.Set;
 
 public abstract class Computation<T> implements StateListener {
 
-  private final Set<Computation> children = new HashSet<>();
+  private final Set<StateListener> children = new HashSet<>();
   protected T result;
 
   protected Computation() { }
-  protected Computation(Computation ... children) {
+  protected Computation(StateListener ... children) {
     addChildren(children);
   }
 
-  protected void addChildren(Computation ... children) {
+  protected void addChildren(StateListener ... children) {
     this.children.addAll(Arrays.asList(children));
   }
 
-  protected void removeChildren(Computation ... children) {
+  protected void removeChildren(StateListener ... children) {
     this.children.removeAll(Arrays.asList(children));
   }
 
@@ -51,13 +51,13 @@ public abstract class Computation<T> implements StateListener {
 
   @Override
   public void onStateChange(State state, long nanoseconds) throws StateProcessingException {
-    for (Computation child : children) { child.onStateChange(state, nanoseconds); }
+    for (StateListener child : children) { child.onStateChange(state, nanoseconds); }
     result = computeNextResult(state, nanoseconds);
   }
 
   @Override
   public void onStateReset() throws StateProcessingException {
-    for (Computation child : children) { child.onStateReset(); }
+    for (StateListener child : children) { child.onStateReset(); }
   }
 
 }

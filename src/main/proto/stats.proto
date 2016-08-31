@@ -5,17 +5,19 @@ option java_outer_classname = "StatsProto";
 
 message BaseMessage {
   enum Type {
-    ERROR = 0;
-    RESET = 1;
-    TAKE  = 2;
+    ERROR   = 0;
+    RESET   = 1;
+    TAKE    = 2;
+    LATENCY = 3;
   }
 
-  Type      type      = 1;
-  Error     error     = 2;
-  TakeEvent takeEvent = 3;
+  Type         type    = 1;
+  ErrorEvent   error   = 2;
+  TakeEvent    take    = 3;
+  LatencyEvent latency = 4;
 }
 
-message Error {
+message ErrorEvent {
   string message = 1;
 }
 
@@ -38,4 +40,9 @@ message TakeEvent {
   repeated Order makers    = 2;
            int64 takeSize  = 3;
            int64 takeValue = 4;
+}
+
+message LatencyEvent {
+  int64 mod         = 1;
+  int64 nanoseconds = 2;
 }

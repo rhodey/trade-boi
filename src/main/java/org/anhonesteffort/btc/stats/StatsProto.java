@@ -28,30 +28,43 @@ public final class StatsProto {
     org.anhonesteffort.btc.stats.StatsProto.BaseMessage.Type getType();
 
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
     boolean hasError();
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
-    org.anhonesteffort.btc.stats.StatsProto.Error getError();
+    org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getError();
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
-    org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder getErrorOrBuilder();
+    org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder getErrorOrBuilder();
 
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    boolean hasTakeEvent();
+    boolean hasTake();
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTakeEvent();
+    org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTake();
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeEventOrBuilder();
+    org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeOrBuilder();
+
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    boolean hasLatency();
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getLatency();
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder getLatencyOrBuilder();
   }
   /**
    * Protobuf type {@code BaseMessage}
@@ -100,11 +113,11 @@ public final class StatsProto {
               break;
             }
             case 18: {
-              org.anhonesteffort.btc.stats.StatsProto.Error.Builder subBuilder = null;
+              org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder subBuilder = null;
               if (error_ != null) {
                 subBuilder = error_.toBuilder();
               }
-              error_ = input.readMessage(org.anhonesteffort.btc.stats.StatsProto.Error.parser(), extensionRegistry);
+              error_ = input.readMessage(org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(error_);
                 error_ = subBuilder.buildPartial();
@@ -114,13 +127,26 @@ public final class StatsProto {
             }
             case 26: {
               org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder subBuilder = null;
-              if (takeEvent_ != null) {
-                subBuilder = takeEvent_.toBuilder();
+              if (take_ != null) {
+                subBuilder = take_.toBuilder();
               }
-              takeEvent_ = input.readMessage(org.anhonesteffort.btc.stats.StatsProto.TakeEvent.parser(), extensionRegistry);
+              take_ = input.readMessage(org.anhonesteffort.btc.stats.StatsProto.TakeEvent.parser(), extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(takeEvent_);
-                takeEvent_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(take_);
+                take_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder subBuilder = null;
+              if (latency_ != null) {
+                subBuilder = latency_.toBuilder();
+              }
+              latency_ = input.readMessage(org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(latency_);
+                latency_ = subBuilder.buildPartial();
               }
 
               break;
@@ -165,6 +191,10 @@ public final class StatsProto {
        * <code>TAKE = 2;</code>
        */
       TAKE(2),
+      /**
+       * <code>LATENCY = 3;</code>
+       */
+      LATENCY(3),
       UNRECOGNIZED(-1),
       ;
 
@@ -180,6 +210,10 @@ public final class StatsProto {
        * <code>TAKE = 2;</code>
        */
       public static final int TAKE_VALUE = 2;
+      /**
+       * <code>LATENCY = 3;</code>
+       */
+      public static final int LATENCY_VALUE = 3;
 
 
       public final int getNumber() {
@@ -203,6 +237,7 @@ public final class StatsProto {
           case 0: return ERROR;
           case 1: return RESET;
           case 2: return TAKE;
+          case 3: return LATENCY;
           default: return null;
         }
       }
@@ -272,45 +307,66 @@ public final class StatsProto {
     }
 
     public static final int ERROR_FIELD_NUMBER = 2;
-    private org.anhonesteffort.btc.stats.StatsProto.Error error_;
+    private org.anhonesteffort.btc.stats.StatsProto.ErrorEvent error_;
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
     public boolean hasError() {
       return error_ != null;
     }
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
-    public org.anhonesteffort.btc.stats.StatsProto.Error getError() {
-      return error_ == null ? org.anhonesteffort.btc.stats.StatsProto.Error.getDefaultInstance() : error_;
+    public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getError() {
+      return error_ == null ? org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.getDefaultInstance() : error_;
     }
     /**
-     * <code>optional .Error error = 2;</code>
+     * <code>optional .ErrorEvent error = 2;</code>
      */
-    public org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder getErrorOrBuilder() {
+    public org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder getErrorOrBuilder() {
       return getError();
     }
 
-    public static final int TAKEEVENT_FIELD_NUMBER = 3;
-    private org.anhonesteffort.btc.stats.StatsProto.TakeEvent takeEvent_;
+    public static final int TAKE_FIELD_NUMBER = 3;
+    private org.anhonesteffort.btc.stats.StatsProto.TakeEvent take_;
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    public boolean hasTakeEvent() {
-      return takeEvent_ != null;
+    public boolean hasTake() {
+      return take_ != null;
     }
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    public org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTakeEvent() {
-      return takeEvent_ == null ? org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : takeEvent_;
+    public org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTake() {
+      return take_ == null ? org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : take_;
     }
     /**
-     * <code>optional .TakeEvent takeEvent = 3;</code>
+     * <code>optional .TakeEvent take = 3;</code>
      */
-    public org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeEventOrBuilder() {
-      return getTakeEvent();
+    public org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeOrBuilder() {
+      return getTake();
+    }
+
+    public static final int LATENCY_FIELD_NUMBER = 4;
+    private org.anhonesteffort.btc.stats.StatsProto.LatencyEvent latency_;
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    public boolean hasLatency() {
+      return latency_ != null;
+    }
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getLatency() {
+      return latency_ == null ? org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.getDefaultInstance() : latency_;
+    }
+    /**
+     * <code>optional .LatencyEvent latency = 4;</code>
+     */
+    public org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder getLatencyOrBuilder() {
+      return getLatency();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -331,8 +387,11 @@ public final class StatsProto {
       if (error_ != null) {
         output.writeMessage(2, getError());
       }
-      if (takeEvent_ != null) {
-        output.writeMessage(3, getTakeEvent());
+      if (take_ != null) {
+        output.writeMessage(3, getTake());
+      }
+      if (latency_ != null) {
+        output.writeMessage(4, getLatency());
       }
     }
 
@@ -349,9 +408,13 @@ public final class StatsProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getError());
       }
-      if (takeEvent_ != null) {
+      if (take_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getTakeEvent());
+          .computeMessageSize(3, getTake());
+      }
+      if (latency_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getLatency());
       }
       memoizedSize = size;
       return size;
@@ -375,10 +438,15 @@ public final class StatsProto {
         result = result && getError()
             .equals(other.getError());
       }
-      result = result && (hasTakeEvent() == other.hasTakeEvent());
-      if (hasTakeEvent()) {
-        result = result && getTakeEvent()
-            .equals(other.getTakeEvent());
+      result = result && (hasTake() == other.hasTake());
+      if (hasTake()) {
+        result = result && getTake()
+            .equals(other.getTake());
+      }
+      result = result && (hasLatency() == other.hasLatency());
+      if (hasLatency()) {
+        result = result && getLatency()
+            .equals(other.getLatency());
       }
       return result;
     }
@@ -396,9 +464,13 @@ public final class StatsProto {
         hash = (37 * hash) + ERROR_FIELD_NUMBER;
         hash = (53 * hash) + getError().hashCode();
       }
-      if (hasTakeEvent()) {
-        hash = (37 * hash) + TAKEEVENT_FIELD_NUMBER;
-        hash = (53 * hash) + getTakeEvent().hashCode();
+      if (hasTake()) {
+        hash = (37 * hash) + TAKE_FIELD_NUMBER;
+        hash = (53 * hash) + getTake().hashCode();
+      }
+      if (hasLatency()) {
+        hash = (37 * hash) + LATENCY_FIELD_NUMBER;
+        hash = (53 * hash) + getLatency().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -526,11 +598,17 @@ public final class StatsProto {
           error_ = null;
           errorBuilder_ = null;
         }
-        if (takeEventBuilder_ == null) {
-          takeEvent_ = null;
+        if (takeBuilder_ == null) {
+          take_ = null;
         } else {
-          takeEvent_ = null;
-          takeEventBuilder_ = null;
+          take_ = null;
+          takeBuilder_ = null;
+        }
+        if (latencyBuilder_ == null) {
+          latency_ = null;
+        } else {
+          latency_ = null;
+          latencyBuilder_ = null;
         }
         return this;
       }
@@ -560,10 +638,15 @@ public final class StatsProto {
         } else {
           result.error_ = errorBuilder_.build();
         }
-        if (takeEventBuilder_ == null) {
-          result.takeEvent_ = takeEvent_;
+        if (takeBuilder_ == null) {
+          result.take_ = take_;
         } else {
-          result.takeEvent_ = takeEventBuilder_.build();
+          result.take_ = takeBuilder_.build();
+        }
+        if (latencyBuilder_ == null) {
+          result.latency_ = latency_;
+        } else {
+          result.latency_ = latencyBuilder_.build();
         }
         onBuilt();
         return result;
@@ -612,8 +695,11 @@ public final class StatsProto {
         if (other.hasError()) {
           mergeError(other.getError());
         }
-        if (other.hasTakeEvent()) {
-          mergeTakeEvent(other.getTakeEvent());
+        if (other.hasTake()) {
+          mergeTake(other.getTake());
+        }
+        if (other.hasLatency()) {
+          mergeLatency(other.getLatency());
         }
         onChanged();
         return this;
@@ -685,29 +771,29 @@ public final class StatsProto {
         return this;
       }
 
-      private org.anhonesteffort.btc.stats.StatsProto.Error error_ = null;
+      private org.anhonesteffort.btc.stats.StatsProto.ErrorEvent error_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          org.anhonesteffort.btc.stats.StatsProto.Error, org.anhonesteffort.btc.stats.StatsProto.Error.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder> errorBuilder_;
+          org.anhonesteffort.btc.stats.StatsProto.ErrorEvent, org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder> errorBuilder_;
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
       public boolean hasError() {
         return errorBuilder_ != null || error_ != null;
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.Error getError() {
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getError() {
         if (errorBuilder_ == null) {
-          return error_ == null ? org.anhonesteffort.btc.stats.StatsProto.Error.getDefaultInstance() : error_;
+          return error_ == null ? org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.getDefaultInstance() : error_;
         } else {
           return errorBuilder_.getMessage();
         }
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
-      public Builder setError(org.anhonesteffort.btc.stats.StatsProto.Error value) {
+      public Builder setError(org.anhonesteffort.btc.stats.StatsProto.ErrorEvent value) {
         if (errorBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -721,10 +807,10 @@ public final class StatsProto {
         return this;
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
       public Builder setError(
-          org.anhonesteffort.btc.stats.StatsProto.Error.Builder builderForValue) {
+          org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder builderForValue) {
         if (errorBuilder_ == null) {
           error_ = builderForValue.build();
           onChanged();
@@ -735,13 +821,13 @@ public final class StatsProto {
         return this;
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
-      public Builder mergeError(org.anhonesteffort.btc.stats.StatsProto.Error value) {
+      public Builder mergeError(org.anhonesteffort.btc.stats.StatsProto.ErrorEvent value) {
         if (errorBuilder_ == null) {
           if (error_ != null) {
             error_ =
-              org.anhonesteffort.btc.stats.StatsProto.Error.newBuilder(error_).mergeFrom(value).buildPartial();
+              org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.newBuilder(error_).mergeFrom(value).buildPartial();
           } else {
             error_ = value;
           }
@@ -753,7 +839,7 @@ public final class StatsProto {
         return this;
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
       public Builder clearError() {
         if (errorBuilder_ == null) {
@@ -767,33 +853,33 @@ public final class StatsProto {
         return this;
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.Error.Builder getErrorBuilder() {
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder getErrorBuilder() {
         
         onChanged();
         return getErrorFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder getErrorOrBuilder() {
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder getErrorOrBuilder() {
         if (errorBuilder_ != null) {
           return errorBuilder_.getMessageOrBuilder();
         } else {
           return error_ == null ?
-              org.anhonesteffort.btc.stats.StatsProto.Error.getDefaultInstance() : error_;
+              org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.getDefaultInstance() : error_;
         }
       }
       /**
-       * <code>optional .Error error = 2;</code>
+       * <code>optional .ErrorEvent error = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          org.anhonesteffort.btc.stats.StatsProto.Error, org.anhonesteffort.btc.stats.StatsProto.Error.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder> 
+          org.anhonesteffort.btc.stats.StatsProto.ErrorEvent, org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder> 
           getErrorFieldBuilder() {
         if (errorBuilder_ == null) {
           errorBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              org.anhonesteffort.btc.stats.StatsProto.Error, org.anhonesteffort.btc.stats.StatsProto.Error.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder>(
+              org.anhonesteffort.btc.stats.StatsProto.ErrorEvent, org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder>(
                   getError(),
                   getParentForChildren(),
                   isClean());
@@ -802,121 +888,238 @@ public final class StatsProto {
         return errorBuilder_;
       }
 
-      private org.anhonesteffort.btc.stats.StatsProto.TakeEvent takeEvent_ = null;
+      private org.anhonesteffort.btc.stats.StatsProto.TakeEvent take_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          org.anhonesteffort.btc.stats.StatsProto.TakeEvent, org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder> takeEventBuilder_;
+          org.anhonesteffort.btc.stats.StatsProto.TakeEvent, org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder> takeBuilder_;
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public boolean hasTakeEvent() {
-        return takeEventBuilder_ != null || takeEvent_ != null;
+      public boolean hasTake() {
+        return takeBuilder_ != null || take_ != null;
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTakeEvent() {
-        if (takeEventBuilder_ == null) {
-          return takeEvent_ == null ? org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : takeEvent_;
+      public org.anhonesteffort.btc.stats.StatsProto.TakeEvent getTake() {
+        if (takeBuilder_ == null) {
+          return take_ == null ? org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : take_;
         } else {
-          return takeEventBuilder_.getMessage();
+          return takeBuilder_.getMessage();
         }
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public Builder setTakeEvent(org.anhonesteffort.btc.stats.StatsProto.TakeEvent value) {
-        if (takeEventBuilder_ == null) {
+      public Builder setTake(org.anhonesteffort.btc.stats.StatsProto.TakeEvent value) {
+        if (takeBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          takeEvent_ = value;
+          take_ = value;
           onChanged();
         } else {
-          takeEventBuilder_.setMessage(value);
+          takeBuilder_.setMessage(value);
         }
 
         return this;
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public Builder setTakeEvent(
+      public Builder setTake(
           org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder builderForValue) {
-        if (takeEventBuilder_ == null) {
-          takeEvent_ = builderForValue.build();
+        if (takeBuilder_ == null) {
+          take_ = builderForValue.build();
           onChanged();
         } else {
-          takeEventBuilder_.setMessage(builderForValue.build());
+          takeBuilder_.setMessage(builderForValue.build());
         }
 
         return this;
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public Builder mergeTakeEvent(org.anhonesteffort.btc.stats.StatsProto.TakeEvent value) {
-        if (takeEventBuilder_ == null) {
-          if (takeEvent_ != null) {
-            takeEvent_ =
-              org.anhonesteffort.btc.stats.StatsProto.TakeEvent.newBuilder(takeEvent_).mergeFrom(value).buildPartial();
+      public Builder mergeTake(org.anhonesteffort.btc.stats.StatsProto.TakeEvent value) {
+        if (takeBuilder_ == null) {
+          if (take_ != null) {
+            take_ =
+              org.anhonesteffort.btc.stats.StatsProto.TakeEvent.newBuilder(take_).mergeFrom(value).buildPartial();
           } else {
-            takeEvent_ = value;
+            take_ = value;
           }
           onChanged();
         } else {
-          takeEventBuilder_.mergeFrom(value);
+          takeBuilder_.mergeFrom(value);
         }
 
         return this;
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public Builder clearTakeEvent() {
-        if (takeEventBuilder_ == null) {
-          takeEvent_ = null;
+      public Builder clearTake() {
+        if (takeBuilder_ == null) {
+          take_ = null;
           onChanged();
         } else {
-          takeEvent_ = null;
-          takeEventBuilder_ = null;
+          take_ = null;
+          takeBuilder_ = null;
         }
 
         return this;
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder getTakeEventBuilder() {
+      public org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder getTakeBuilder() {
         
         onChanged();
-        return getTakeEventFieldBuilder().getBuilder();
+        return getTakeFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
-      public org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeEventOrBuilder() {
-        if (takeEventBuilder_ != null) {
-          return takeEventBuilder_.getMessageOrBuilder();
+      public org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder getTakeOrBuilder() {
+        if (takeBuilder_ != null) {
+          return takeBuilder_.getMessageOrBuilder();
         } else {
-          return takeEvent_ == null ?
-              org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : takeEvent_;
+          return take_ == null ?
+              org.anhonesteffort.btc.stats.StatsProto.TakeEvent.getDefaultInstance() : take_;
         }
       }
       /**
-       * <code>optional .TakeEvent takeEvent = 3;</code>
+       * <code>optional .TakeEvent take = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.anhonesteffort.btc.stats.StatsProto.TakeEvent, org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder> 
-          getTakeEventFieldBuilder() {
-        if (takeEventBuilder_ == null) {
-          takeEventBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+          getTakeFieldBuilder() {
+        if (takeBuilder_ == null) {
+          takeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
               org.anhonesteffort.btc.stats.StatsProto.TakeEvent, org.anhonesteffort.btc.stats.StatsProto.TakeEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.TakeEventOrBuilder>(
-                  getTakeEvent(),
+                  getTake(),
                   getParentForChildren(),
                   isClean());
-          takeEvent_ = null;
+          take_ = null;
         }
-        return takeEventBuilder_;
+        return takeBuilder_;
+      }
+
+      private org.anhonesteffort.btc.stats.StatsProto.LatencyEvent latency_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.anhonesteffort.btc.stats.StatsProto.LatencyEvent, org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder> latencyBuilder_;
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public boolean hasLatency() {
+        return latencyBuilder_ != null || latency_ != null;
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getLatency() {
+        if (latencyBuilder_ == null) {
+          return latency_ == null ? org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.getDefaultInstance() : latency_;
+        } else {
+          return latencyBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public Builder setLatency(org.anhonesteffort.btc.stats.StatsProto.LatencyEvent value) {
+        if (latencyBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          latency_ = value;
+          onChanged();
+        } else {
+          latencyBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public Builder setLatency(
+          org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder builderForValue) {
+        if (latencyBuilder_ == null) {
+          latency_ = builderForValue.build();
+          onChanged();
+        } else {
+          latencyBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public Builder mergeLatency(org.anhonesteffort.btc.stats.StatsProto.LatencyEvent value) {
+        if (latencyBuilder_ == null) {
+          if (latency_ != null) {
+            latency_ =
+              org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.newBuilder(latency_).mergeFrom(value).buildPartial();
+          } else {
+            latency_ = value;
+          }
+          onChanged();
+        } else {
+          latencyBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public Builder clearLatency() {
+        if (latencyBuilder_ == null) {
+          latency_ = null;
+          onChanged();
+        } else {
+          latency_ = null;
+          latencyBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder getLatencyBuilder() {
+        
+        onChanged();
+        return getLatencyFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder getLatencyOrBuilder() {
+        if (latencyBuilder_ != null) {
+          return latencyBuilder_.getMessageOrBuilder();
+        } else {
+          return latency_ == null ?
+              org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.getDefaultInstance() : latency_;
+        }
+      }
+      /**
+       * <code>optional .LatencyEvent latency = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.anhonesteffort.btc.stats.StatsProto.LatencyEvent, org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder> 
+          getLatencyFieldBuilder() {
+        if (latencyBuilder_ == null) {
+          latencyBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              org.anhonesteffort.btc.stats.StatsProto.LatencyEvent, org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder, org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder>(
+                  getLatency(),
+                  getParentForChildren(),
+                  isClean());
+          latency_ = null;
+        }
+        return latencyBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -967,8 +1170,8 @@ public final class StatsProto {
 
   }
 
-  public interface ErrorOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Error)
+  public interface ErrorEventOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ErrorEvent)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -982,17 +1185,17 @@ public final class StatsProto {
         getMessageBytes();
   }
   /**
-   * Protobuf type {@code Error}
+   * Protobuf type {@code ErrorEvent}
    */
-  public  static final class Error extends
+  public  static final class ErrorEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:Error)
-      ErrorOrBuilder {
-    // Use Error.newBuilder() to construct.
-    private Error(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:ErrorEvent)
+      ErrorEventOrBuilder {
+    // Use ErrorEvent.newBuilder() to construct.
+    private ErrorEvent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private Error() {
+    private ErrorEvent() {
       message_ = "";
     }
 
@@ -1001,7 +1204,7 @@ public final class StatsProto {
     getUnknownFields() {
       return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
     }
-    private Error(
+    private ErrorEvent(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1040,14 +1243,14 @@ public final class StatsProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.anhonesteffort.btc.stats.StatsProto.internal_static_Error_descriptor;
+      return org.anhonesteffort.btc.stats.StatsProto.internal_static_ErrorEvent_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.anhonesteffort.btc.stats.StatsProto.internal_static_Error_fieldAccessorTable
+      return org.anhonesteffort.btc.stats.StatsProto.internal_static_ErrorEvent_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.anhonesteffort.btc.stats.StatsProto.Error.class, org.anhonesteffort.btc.stats.StatsProto.Error.Builder.class);
+              org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.class, org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder.class);
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 1;
@@ -1119,10 +1322,10 @@ public final class StatsProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof org.anhonesteffort.btc.stats.StatsProto.Error)) {
+      if (!(obj instanceof org.anhonesteffort.btc.stats.StatsProto.ErrorEvent)) {
         return super.equals(obj);
       }
-      org.anhonesteffort.btc.stats.StatsProto.Error other = (org.anhonesteffort.btc.stats.StatsProto.Error) obj;
+      org.anhonesteffort.btc.stats.StatsProto.ErrorEvent other = (org.anhonesteffort.btc.stats.StatsProto.ErrorEvent) obj;
 
       boolean result = true;
       result = result && getMessage()
@@ -1144,58 +1347,58 @@ public final class StatsProto {
       return hash;
     }
 
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(byte[] data)
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(java.io.InputStream input)
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseDelimitedFrom(java.io.InputStream input)
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseDelimitedFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static org.anhonesteffort.btc.stats.StatsProto.Error parseFrom(
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1207,7 +1410,7 @@ public final class StatsProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(org.anhonesteffort.btc.stats.StatsProto.Error prototype) {
+    public static Builder newBuilder(org.anhonesteffort.btc.stats.StatsProto.ErrorEvent prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() {
@@ -1222,25 +1425,25 @@ public final class StatsProto {
       return builder;
     }
     /**
-     * Protobuf type {@code Error}
+     * Protobuf type {@code ErrorEvent}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Error)
-        org.anhonesteffort.btc.stats.StatsProto.ErrorOrBuilder {
+        // @@protoc_insertion_point(builder_implements:ErrorEvent)
+        org.anhonesteffort.btc.stats.StatsProto.ErrorEventOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.anhonesteffort.btc.stats.StatsProto.internal_static_Error_descriptor;
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_ErrorEvent_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.anhonesteffort.btc.stats.StatsProto.internal_static_Error_fieldAccessorTable
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_ErrorEvent_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                org.anhonesteffort.btc.stats.StatsProto.Error.class, org.anhonesteffort.btc.stats.StatsProto.Error.Builder.class);
+                org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.class, org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.Builder.class);
       }
 
-      // Construct using org.anhonesteffort.btc.stats.StatsProto.Error.newBuilder()
+      // Construct using org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1264,23 +1467,23 @@ public final class StatsProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.anhonesteffort.btc.stats.StatsProto.internal_static_Error_descriptor;
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_ErrorEvent_descriptor;
       }
 
-      public org.anhonesteffort.btc.stats.StatsProto.Error getDefaultInstanceForType() {
-        return org.anhonesteffort.btc.stats.StatsProto.Error.getDefaultInstance();
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getDefaultInstanceForType() {
+        return org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.getDefaultInstance();
       }
 
-      public org.anhonesteffort.btc.stats.StatsProto.Error build() {
-        org.anhonesteffort.btc.stats.StatsProto.Error result = buildPartial();
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent build() {
+        org.anhonesteffort.btc.stats.StatsProto.ErrorEvent result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public org.anhonesteffort.btc.stats.StatsProto.Error buildPartial() {
-        org.anhonesteffort.btc.stats.StatsProto.Error result = new org.anhonesteffort.btc.stats.StatsProto.Error(this);
+      public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent buildPartial() {
+        org.anhonesteffort.btc.stats.StatsProto.ErrorEvent result = new org.anhonesteffort.btc.stats.StatsProto.ErrorEvent(this);
         result.message_ = message_;
         onBuilt();
         return result;
@@ -1313,16 +1516,16 @@ public final class StatsProto {
         return (Builder) super.addRepeatedField(field, value);
       }
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.anhonesteffort.btc.stats.StatsProto.Error) {
-          return mergeFrom((org.anhonesteffort.btc.stats.StatsProto.Error)other);
+        if (other instanceof org.anhonesteffort.btc.stats.StatsProto.ErrorEvent) {
+          return mergeFrom((org.anhonesteffort.btc.stats.StatsProto.ErrorEvent)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(org.anhonesteffort.btc.stats.StatsProto.Error other) {
-        if (other == org.anhonesteffort.btc.stats.StatsProto.Error.getDefaultInstance()) return this;
+      public Builder mergeFrom(org.anhonesteffort.btc.stats.StatsProto.ErrorEvent other) {
+        if (other == org.anhonesteffort.btc.stats.StatsProto.ErrorEvent.getDefaultInstance()) return this;
         if (!other.getMessage().isEmpty()) {
           message_ = other.message_;
           onChanged();
@@ -1339,11 +1542,11 @@ public final class StatsProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        org.anhonesteffort.btc.stats.StatsProto.Error parsedMessage = null;
+        org.anhonesteffort.btc.stats.StatsProto.ErrorEvent parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.anhonesteffort.btc.stats.StatsProto.Error) e.getUnfinishedMessage();
+          parsedMessage = (org.anhonesteffort.btc.stats.StatsProto.ErrorEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1432,39 +1635,39 @@ public final class StatsProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:Error)
+      // @@protoc_insertion_point(builder_scope:ErrorEvent)
     }
 
-    // @@protoc_insertion_point(class_scope:Error)
-    private static final org.anhonesteffort.btc.stats.StatsProto.Error DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:ErrorEvent)
+    private static final org.anhonesteffort.btc.stats.StatsProto.ErrorEvent DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new org.anhonesteffort.btc.stats.StatsProto.Error();
+      DEFAULT_INSTANCE = new org.anhonesteffort.btc.stats.StatsProto.ErrorEvent();
     }
 
-    public static org.anhonesteffort.btc.stats.StatsProto.Error getDefaultInstance() {
+    public static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<Error>
-        PARSER = new com.google.protobuf.AbstractParser<Error>() {
-      public Error parsePartialFrom(
+    private static final com.google.protobuf.Parser<ErrorEvent>
+        PARSER = new com.google.protobuf.AbstractParser<ErrorEvent>() {
+      public ErrorEvent parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Error(input, extensionRegistry);
+          return new ErrorEvent(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<Error> parser() {
+    public static com.google.protobuf.Parser<ErrorEvent> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<Error> getParserForType() {
+    public com.google.protobuf.Parser<ErrorEvent> getParserForType() {
       return PARSER;
     }
 
-    public org.anhonesteffort.btc.stats.StatsProto.Error getDefaultInstanceForType() {
+    public org.anhonesteffort.btc.stats.StatsProto.ErrorEvent getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3479,16 +3682,510 @@ public final class StatsProto {
 
   }
 
+  public interface LatencyEventOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:LatencyEvent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional int64 mod = 1;</code>
+     */
+    long getMod();
+
+    /**
+     * <code>optional int64 nanoseconds = 2;</code>
+     */
+    long getNanoseconds();
+  }
+  /**
+   * Protobuf type {@code LatencyEvent}
+   */
+  public  static final class LatencyEvent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:LatencyEvent)
+      LatencyEventOrBuilder {
+    // Use LatencyEvent.newBuilder() to construct.
+    private LatencyEvent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private LatencyEvent() {
+      mod_ = 0L;
+      nanoseconds_ = 0L;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private LatencyEvent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              mod_ = input.readInt64();
+              break;
+            }
+            case 16: {
+
+              nanoseconds_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.anhonesteffort.btc.stats.StatsProto.internal_static_LatencyEvent_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.anhonesteffort.btc.stats.StatsProto.internal_static_LatencyEvent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.class, org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder.class);
+    }
+
+    public static final int MOD_FIELD_NUMBER = 1;
+    private long mod_;
+    /**
+     * <code>optional int64 mod = 1;</code>
+     */
+    public long getMod() {
+      return mod_;
+    }
+
+    public static final int NANOSECONDS_FIELD_NUMBER = 2;
+    private long nanoseconds_;
+    /**
+     * <code>optional int64 nanoseconds = 2;</code>
+     */
+    public long getNanoseconds() {
+      return nanoseconds_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (mod_ != 0L) {
+        output.writeInt64(1, mod_);
+      }
+      if (nanoseconds_ != 0L) {
+        output.writeInt64(2, nanoseconds_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (mod_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, mod_);
+      }
+      if (nanoseconds_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, nanoseconds_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.anhonesteffort.btc.stats.StatsProto.LatencyEvent)) {
+        return super.equals(obj);
+      }
+      org.anhonesteffort.btc.stats.StatsProto.LatencyEvent other = (org.anhonesteffort.btc.stats.StatsProto.LatencyEvent) obj;
+
+      boolean result = true;
+      result = result && (getMod()
+          == other.getMod());
+      result = result && (getNanoseconds()
+          == other.getNanoseconds());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      hash = (37 * hash) + MOD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMod());
+      hash = (37 * hash) + NANOSECONDS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getNanoseconds());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.anhonesteffort.btc.stats.StatsProto.LatencyEvent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code LatencyEvent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:LatencyEvent)
+        org.anhonesteffort.btc.stats.StatsProto.LatencyEventOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_LatencyEvent_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_LatencyEvent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.class, org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.Builder.class);
+      }
+
+      // Construct using org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        mod_ = 0L;
+
+        nanoseconds_ = 0L;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.anhonesteffort.btc.stats.StatsProto.internal_static_LatencyEvent_descriptor;
+      }
+
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getDefaultInstanceForType() {
+        return org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.getDefaultInstance();
+      }
+
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent build() {
+        org.anhonesteffort.btc.stats.StatsProto.LatencyEvent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent buildPartial() {
+        org.anhonesteffort.btc.stats.StatsProto.LatencyEvent result = new org.anhonesteffort.btc.stats.StatsProto.LatencyEvent(this);
+        result.mod_ = mod_;
+        result.nanoseconds_ = nanoseconds_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.anhonesteffort.btc.stats.StatsProto.LatencyEvent) {
+          return mergeFrom((org.anhonesteffort.btc.stats.StatsProto.LatencyEvent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.anhonesteffort.btc.stats.StatsProto.LatencyEvent other) {
+        if (other == org.anhonesteffort.btc.stats.StatsProto.LatencyEvent.getDefaultInstance()) return this;
+        if (other.getMod() != 0L) {
+          setMod(other.getMod());
+        }
+        if (other.getNanoseconds() != 0L) {
+          setNanoseconds(other.getNanoseconds());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.anhonesteffort.btc.stats.StatsProto.LatencyEvent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.anhonesteffort.btc.stats.StatsProto.LatencyEvent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long mod_ ;
+      /**
+       * <code>optional int64 mod = 1;</code>
+       */
+      public long getMod() {
+        return mod_;
+      }
+      /**
+       * <code>optional int64 mod = 1;</code>
+       */
+      public Builder setMod(long value) {
+        
+        mod_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 mod = 1;</code>
+       */
+      public Builder clearMod() {
+        
+        mod_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long nanoseconds_ ;
+      /**
+       * <code>optional int64 nanoseconds = 2;</code>
+       */
+      public long getNanoseconds() {
+        return nanoseconds_;
+      }
+      /**
+       * <code>optional int64 nanoseconds = 2;</code>
+       */
+      public Builder setNanoseconds(long value) {
+        
+        nanoseconds_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 nanoseconds = 2;</code>
+       */
+      public Builder clearNanoseconds() {
+        
+        nanoseconds_ = 0L;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:LatencyEvent)
+    }
+
+    // @@protoc_insertion_point(class_scope:LatencyEvent)
+    private static final org.anhonesteffort.btc.stats.StatsProto.LatencyEvent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.anhonesteffort.btc.stats.StatsProto.LatencyEvent();
+    }
+
+    public static org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<LatencyEvent>
+        PARSER = new com.google.protobuf.AbstractParser<LatencyEvent>() {
+      public LatencyEvent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new LatencyEvent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<LatencyEvent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LatencyEvent> getParserForType() {
+      return PARSER;
+    }
+
+    public org.anhonesteffort.btc.stats.StatsProto.LatencyEvent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_BaseMessage_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_BaseMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Error_descriptor;
+    internal_static_ErrorEvent_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_Error_fieldAccessorTable;
+      internal_static_ErrorEvent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_Order_descriptor;
   private static final 
@@ -3499,6 +4196,11 @@ public final class StatsProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TakeEvent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_LatencyEvent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_LatencyEvent_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -3508,19 +4210,21 @@ public final class StatsProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013stats.proto\"\214\001\n\013BaseMessage\022\037\n\004type\030\001 " +
-      "\001(\0162\021.BaseMessage.Type\022\025\n\005error\030\002 \001(\0132\006." +
-      "Error\022\035\n\ttakeEvent\030\003 \001(\0132\n.TakeEvent\"&\n\004" +
-      "Type\022\t\n\005ERROR\020\000\022\t\n\005RESET\020\001\022\010\n\004TAKE\020\002\"\030\n\005" +
-      "Error\022\017\n\007message\030\001 \001(\t\"\227\001\n\005Order\022\017\n\007orde" +
-      "rId\030\001 \001(\t\022\031\n\004side\030\002 \001(\0162\013.Order.Side\022\r\n\005" +
-      "price\030\003 \001(\003\022\014\n\004size\030\004 \001(\003\022\025\n\rsizeRemaini" +
-      "ng\030\005 \001(\003\022\024\n\014valueRemoved\030\006 \001(\003\"\030\n\004Side\022\007" +
-      "\n\003ASK\020\000\022\007\n\003BID\020\001\"_\n\tTakeEvent\022\025\n\005taker\030\001" +
-      " \001(\0132\006.Order\022\026\n\006makers\030\002 \003(\0132\006.Order\022\020\n\010",
-      "takeSize\030\003 \001(\003\022\021\n\ttakeValue\030\004 \001(\003B*\n\034org" +
-      ".anhonesteffort.btc.statsB\nStatsProtob\006p" +
-      "roto3"
+      "\n\013stats.proto\"\271\001\n\013BaseMessage\022\037\n\004type\030\001 " +
+      "\001(\0162\021.BaseMessage.Type\022\032\n\005error\030\002 \001(\0132\013." +
+      "ErrorEvent\022\030\n\004take\030\003 \001(\0132\n.TakeEvent\022\036\n\007" +
+      "latency\030\004 \001(\0132\r.LatencyEvent\"3\n\004Type\022\t\n\005" +
+      "ERROR\020\000\022\t\n\005RESET\020\001\022\010\n\004TAKE\020\002\022\013\n\007LATENCY\020" +
+      "\003\"\035\n\nErrorEvent\022\017\n\007message\030\001 \001(\t\"\227\001\n\005Ord" +
+      "er\022\017\n\007orderId\030\001 \001(\t\022\031\n\004side\030\002 \001(\0162\013.Orde" +
+      "r.Side\022\r\n\005price\030\003 \001(\003\022\014\n\004size\030\004 \001(\003\022\025\n\rs" +
+      "izeRemaining\030\005 \001(\003\022\024\n\014valueRemoved\030\006 \001(\003" +
+      "\"\030\n\004Side\022\007\n\003ASK\020\000\022\007\n\003BID\020\001\"_\n\tTakeEvent\022",
+      "\025\n\005taker\030\001 \001(\0132\006.Order\022\026\n\006makers\030\002 \003(\0132\006" +
+      ".Order\022\020\n\010takeSize\030\003 \001(\003\022\021\n\ttakeValue\030\004 " +
+      "\001(\003\"0\n\014LatencyEvent\022\013\n\003mod\030\001 \001(\003\022\023\n\013nano" +
+      "seconds\030\002 \001(\003B*\n\034org.anhonesteffort.btc." +
+      "statsB\nStatsProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3539,12 +4243,12 @@ public final class StatsProto {
     internal_static_BaseMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_BaseMessage_descriptor,
-        new java.lang.String[] { "Type", "Error", "TakeEvent", });
-    internal_static_Error_descriptor =
+        new java.lang.String[] { "Type", "Error", "Take", "Latency", });
+    internal_static_ErrorEvent_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_Error_fieldAccessorTable = new
+    internal_static_ErrorEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_Error_descriptor,
+        internal_static_ErrorEvent_descriptor,
         new java.lang.String[] { "Message", });
     internal_static_Order_descriptor =
       getDescriptor().getMessageTypes().get(2);
@@ -3558,6 +4262,12 @@ public final class StatsProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TakeEvent_descriptor,
         new java.lang.String[] { "Taker", "Makers", "TakeSize", "TakeValue", });
+    internal_static_LatencyEvent_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_LatencyEvent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_LatencyEvent_descriptor,
+        new java.lang.String[] { "Mod", "Nanoseconds", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
