@@ -99,7 +99,7 @@ public class ScamStrategy extends Strategy<Void> {
         if (ask.isPresent()) {
           log.info("opening ask for " + ask.get().getSize() + " at " + ask.get().getPrice());
           removeChildren(askIdStrategy);
-          orderOpenStrategy = new OrderOpeningStrategy(null, ask.get());
+          orderOpenStrategy = new OrderOpeningStrategy(http, ask.get());
           addChildren(orderOpenStrategy);
           this.state = ScamState.ASKING;
         }

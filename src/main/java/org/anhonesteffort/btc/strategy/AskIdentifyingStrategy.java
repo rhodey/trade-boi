@@ -22,7 +22,6 @@ import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.util.LongCaster;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -41,14 +40,12 @@ public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
     double bidFloor    = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
     double profitPoint = caster.toDouble(bid.getPrice()) + 0.01d;
-    double minPrice    = bidFloor + 0.01d;
+    double minPrice    = bidFloor + 0.02d;
     double askSize     = caster.toDouble(bid.getSize());
 
     if (profitPoint > minPrice) {
-      LoggerFactory.getLogger(getClass()).info("profit-point:" + profitPoint + " > min:" + minPrice);
       return Optional.of(requests.newOrder(Order.Side.ASK, profitPoint, askSize));
     } else {
-      LoggerFactory.getLogger(getClass()).info("min:" + minPrice + " >= profit-point:" + profitPoint);
       return Optional.of(requests.newOrder(Order.Side.ASK, minPrice, askSize));
     }
   }
