@@ -33,6 +33,7 @@ public class ScamConfig {
   private final String  gdaxAccessKey;
   private final String  gdaxSecretKey;
   private final String  gdaxPassword;
+  private final Boolean statsEnabled;
   private final Integer statsPort;
 
   private WaitStrategy   waitStrategy;
@@ -49,6 +50,7 @@ public class ScamConfig {
     gdaxAccessKey      = properties.getProperty("gdax_access_key");
     gdaxSecretKey      = properties.getProperty("gdax_secret_key");
     gdaxPassword       = properties.getProperty("gdax_key_password");
+    statsEnabled       = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
     statsPort          = Integer.parseInt(properties.getProperty("stats_port"));
   }
 
@@ -78,6 +80,10 @@ public class ScamConfig {
 
   public String getGdaxPassword() {
     return gdaxPassword;
+  }
+
+  public Boolean getStatsEnabled() {
+    return statsEnabled;
   }
 
   public Integer getStatsPort() {

@@ -19,6 +19,7 @@ package org.anhonesteffort.btc;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.YieldingWaitStrategy;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
@@ -63,14 +64,19 @@ public class Scam {
     ScamStrategy        scamStrategy = new ScamStrategy(http, caster);
     StatsHandlerFactory statsHandler = new StatsHandlerFactory();
 
-    config.setWaitStrategy(new BlockingWaitStrategy());
-    config.setEventHandlers(new EventHandler[] { handlerFor(scamStrategy, statsHandler)});
+    if (config.getStatsEnabled()) {
+      config.setWaitStrategy(new BlockingWaitStrategy());
+      config.setEventHandlers(new EventHandler[]{handlerFor(scamStrategy, statsHandler)});
+    } else {
+      config.setWaitStrategy(new YieldingWaitStrategy());
+      config.setEventHandlers(new EventHandler[]{handlerFor(scamStrategy)});
+    }
 
     WsService    wsService    = new WsService(config, http, caster);
     StatsService statsService = new StatsService(config, statsHandler);
 
     wsService.start();
-    statsService.start();
+    if (config.getStatsEnabled()) { statsService.start(); }
 
     pool.submit(new ShutdownProcedure(pool, wsService, statsService, http)).get();
   }

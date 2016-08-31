@@ -39,16 +39,14 @@ public class StatsService {
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
   private final ScamConfig config;
   private final StatsHandlerFactory handlerFactory;
-  private final EventLoopGroup bossGroup;
-  private final EventLoopGroup workerGroup;
 
-  private Channel channel;
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workerGroup;
+  private Channel        channel;
 
   public StatsService(ScamConfig config, StatsHandlerFactory handlerFactory) {
     this.config         = config;
     this.handlerFactory = handlerFactory;
-    bossGroup           = new NioEventLoopGroup();
-    workerGroup         = new NioEventLoopGroup();
   }
 
   public CompletableFuture<Void> getShutdownFuture() {
@@ -56,7 +54,10 @@ public class StatsService {
   }
 
   public void start() throws InterruptedException {
-    ServerBootstrap bootstrap = new ServerBootstrap();
+    ServerBootstrap bootstrap   = new ServerBootstrap();
+                    bossGroup   = new NioEventLoopGroup();
+                    workerGroup = new NioEventLoopGroup();
+
     bootstrap.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
              .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -80,7 +81,7 @@ public class StatsService {
   }
 
   public boolean shutdown() {
-    if (shutdownFuture.complete(null)) {
+    if (channel != null && shutdownFuture.complete(null)) {
       channel.close();
       workerGroup.shutdownGracefully();
       bossGroup.shutdownGracefully();
@@ -91,7 +92,7 @@ public class StatsService {
   }
 
   private boolean shutdown(Throwable throwable) {
-    if (shutdownFuture.completeExceptionally(throwable)) {
+    if (channel != null && shutdownFuture.completeExceptionally(throwable)) {
       channel.close();
       workerGroup.shutdownGracefully();
       bossGroup.shutdownGracefully();
