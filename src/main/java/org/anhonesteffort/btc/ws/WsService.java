@@ -61,26 +61,21 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
-  private final ScamConfig                 config;
-  private final Disruptor<OrderEvent>      wsDisruptor;
-  private final EventHandler<OrderEvent>[] handlers;
-  private final WsMessageSorter            messageSorter;
+  private final ScamConfig            config;
+  private final Disruptor<OrderEvent> wsDisruptor;
+  private final EventHandler[]        handlers;
+  private final WsMessageSorter       messageSorter;
 
   private Channel channel;
 
-  public WsService(
-      ScamConfig config, EventHandler<OrderEvent>[] handlers,
-      HttpClientWrapper http, LongCaster caster
-  ) {
+  public WsService(ScamConfig config, HttpClientWrapper http, LongCaster caster) {
     this.config   = config;
-    this.handlers = handlers;
+    this.handlers = config.getEventHandlers();
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),
         ProducerType.SINGLE, config.getWaitStrategy()
     );
-    messageSorter = new WsMessageSorter(
-        new WsRingPublisher(wsDisruptor.getRingBuffer(), caster), http
-    );
+    messageSorter = new WsMessageSorter(new WsRingPublisher(wsDisruptor.getRingBuffer(), caster), http);
   }
 
   public CompletableFuture<Void> getShutdownFuture() {
@@ -111,8 +106,8 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
                }
              });
 
-    wsDisruptor.handleEventsWith(handlers);
     wsDisruptor.setDefaultExceptionHandler(this);
+    wsDisruptor.handleEventsWith(handlers);
     wsDisruptor.start();
 
     channel = bootstrap.connect(WS_HOST, WS_PORT).channel();

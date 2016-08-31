@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ShutdownProcedure implements Callable<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
-
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
-  private final ExecutorService pool;
-  private final WsService wsService;
-  private final StatsService statService;
+
+  private final ExecutorService   pool;
+  private final WsService         wsService;
+  private final StatsService      statService;
   private final HttpClientWrapper http;
 
   public ShutdownProcedure(

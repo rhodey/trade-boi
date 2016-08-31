@@ -25,30 +25,30 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChannelHandlerFactory implements StateListener {
+public class StatsHandlerFactory implements StateListener {
 
-  private final Set<ServerHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+  private final Set<StatsChannelHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   public ChannelInboundHandler newHandler() {
-    return new ServerHandler(this);
+    return new StatsChannelHandler(this);
   }
 
-  protected void onChannelActive(ServerHandler handler) {
+  protected void onChannelActive(StatsChannelHandler handler) {
     handlers.add(handler);
   }
 
-  protected void onChannelInactive(ServerHandler handler) {
+  protected void onChannelInactive(StatsChannelHandler handler) {
     handlers.remove(handler);
   }
 
   @Override
   public void onStateChange(State state, long nanoseconds) {
-    for (ServerHandler handler : handlers) { handler.onStateChange(state, nanoseconds); }
+    for (StatsChannelHandler handler : handlers) { handler.onStateChange(state, nanoseconds); }
   }
 
   @Override
   public void onStateReset() {
-    handlers.forEach(ServerHandler::onStateReset);
+    handlers.forEach(StatsChannelHandler::onStateReset);
   }
 
 }

@@ -17,11 +17,13 @@
 
 package org.anhonesteffort.btc;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.state.StateListener;
+import org.anhonesteffort.btc.stats.StatsHandlerFactory;
 import org.anhonesteffort.btc.stats.StatsService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
@@ -57,15 +59,15 @@ public class Scam {
     );
   }
 
-  @SuppressWarnings("unchecked")
   public void run() throws Exception {
-    StatsService statsService = new StatsService(config);
-    WsService    wsService    = new WsService(
-        config, new EventHandler[] {
-          handlerFor(new ScamStrategy(http, caster)),
-          handlerFor(statsService.getStateListener())
-        }, http, caster
-    );
+    ScamStrategy        scamStrategy = new ScamStrategy(http, caster);
+    StatsHandlerFactory statsHandler = new StatsHandlerFactory();
+
+    config.setWaitStrategy(new BlockingWaitStrategy());
+    config.setEventHandlers(new EventHandler[] { handlerFor(scamStrategy, statsHandler)});
+
+    WsService    wsService    = new WsService(config, http, caster);
+    StatsService statsService = new StatsService(config, statsHandler);
 
     wsService.start();
     statsService.start();

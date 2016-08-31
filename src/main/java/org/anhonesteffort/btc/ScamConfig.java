@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WaitStrategy;
 
 import java.io.FileInputStream;
@@ -34,6 +34,9 @@ public class ScamConfig {
   private final String  gdaxSecretKey;
   private final String  gdaxPassword;
   private final Integer statsPort;
+
+  private WaitStrategy   waitStrategy;
+  private EventHandler[] eventHandlers;
 
   public ScamConfig() throws IOException {
     Properties properties = new Properties();
@@ -65,10 +68,6 @@ public class ScamConfig {
     return wsReadTimeoutMs;
   }
 
-  public WaitStrategy getWaitStrategy() {
-    return new BlockingWaitStrategy();
-  }
-
   public String getGdaxAccessKey() {
     return gdaxAccessKey;
   }
@@ -83,6 +82,22 @@ public class ScamConfig {
 
   public Integer getStatsPort() {
     return statsPort;
+  }
+
+  public WaitStrategy getWaitStrategy() {
+    return waitStrategy;
+  }
+
+  protected void setWaitStrategy(WaitStrategy waitStrategy) {
+    this.waitStrategy = waitStrategy;
+  }
+
+  public EventHandler[] getEventHandlers() {
+    return eventHandlers;
+  }
+
+  protected void setEventHandlers(EventHandler[] eventHandlers) {
+    this.eventHandlers = eventHandlers;
   }
 
 }

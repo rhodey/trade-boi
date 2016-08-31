@@ -26,15 +26,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class ServerHandler extends ChannelInboundHandlerAdapter implements StateListener {
+public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements StateListener {
 
-  private static final Logger log = LoggerFactory.getLogger(ServerHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(StatsChannelHandler.class);
 
   private final StatsProtoFactory proto = new StatsProtoFactory();
-  private final ChannelHandlerFactory parent;
+  private final StatsHandlerFactory parent;
   private Optional<ChannelHandlerContext> context = Optional.empty();
 
-  public ServerHandler(ChannelHandlerFactory parent) {
+  public StatsChannelHandler(StatsHandlerFactory parent) {
     this.parent = parent;
   }
 
