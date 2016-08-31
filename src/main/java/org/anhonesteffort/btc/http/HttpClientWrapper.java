@@ -54,6 +54,7 @@ public class HttpClientWrapper implements Closeable {
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final RequestSigner signer;
 
+  // todo: run callback on source thread
   public HttpClientWrapper(RequestSigner signer) {
     this.signer = signer;
   }

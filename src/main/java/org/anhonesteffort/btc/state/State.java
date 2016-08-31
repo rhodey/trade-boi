@@ -23,16 +23,15 @@ import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.book.TakeResult;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 public class State {
 
   private final Map<String, String>      orderIdMap    = new HashMap<>();
   private final Map<String, Order>       rxLimitOrders = new HashMap<>();
   private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
-  private final Set<TakeResult>          takes         = new HashSet<>();
+  private       Optional<TakeResult>     take          = Optional.empty();
 
   private final LimitOrderBook orderBook;
 
@@ -56,8 +55,12 @@ public class State {
     return marketOrders;
   }
 
-  public Set<TakeResult> getTakes() {
-    return takes;
+  public void setTake(TakeResult take) {
+    this.take = Optional.ofNullable(take);
+  }
+
+  public Optional<TakeResult> getTake() {
+    return take;
   }
 
   public void clear() {
@@ -65,7 +68,7 @@ public class State {
     orderBook.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
-    takes.clear();
+    take = Optional.empty();
   }
 
 }

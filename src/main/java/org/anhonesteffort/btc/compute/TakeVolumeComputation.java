@@ -18,7 +18,6 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.book.TakeResult;
 import org.anhonesteffort.btc.state.State;
 
 public class TakeVolumeComputation extends Computation<Long> {
@@ -31,9 +30,13 @@ public class TakeVolumeComputation extends Computation<Long> {
 
   @Override
   protected Long computeNextResult(State state, long nanoseconds) {
-    return state.getTakes().stream().filter(
-        take -> take.getTaker().getSide().equals(side)
-    ).mapToLong(TakeResult::getTakeSize).sum();
+    if (!state.getTake().isPresent()) {
+      return 0l;
+    } else if (!state.getTake().get().getTaker().getSide().equals(side)) {
+      return 0l;
+    } else {
+      return state.getTake().get().getTakeSize();
+    }
   }
 
 }

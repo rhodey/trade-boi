@@ -46,9 +46,8 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
 
   @Override
   public void onStateChange(State state, long nanoseconds) {
-    if (context.isPresent()) {
-      state.getTakes().forEach(take -> context.get().write(proto.takeMsg(take)));
-      if (!state.getTakes().isEmpty()) { context.get().flush(); }
+    if (context.isPresent() && state.getTake().isPresent()) {
+      context.get().writeAndFlush(proto.takeMsg(state.getTake().get()));
     }
   }
 

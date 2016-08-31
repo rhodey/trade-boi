@@ -44,13 +44,13 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
     return rebuilding;
   }
 
-  private void cleanupTakersAndMakers() {
-    state.getTakes().forEach(take ->
-            take.getMakers().stream()
-                            .filter(make -> make.getSizeRemaining() > 0l)
-                            .forEach(Order::clearValueRemoved)
-    );
-    state.getTakes().clear();
+  private void cleanupTakerAndMakers() {
+    if (state.getTake().isPresent()) {
+      state.getTake().get().getMakers().stream()
+           .filter(make -> make.getSizeRemaining() > 0l)
+           .forEach(Order::clearValueRemoved);
+      state.setTake(null);
+    }
   }
 
   protected abstract void onEvent(OrderEvent event) throws StateProcessingException;
@@ -75,7 +75,7 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
         if (!rebuilding) {
           for (StateListener listener : listeners) { listener.onStateChange(state, event.getNanoseconds()); }
         }
-        cleanupTakersAndMakers();
+        cleanupTakerAndMakers();
     }
 
     if ((sequence % 50l) == 0l) {
