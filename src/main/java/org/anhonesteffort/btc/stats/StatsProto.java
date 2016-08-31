@@ -158,9 +158,13 @@ public final class StatsProto {
        */
       ERROR(0),
       /**
-       * <code>TAKE_EVENT = 1;</code>
+       * <code>RESET = 1;</code>
        */
-      TAKE_EVENT(1),
+      RESET(1),
+      /**
+       * <code>TAKE = 2;</code>
+       */
+      TAKE(2),
       UNRECOGNIZED(-1),
       ;
 
@@ -169,9 +173,13 @@ public final class StatsProto {
        */
       public static final int ERROR_VALUE = 0;
       /**
-       * <code>TAKE_EVENT = 1;</code>
+       * <code>RESET = 1;</code>
        */
-      public static final int TAKE_EVENT_VALUE = 1;
+      public static final int RESET_VALUE = 1;
+      /**
+       * <code>TAKE = 2;</code>
+       */
+      public static final int TAKE_VALUE = 2;
 
 
       public final int getNumber() {
@@ -193,7 +201,8 @@ public final class StatsProto {
       public static Type forNumber(int value) {
         switch (value) {
           case 0: return ERROR;
-          case 1: return TAKE_EVENT;
+          case 1: return RESET;
+          case 2: return TAKE;
           default: return null;
         }
       }
@@ -3499,18 +3508,19 @@ public final class StatsProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013stats.proto\"\207\001\n\013BaseMessage\022\037\n\004type\030\001 " +
+      "\n\013stats.proto\"\214\001\n\013BaseMessage\022\037\n\004type\030\001 " +
       "\001(\0162\021.BaseMessage.Type\022\025\n\005error\030\002 \001(\0132\006." +
-      "Error\022\035\n\ttakeEvent\030\003 \001(\0132\n.TakeEvent\"!\n\004" +
-      "Type\022\t\n\005ERROR\020\000\022\016\n\nTAKE_EVENT\020\001\"\030\n\005Error" +
-      "\022\017\n\007message\030\001 \001(\t\"\227\001\n\005Order\022\017\n\007orderId\030\001" +
-      " \001(\t\022\031\n\004side\030\002 \001(\0162\013.Order.Side\022\r\n\005price" +
-      "\030\003 \001(\003\022\014\n\004size\030\004 \001(\003\022\025\n\rsizeRemaining\030\005 " +
-      "\001(\003\022\024\n\014valueRemoved\030\006 \001(\003\"\030\n\004Side\022\007\n\003ASK" +
-      "\020\000\022\007\n\003BID\020\001\"_\n\tTakeEvent\022\025\n\005taker\030\001 \001(\0132" +
-      "\006.Order\022\026\n\006makers\030\002 \003(\0132\006.Order\022\020\n\010takeS",
-      "ize\030\003 \001(\003\022\021\n\ttakeValue\030\004 \001(\003B*\n\034org.anho" +
-      "nesteffort.btc.statsB\nStatsProtob\006proto3"
+      "Error\022\035\n\ttakeEvent\030\003 \001(\0132\n.TakeEvent\"&\n\004" +
+      "Type\022\t\n\005ERROR\020\000\022\t\n\005RESET\020\001\022\010\n\004TAKE\020\002\"\030\n\005" +
+      "Error\022\017\n\007message\030\001 \001(\t\"\227\001\n\005Order\022\017\n\007orde" +
+      "rId\030\001 \001(\t\022\031\n\004side\030\002 \001(\0162\013.Order.Side\022\r\n\005" +
+      "price\030\003 \001(\003\022\014\n\004size\030\004 \001(\003\022\025\n\rsizeRemaini" +
+      "ng\030\005 \001(\003\022\024\n\014valueRemoved\030\006 \001(\003\"\030\n\004Side\022\007" +
+      "\n\003ASK\020\000\022\007\n\003BID\020\001\"_\n\tTakeEvent\022\025\n\005taker\030\001" +
+      " \001(\0132\006.Order\022\026\n\006makers\030\002 \003(\0132\006.Order\022\020\n\010",
+      "takeSize\030\003 \001(\003\022\021\n\ttakeValue\030\004 \001(\003B*\n\034org" +
+      ".anhonesteffort.btc.statsB\nStatsProtob\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

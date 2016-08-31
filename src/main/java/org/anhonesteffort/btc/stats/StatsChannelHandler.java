@@ -55,7 +55,7 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   @Override
   public void onStateReset() {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.errorMsg("lol, reset"));
+      context.get().writeAndFlush(proto.resetMsg());
     }
   }
 

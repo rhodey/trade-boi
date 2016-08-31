@@ -5,8 +5,9 @@ option java_outer_classname = "StatsProto";
 
 message BaseMessage {
   enum Type {
-    ERROR      = 0;
-    TAKE_EVENT = 1;
+    ERROR = 0;
+    RESET = 1;
+    TAKE  = 2;
   }
 
   Type      type      = 1;

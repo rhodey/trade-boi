@@ -35,6 +35,12 @@ public class StatsProtoFactory {
         .build();
   }
 
+  public BaseMessage resetMsg() {
+    return BaseMessage.newBuilder()
+        .setType(BaseMessage.Type.RESET)
+        .build();
+  }
+
   private StatsProto.Order order(Order order) {
     return StatsProto.Order.newBuilder()
         .setOrderId(order.getOrderId())
@@ -57,7 +63,7 @@ public class StatsProtoFactory {
 
   public BaseMessage takeEventMsg(TakeResult takeResult) {
     return BaseMessage.newBuilder()
-        .setType(BaseMessage.Type.TAKE_EVENT)
+        .setType(BaseMessage.Type.TAKE)
         .setTakeEvent(takeEvent(takeResult))
         .build();
   }
