@@ -70,7 +70,7 @@ public class Scam {
     wsService.start();
     statsService.start();
 
-    pool.submit(new ShutdownProcedure(pool, wsService, statsService)).get();
+    pool.submit(new ShutdownProcedure(pool, wsService, statsService, http)).get();
   }
 
   public static void main(String[] args) throws Exception {

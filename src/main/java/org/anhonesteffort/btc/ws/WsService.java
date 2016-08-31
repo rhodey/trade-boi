@@ -64,8 +64,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private final ScamConfig                 config;
   private final Disruptor<OrderEvent>      wsDisruptor;
   private final EventHandler<OrderEvent>[] handlers;
-  private final HttpClientWrapper          http;
-  private final LongCaster                 caster;
+  private final WsMessageSorter            messageSorter;
 
   private Channel channel;
 
@@ -75,11 +74,12 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   ) {
     this.config   = config;
     this.handlers = handlers;
-    this.http     = http;
-    this.caster   = caster;
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),
         ProducerType.SINGLE, config.getWaitStrategy()
+    );
+    messageSorter = new WsMessageSorter(
+        new WsRingPublisher(wsDisruptor.getRingBuffer(), caster), http
     );
   }
 
@@ -89,10 +89,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   @SuppressWarnings("unchecked")
   public void start() throws URISyntaxException, SSLException {
-    Bootstrap       bootstrap     = new Bootstrap();
-    WsRingPublisher ringPublisher = new WsRingPublisher(wsDisruptor.getRingBuffer(), caster);
-    WsMessageSorter messageSorter = new WsMessageSorter(ringPublisher, http);
-
+    final Bootstrap                 bootstrap       = new Bootstrap();
     final SslContext                sslContext      = SslContextBuilder.forClient().build();
     final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
     final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
@@ -128,7 +125,6 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   public boolean shutdown() {
     if (shutdownFuture.complete(null)) {
       channel.close();
-      http.close();
       return true;
     } else {
       return false;
@@ -138,7 +134,6 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private boolean shutdown(Throwable throwable) {
     if (shutdownFuture.completeExceptionally(throwable)) {
       channel.close();
-      http.close();
       return true;
     } else {
       return false;

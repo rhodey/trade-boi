@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc;
 
+import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.stats.StatsService;
 import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
@@ -35,16 +36,21 @@ public class ShutdownProcedure implements Callable<Void> {
   private final ExecutorService pool;
   private final WsService wsService;
   private final StatsService statService;
+  private final HttpClientWrapper http;
 
-  // todo: manage http
-  public ShutdownProcedure(ExecutorService pool, WsService wsService, StatsService statService) {
+  public ShutdownProcedure(
+      ExecutorService pool, WsService wsService,
+      StatsService statService, HttpClientWrapper http
+  ) {
     this.pool        = pool;
     this.wsService   = wsService;
     this.statService = statService;
+    this.http        = http;
   }
 
   private void shutdown() {
     if (!shutdown.getAndSet(true)) {
+      http.close();
       wsService.shutdown();
       statService.shutdown();
       pool.submit(new OrderClosingRunnable());
