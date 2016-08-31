@@ -27,6 +27,7 @@ import org.anhonesteffort.btc.state.CriticalStateProcessingException;
 import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.util.LongCaster;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -93,7 +94,7 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
       double bidPrice   = askCeiling - 0.01d;
 
-      return Optional.of(requests.newOrder(Order.Side.BID, 400.015d, 0.015d));
+      return Optional.of(requests.newOrder(Order.Side.BID, bidPrice, 0.010d));
     } else {
       return Optional.empty();
     }

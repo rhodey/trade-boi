@@ -17,6 +17,7 @@
 
 package org.anhonesteffort.btc.strategy;
 
+import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.CriticalStateProcessingException;
@@ -28,17 +29,17 @@ import java.util.Optional;
 
 public class OrderOpeningStrategy extends Strategy<Optional<String>> {
 
-  private final String clientOid;
-  private Optional<String> serverOid = Optional.empty();
+  private final PostOrderRequest postOrder;
 
-  public OrderOpeningStrategy(HttpClientWrapper http, PostOrderRequest order) {
-    clientOid = order.getClientOid();
+  public OrderOpeningStrategy(HttpClientWrapper http, PostOrderRequest postOrder) {
+    this.postOrder = postOrder;
     try {
 
-      http.postOrder(order).whenComplete((ok, err) -> {
+      http.postOrder(postOrder).whenComplete((ok, err) -> {
         if (err != null) {
           handleAsyncError(new CriticalStateProcessingException("api request completed with error", err));
         }
+        // todo: check OK for post-only
       });
 
     } catch (IOException e) {
@@ -46,10 +47,26 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
     }
   }
 
+  private boolean sideMatches(PostOrderRequest postOrder, Order bookOrder) {
+    return (postOrder.getSide().equals("sell") && bookOrder.getSide().equals(Order.Side.ASK)) ||
+           (postOrder.getSide().equals("buy")  && bookOrder.getSide().equals(Order.Side.BID));
+  }
+
   @Override
-  protected Optional<String> advanceStrategy(State state, long nanoseconds) {
-    if (!serverOid.isPresent()) { serverOid = Optional.ofNullable(state.getOrderIdMap().get(clientOid)); }
-    return serverOid;
+  protected Optional<String> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+    Optional<String> bookOid   = Optional.ofNullable(state.getOrderIdMap().get(postOrder.getClientOid()));
+    Optional<Order>  bookOrder = bookOid.isPresent() ?
+        Optional.ofNullable(state.getRxLimitOrders().get(bookOid.get())) : Optional.empty();
+
+    if (!bookOid.isPresent()) {
+      return Optional.empty();
+    } else if (!bookOrder.isPresent()) {
+      throw new CriticalStateProcessingException("order id map entry not found in rx limit order map");
+    } else if (!sideMatches(postOrder, bookOrder.get())) {
+      throw new CriticalStateProcessingException("posted order ended up on wrong side of the book");
+    } else {
+      return bookOid;
+    }
   }
 
   @Override
