@@ -41,7 +41,11 @@ public class OrderMatchingStrategy extends Strategy<Boolean> {
 
   @Override
   protected Boolean advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
-    if (startNs == -1l) {
+    if (state.getCanceled().isPresent() && state.getCanceled().get().equals(orderId)) {
+      throw new CriticalStateProcessingException("order canceled unexpectedly");
+    } else if (state.getTake().isPresent() && state.getTake().get().getTaker().getOrderId().equals(orderId)) {
+      throw new CriticalStateProcessingException("order took from the book");
+    } else if (startNs == -1l) {
       startNs = nanoseconds;
     } else if ((nanoseconds - startNs) >= abortNs) {
       abort();
@@ -50,8 +54,6 @@ public class OrderMatchingStrategy extends Strategy<Boolean> {
 
     if (!state.getTake().isPresent()) {
       return false;
-    } else if (state.getTake().get().getTaker().getOrderId().equals(orderId)) {
-      throw new CriticalStateProcessingException("order took from the book");
     }
 
     Optional<Order> maker = state.getTake().get().getMakers().stream()

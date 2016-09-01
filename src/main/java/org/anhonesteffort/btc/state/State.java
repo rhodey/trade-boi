@@ -32,6 +32,7 @@ public class State {
   private final Map<String, Order>       rxLimitOrders = new HashMap<>();
   private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
   private       Optional<TakeResult>     take          = Optional.empty();
+  private       Optional<String>         canceled      = Optional.empty();
 
   private final LimitOrderBook orderBook;
 
@@ -63,12 +64,21 @@ public class State {
     return take;
   }
 
+  public void setCanceled(String canceled) {
+    this.canceled = Optional.ofNullable(canceled);
+  }
+
+  public Optional<String> getCanceled() {
+    return canceled;
+  }
+
   public void clear() {
     orderIdMap.clear();
     orderBook.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
-    take = Optional.empty();
+    take     = Optional.empty();
+    canceled = Optional.empty();
   }
 
 }

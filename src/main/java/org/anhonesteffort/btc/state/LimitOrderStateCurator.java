@@ -143,6 +143,7 @@ public class LimitOrderStateCurator extends StateCurator {
           throw new CriticalStateProcessingException("order for cancel order event not found on the book");
         } else if (event.getSize() > 0l && doneOpenOrder.isPresent()) {
           checkCanceledLimitOrder(event, doneOpenOrder.get());
+          state.setCanceled(doneOpenOrder.get().getOrderId());
         }
         break;
     }
