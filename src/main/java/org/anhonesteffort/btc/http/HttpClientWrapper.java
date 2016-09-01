@@ -26,6 +26,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.anhonesteffort.btc.http.response.GetAccountsCallback;
+import org.anhonesteffort.btc.http.response.PostOrderCallback;
 import org.anhonesteffort.btc.http.response.ResponseCallback;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestSigner;
@@ -92,14 +93,14 @@ public class HttpClientWrapper implements Closeable {
     return future;
   }
 
-  public CompletableFuture<Response> postOrder(PostOrderRequest order) throws IOException {
-    CompletableFuture<Response> future = new CompletableFuture<>();
+  public CompletableFuture<Boolean> postOrder(PostOrderRequest order) throws IOException {
+    CompletableFuture<Boolean> future = new CompletableFuture<>();
 
     if (!setExceptionIfShutdown(future)) {
       RequestBody     body    = RequestBody.create(TYPE_JSON, writer.writeValueAsString(order));
       Request.Builder request = new Request.Builder().url(API_BASE + API_PATH_ORDERS).post(body);
       signer.sign(request, "POST", API_PATH_ORDERS, Optional.of(body));
-      client.newCall(request.build()).enqueue(new ResponseCallback(future));
+      client.newCall(request.build()).enqueue(new PostOrderCallback(reader, future));
     }
 
     return future;

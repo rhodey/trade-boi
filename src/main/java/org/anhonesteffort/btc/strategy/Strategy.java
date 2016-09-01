@@ -31,6 +31,7 @@ public abstract class Strategy<T> extends Computation<T> {
   protected boolean isAborted() { return abort; }
   protected void abort() { abort = true; }
 
+  // todo: not thread safe
   protected void handleAsyncError(StateProcessingException error) {
     this.error = Optional.of(error);
   }

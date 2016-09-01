@@ -89,8 +89,9 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
     if (isBullish() && caster.toDouble(spread.getResult().get()) >= 0.02d) {
+      double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-      double bidPrice   = askCeiling - 0.01d;
+      double bidPrice   = (askCeiling + bidFloor) / 2.0d;
 
       return Optional.of(requests.newOrder(Order.Side.BID, bidPrice, 0.010d));
     } else {

@@ -28,23 +28,29 @@ import java.util.Optional;
 public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
   private final RequestFactory requests = new RequestFactory();
-  private final LongCaster caster;
-  private final Order bid;
 
-  public AskIdentifyingStrategy(LongCaster caster, Order bid) {
-    this.caster = caster;
-    this.bid    = bid;
+  private final LongCaster      caster;
+  private final Order           bidPosition;
+  private final Optional<Order> lastAsk;
+
+  public AskIdentifyingStrategy(LongCaster caster, Order bidPosition, Optional<Order> lastAsk) {
+    this.caster      = caster;
+    this.bidPosition = bidPosition;
+    this.lastAsk     = lastAsk;
   }
 
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
-    double bidFloor    = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
-    double profitPoint = caster.toDouble(bid.getPrice()) + 0.01d;
-    double minPrice    = bidFloor + 0.02d;
-    double askSize     = caster.toDouble(bid.getSize());
+    double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
+    double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
+    double lastPrice  = lastAsk.isPresent() ? caster.toDouble(lastAsk.get().getPrice()) : -1l;
+    double askSize    = caster.toDouble(bidPosition.getSize());
+    double minPrice   = bidFloor + 0.01d;
 
-    if (profitPoint > minPrice) {
-      return Optional.of(requests.newOrder(Order.Side.ASK, profitPoint, askSize));
+    if (!lastAsk.isPresent()) {
+      return Optional.of(requests.newOrder(Order.Side.ASK, askCeiling, askSize));
+    } else if (lastPrice > minPrice) {
+      return Optional.of(requests.newOrder(Order.Side.ASK, (lastPrice - 0.01d), askSize));
     } else {
       return Optional.of(requests.newOrder(Order.Side.ASK, minPrice, askSize));
     }

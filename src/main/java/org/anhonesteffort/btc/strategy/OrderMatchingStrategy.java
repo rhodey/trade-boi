@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class OrderMatchingStrategy extends Strategy<Optional<Order>> {
+public class OrderMatchingStrategy extends Strategy<Boolean> {
 
   private static final Logger log = LoggerFactory.getLogger(OrderMatchingStrategy.class);
   private final String orderId;
@@ -35,36 +35,36 @@ public class OrderMatchingStrategy extends Strategy<Optional<Order>> {
 
   public OrderMatchingStrategy(String orderId, long abortMs) {
     this.orderId = orderId;
-    this.abortNs = abortMs * 1000l;
+    this.abortNs = abortMs * 1_000_000l;
     startNs      = -1l;
   }
 
   @Override
-  protected Optional<Order> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+  protected Boolean advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
     if (startNs == -1l) {
       startNs = nanoseconds;
     } else if ((nanoseconds - startNs) >= abortNs) {
       abort();
-      return Optional.empty();
+      return false;
     }
 
     if (!state.getTake().isPresent()) {
-      return Optional.empty();
+      return false;
     } else if (state.getTake().get().getTaker().getOrderId().equals(orderId)) {
       throw new CriticalStateProcessingException("order took from the book");
     }
 
-    Optional<Order> order = state.getTake().get().getMakers().stream()
-                                 .filter(maker -> maker.getOrderId().equals(orderId))
+    Optional<Order> maker = state.getTake().get().getMakers().stream()
+                                 .filter(m -> m.getOrderId().equals(orderId))
                                  .findAny();
 
-    if (!order.isPresent()) {
-      return Optional.empty();
-    } else if (order.get().getSizeRemaining() > 0l) {
-      log.info("order partially matched, " + order.get().getSizeRemaining() + " remaining");
-      return Optional.empty();
+    if (!maker.isPresent()) {
+      return false;
+    } else if (maker.get().getSizeRemaining() > 0l) {
+      log.info("order partially matched, " + maker.get().getSizeRemaining() + " remaining");
+      return false;
     } else {
-      return order;
+      return true;
     }
   }
 

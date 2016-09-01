@@ -27,7 +27,7 @@ import org.anhonesteffort.btc.state.StateProcessingException;
 import java.io.IOException;
 import java.util.Optional;
 
-public class OrderOpeningStrategy extends Strategy<Optional<String>> {
+public class OrderOpeningStrategy extends Strategy<Optional<Order>> {
 
   private final PostOrderRequest postOrder;
 
@@ -37,9 +37,10 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
 
       http.postOrder(postOrder).whenComplete((ok, err) -> {
         if (err != null) {
-          handleAsyncError(new CriticalStateProcessingException("api request completed with error", err));
+          handleAsyncError(new CriticalStateProcessingException("post order request completed with error", err));
+        } else if (!ok) {
+          handleAsyncError(new CriticalStateProcessingException("post order rejected due to post-only flag"));
         }
-        // todo: check OK for post-only
       });
 
     } catch (IOException e) {
@@ -48,12 +49,12 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
   }
 
   private boolean sideMatches(PostOrderRequest postOrder, Order bookOrder) {
-    return (postOrder.getSide().equals("sell") && bookOrder.getSide().equals(Order.Side.ASK)) ||
-           (postOrder.getSide().equals("buy")  && bookOrder.getSide().equals(Order.Side.BID));
+    return (postOrder.getSide().equals("sell") && bookOrder.getSide() == Order.Side.ASK) ||
+           (postOrder.getSide().equals("buy")  && bookOrder.getSide() == Order.Side.BID);
   }
 
   @Override
-  protected Optional<String> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+  protected Optional<Order> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
     Optional<String> bookOid   = Optional.ofNullable(state.getOrderIdMap().get(postOrder.getClientOid()));
     Optional<Order>  bookOrder = bookOid.isPresent() ?
         Optional.ofNullable(state.getRxLimitOrders().get(bookOid.get())) : Optional.empty();
@@ -65,7 +66,7 @@ public class OrderOpeningStrategy extends Strategy<Optional<String>> {
     } else if (!sideMatches(postOrder, bookOrder.get())) {
       throw new CriticalStateProcessingException("posted order ended up on wrong side of the book");
     } else {
-      return bookOid;
+      return bookOrder;
     }
   }
 

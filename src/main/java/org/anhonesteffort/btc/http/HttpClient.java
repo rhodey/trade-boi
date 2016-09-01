@@ -19,13 +19,19 @@ package org.anhonesteffort.btc.http;
 
 import okhttp3.OkHttpClient;
 
+import java.util.concurrent.TimeUnit;
+
 public class HttpClient {
 
   private static OkHttpClient client;
 
   public static OkHttpClient getInstance() {
     if (client == null) {
-      client = new OkHttpClient();
+      client = new OkHttpClient.Builder()
+          .connectTimeout(5l, TimeUnit.SECONDS)
+          .readTimeout(5l, TimeUnit.SECONDS)
+          .writeTimeout(5l, TimeUnit.SECONDS)
+          .build();
     }
 
     return client;
