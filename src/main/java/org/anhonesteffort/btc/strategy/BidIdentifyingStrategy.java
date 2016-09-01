@@ -83,14 +83,22 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
     }
   }
 
+  private Optional<PostOrderRequest> bidOrder(double price) {
+    return Optional.of(requests.newOrder(Order.Side.BID, price, BID_SIZE));
+  }
+
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
-    if (isBullish() && caster.toDouble(spread.getResult().get()) >= 0.03d) {
+    if (isBullish()) {
       double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-      double bidPrice   = bidFloor + ((askCeiling - bidFloor) * 0.75d);
 
-      return Optional.of(requests.newOrder(Order.Side.BID, bidPrice, BID_SIZE));
+      if (caster.toDouble(spread.getResult().get()) > 0.02d) {
+        return bidOrder(bidFloor + ((askCeiling - bidFloor) * 0.75d));
+      } else {
+        return bidOrder(bidFloor);
+      }
+
     } else {
       return Optional.empty();
     }
