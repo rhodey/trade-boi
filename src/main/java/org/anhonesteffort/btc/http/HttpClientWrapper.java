@@ -25,6 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.anhonesteffort.btc.ScamConfig;
 import org.anhonesteffort.btc.http.response.GetAccountsCallback;
 import org.anhonesteffort.btc.http.response.PostOrderCallback;
 import org.anhonesteffort.btc.http.response.ResponseCallback;
@@ -36,6 +37,7 @@ import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,7 +46,8 @@ public class HttpClientWrapper implements Closeable {
 
   private static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
-  private static final String API_BASE          = "https://api.exchange.coinbase.com";
+  private static final String PROD_API_BASE     = "https://api.exchange.coinbase.com";
+  private static final String SANDBOX_API_BASE  = "https://api-public.sandbox.gdax.com";
   private static final String API_PATH_BOOK     = "/products/BTC-USD/book?level=3";
   private static final String API_PATH_ORDERS   = "/orders";
   private static final String API_PATH_ACCOUNTS = "/accounts";
@@ -54,10 +57,14 @@ public class HttpClientWrapper implements Closeable {
   private final ObjectWriter  writer   = new ObjectMapper().writer();
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final RequestSigner signer;
+  private final String        API_BASE;
 
   // todo: run callback on source thread
-  public HttpClientWrapper(RequestSigner signer) {
-    this.signer = signer;
+  public HttpClientWrapper(ScamConfig config) throws NoSuchAlgorithmException {
+    API_BASE = config.getUseSandbox() ? SANDBOX_API_BASE : PROD_API_BASE;
+    signer   = new RequestSigner(
+        config.getGdaxAccessKey(), config.getGdaxSecretKey(), config.getGdaxPassword()
+    );
   }
 
   private boolean setExceptionIfShutdown(CompletableFuture<?> future) {

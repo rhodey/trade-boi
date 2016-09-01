@@ -22,7 +22,6 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.stats.StatsHandlerFactory;
 import org.anhonesteffort.btc.stats.StatsService;
@@ -48,9 +47,7 @@ public class Scam {
 
   public Scam() throws IOException, NoSuchAlgorithmException {
     config = new ScamConfig();
-    http   = new HttpClientWrapper(new RequestSigner(
-        config.getGdaxAccessKey(), config.getGdaxSecretKey(), config.getGdaxPassword()
-    ));
+    http   = new HttpClientWrapper(config);
   }
 
   private EventHandler<OrderEvent> handlerFor(StateListener... listeners) {
