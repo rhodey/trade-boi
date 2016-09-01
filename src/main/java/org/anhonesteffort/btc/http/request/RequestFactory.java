@@ -20,14 +20,28 @@ package org.anhonesteffort.btc.http.request;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 
+import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.UUID;
 
 public class RequestFactory {
 
+  private final SecureRandom random = new SecureRandom();
+
   public PostOrderRequest newOrder(Order.Side side, Double price, Double size) {
+    String uuid = UUID.randomUUID().toString().substring(0, 24);
+    String mac  = Long.toHexString(Math.abs(random.nextLong()));
+
+    if (mac.length() > 12) {
+      mac = mac.substring(0, 12);
+    }
+
+    while (mac.length() < 12) {
+      mac += Integer.toHexString(random.nextInt(16));
+    }
+
     return new PostOrderRequest(
-        UUID.randomUUID().toString(),
+        uuid + mac,
         (side == Order.Side.BID) ? "buy" : "sell",
         String.format(Locale.US, "%.2f", price),
         String.format(Locale.US, "%.2f", size)
