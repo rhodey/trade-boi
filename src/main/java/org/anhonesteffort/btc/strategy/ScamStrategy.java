@@ -82,7 +82,11 @@ public class ScamStrategy extends Strategy<Void> {
 
       case OPENING_BID:
         Optional<Order> openedBid = openStrategy.getResult();
-        if (openedBid.isPresent()) {
+        if (openStrategy.isAborted()) {
+          log.info("bid rejected due to post-only flag");
+          removeChildren(openStrategy);
+          this.state = ScamState.COMPLETE;
+        } else if (openedBid.isPresent()) {
           bidPosition = openedBid.get();
           log.info("bid opened with id " + bidPosition.getOrderId() + ", waiting to match");
           removeChildren(openStrategy);
@@ -121,7 +125,13 @@ public class ScamStrategy extends Strategy<Void> {
 
       case OPENING_ASK:
         Optional<Order> openedAsk = openStrategy.getResult();
-        if (openedAsk.isPresent()) {
+        if (openStrategy.isAborted()) {
+          log.info("ask rejected due to post-only flag");
+          removeChildren(openStrategy);
+          askIdStrategy = new AskIdentifyingStrategy(caster, bidPosition, Optional.empty());
+          addChildren(askIdStrategy);
+          this.state = ScamState.IDENTIFY_ASK;
+        } else if (openedAsk.isPresent()) {
           askPosition = openedAsk.get();
           log.info("ask opened with id " + askPosition.getOrderId() + ", waiting to match");
           removeChildren(openStrategy);

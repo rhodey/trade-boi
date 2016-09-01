@@ -39,7 +39,7 @@ public class OrderOpeningStrategy extends Strategy<Optional<Order>> {
         if (err != null) {
           handleAsyncError(new CriticalStateProcessingException("post order request completed with error", err));
         } else if (!ok) {
-          handleAsyncError(new CriticalStateProcessingException("post order rejected due to post-only flag"));
+          abort();
         }
       });
 
