@@ -55,7 +55,6 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private static final Logger log = LoggerFactory.getLogger(WsService.class);
 
-
   private static final String  SANDBOX_WS_HOST = "ws-feed.exchange.gdax.com";
   private static final String  WS_HOST         = "ws-feed-public.sandbox.gdax.com";
   private static final Integer WS_PORT         = 443;
@@ -67,16 +66,11 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private final EventHandler[]        handlers;
   private final WsMessageSorter       messageSorter;
 
-  private final String configHost;
-  private final String configWSUri;
-
   private Channel channel;
 
   public WsService(ScamConfig config, HttpClientWrapper http, LongCaster caster) {
-    this.config      = config;
-    this.handlers    = config.getEventHandlers();
-    this.configHost  = config.getUseSandbox() ? SANDBOX_WS_HOST : WS_HOST;
-    this.configWSUri = "wss://" + configHost;
+    this.config   = config;
+    this.handlers = config.getEventHandlers();
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),
         ProducerType.SINGLE, config.getWaitStrategy()
@@ -94,7 +88,8 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     final SslContext                sslContext      = SslContextBuilder.forClient().build();
     final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
     final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
-        new URI(configWSUri), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
+        new URI("wss://" + (config.getUseSandbox() ? SANDBOX_WS_HOST : WS_HOST)),
+        WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
 
     bootstrap.group(new NioEventLoopGroup())
