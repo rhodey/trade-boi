@@ -57,8 +57,8 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
 
   private static final String  SANDBOX_WS_HOST = "ws-feed.exchange.gdax.com";
-  private static final String  WS_HOST = "ws-feed.exchange.gdax.com";
-  private static final Integer WS_PORT = 443;
+  private static final String  WS_HOST         = "ws-feed-public.sandbox.gdax.com";
+  private static final Integer WS_PORT         = 443;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
@@ -73,9 +73,9 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private Channel channel;
 
   public WsService(ScamConfig config, HttpClientWrapper http, LongCaster caster) {
-    this.config   = config;
-    this.handlers = config.getEventHandlers();
-    this.configHost = config.getUseSandbox() ? SANDBOX_WS_HOST : WS_HOST;
+    this.config      = config;
+    this.handlers    = config.getEventHandlers();
+    this.configHost  = config.getUseSandbox() ? SANDBOX_WS_HOST : WS_HOST;
     this.configWSUri = "wss://" + configHost;
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),
