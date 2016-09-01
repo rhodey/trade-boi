@@ -31,7 +31,7 @@ import java.util.Optional;
 public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
   private static final Double  BID_SIZE                = 0.01d;
-  private static final Integer RECENT_PERIOD_MS        = 1000 * 29;
+  private static final Integer RECENT_PERIOD_MS        = 1000 * 30;
   private static final Integer NOW_PERIOD_MS           = 1000 *  5;
   private static final Double  BULLISH_THRESHOLD_SCORE = 1.25d;
   private static final Double  BULLISH_THRESHOLD_BTC   = 1.50d;
