@@ -29,8 +29,8 @@ import java.util.Optional;
 
 public class ScamStrategy extends Strategy<Void> {
 
-  private static final Long BID_ABORT_MS = 8_000l;
-  private static final Long ASK_ABORT_MS = 2_250l;
+  private static final Long BID_ABORT_MS = 9_000l;
+  private static final Long ASK_ABORT_MS = 1_800l;
 
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
   private final HttpClientWrapper http;
