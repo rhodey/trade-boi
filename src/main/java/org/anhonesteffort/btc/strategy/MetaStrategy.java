@@ -18,66 +18,61 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
-import org.anhonesteffort.btc.state.State;
-import org.anhonesteffort.btc.util.LongCaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class ScamStrategy extends Strategy<Void> {
+public class MetaStrategy extends Strategy<Void> {
 
-  private static final Long BID_ABORT_MS = 12_000l;
-  private static final Long ASK_ABORT_MS =  2_250l;
+  private static final Logger log = LoggerFactory.getLogger(MetaStrategy.class);
 
-  private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
-
-  private final HttpClientWrapper      http;
+  private final StrategyFactory        strategies;
   private final BidIdentifyingStrategy bidIdStrategy;
   private final AskIdentifyingStrategy askIdStrategy;
 
   private OrderOpeningStrategy   openStrategy;
   private OrderMatchingStrategy  matchStrategy;
   private OrderCancelingStrategy cancelStrategy;
-  private Order                  bidPosition;
-  private Order                  askPosition;
-  private ScamState              state;
 
-  private enum ScamState {
+  private State state;
+  private Order bidPosition;
+  private Order askPosition;
+
+  private enum State {
     IDENTIFY_BID, OPENING_BID, MATCHING_BID,
     IDENTIFY_ASK, OPENING_ASK, MATCHING_ASK,
     COMPLETE, ABORT
   }
 
-  public ScamStrategy(HttpClientWrapper http, LongCaster caster) {
-    this.http     = http;
-    bidIdStrategy = new BidIdentifyingStrategy(caster);
-    askIdStrategy = new AskIdentifyingStrategy(caster);
-    state         = ScamState.COMPLETE;
+  public MetaStrategy(StrategyFactory strategies) {
+    this.strategies = strategies;
+    bidIdStrategy   = strategies.newBidIdentifying();
+    askIdStrategy   = strategies.newAskIdentifying();
+    state           = State.COMPLETE;
 
     addChildren(bidIdStrategy, askIdStrategy);
   }
 
   @Override
-  protected Void advanceStrategy(State state, long nanoseconds) {
-    switch (this.state) {
+  protected Void advanceStrategy(org.anhonesteffort.btc.state.State bookState, long nanoseconds) {
+    switch (state) {
       case COMPLETE:
         log.info("awaiting buy opportunity");
         askIdStrategy.setContext(Optional.empty(), Optional.empty());
         bidPosition = null;
         askPosition = null;
-        this.state  = ScamState.IDENTIFY_BID;
+        state       = State.IDENTIFY_BID;
         break;
 
       case IDENTIFY_BID:
         Optional<PostOrderRequest> postBid = bidIdStrategy.getResult();
         if (postBid.isPresent()) {
           log.info("opening bid for " + postBid.get().getSize() + " at " + postBid.get().getPrice());
-          openStrategy = new OrderOpeningStrategy(http, postBid.get());
+          openStrategy = strategies.newOrderOpening(postBid.get());
           addChildren(openStrategy);
-          this.state = ScamState.OPENING_BID;
+          state = State.OPENING_BID;
         }
         break;
 
@@ -86,14 +81,14 @@ public class ScamStrategy extends Strategy<Void> {
         if (openStrategy.isAborted()) {
           log.info("bid rejected due to post-only flag");
           removeChildren(openStrategy);
-          this.state = ScamState.IDENTIFY_BID;
+          state = State.IDENTIFY_BID;
         } else if (openedBid.isPresent()) {
           bidPosition = openedBid.get();
           log.info("bid opened with id " + bidPosition.getOrderId() + ", waiting to match");
           removeChildren(openStrategy);
-          matchStrategy = new OrderMatchingStrategy(bidPosition.getOrderId(), BID_ABORT_MS);
+          matchStrategy = strategies.newOrderMatching(Order.Side.BID, bidPosition.getOrderId());
           addChildren(matchStrategy);
-          this.state = ScamState.MATCHING_BID;
+          state = State.MATCHING_BID;
         }
         break;
 
@@ -101,14 +96,14 @@ public class ScamStrategy extends Strategy<Void> {
         if (matchStrategy.isAborted()) {
           log.info("aborting bid due to match timeout");
           removeChildren(matchStrategy);
-          cancelStrategy = new OrderCancelingStrategy(http, bidPosition.getOrderId());
+          cancelStrategy = strategies.newOrderCanceling(bidPosition.getOrderId());
           addChildren(cancelStrategy);
-          this.state = ScamState.ABORT;
+          state = State.ABORT;
         } else if (matchStrategy.getResult()) {
           log.info("bid matched with ask, awaiting sell opportunity");
           removeChildren(matchStrategy);
           askIdStrategy.setContext(Optional.of(bidPosition), Optional.empty());
-          this.state = ScamState.IDENTIFY_ASK;
+          state = State.IDENTIFY_ASK;
         }
         break;
 
@@ -116,9 +111,9 @@ public class ScamStrategy extends Strategy<Void> {
         Optional<PostOrderRequest> postAsk = askIdStrategy.getResult();
         if (postAsk.isPresent()) {
           log.info("opening ask for " + postAsk.get().getSize() + " at " + postAsk.get().getPrice());
-          openStrategy = new OrderOpeningStrategy(http, postAsk.get());
+          openStrategy = strategies.newOrderOpening(postAsk.get());
           addChildren(openStrategy);
-          this.state = ScamState.OPENING_ASK;
+          state = State.OPENING_ASK;
         }
         break;
 
@@ -128,14 +123,14 @@ public class ScamStrategy extends Strategy<Void> {
           log.info("ask rejected due to post-only flag");
           removeChildren(openStrategy);
           askIdStrategy.setContext(Optional.of(bidPosition), Optional.empty());
-          this.state = ScamState.IDENTIFY_ASK;
+          state = State.IDENTIFY_ASK;
         } else if (openedAsk.isPresent()) {
           askPosition = openedAsk.get();
           log.info("ask opened with id " + askPosition.getOrderId() + ", waiting to match");
           removeChildren(openStrategy);
-          matchStrategy = new OrderMatchingStrategy(askPosition.getOrderId(), ASK_ABORT_MS);
+          matchStrategy = strategies.newOrderMatching(Order.Side.ASK, askPosition.getOrderId());
           addChildren(matchStrategy);
-          this.state = ScamState.MATCHING_ASK;
+          state = State.MATCHING_ASK;
         }
         break;
 
@@ -143,13 +138,13 @@ public class ScamStrategy extends Strategy<Void> {
         if (matchStrategy.isAborted()) {
           log.info("aborting ask due to match timeout");
           removeChildren(matchStrategy);
-          cancelStrategy = new OrderCancelingStrategy(http, askPosition.getOrderId());
+          cancelStrategy = strategies.newOrderCanceling(askPosition.getOrderId());
           addChildren(cancelStrategy);
-          this.state = ScamState.ABORT;
+          state = State.ABORT;
         } else if (matchStrategy.getResult()) {
           log.info("ask matched with bid, strategy complete");
           removeChildren(matchStrategy);
-          this.state = ScamState.COMPLETE;
+          state = State.COMPLETE;
         }
         break;
 
@@ -157,12 +152,12 @@ public class ScamStrategy extends Strategy<Void> {
         if (cancelStrategy.getResult() && askPosition == null) {
           log.info("bid " + bidPosition.getOrderId() + " canceled");
           removeChildren(cancelStrategy);
-          this.state = ScamState.IDENTIFY_BID;
+          state = State.IDENTIFY_BID;
         } else if (cancelStrategy.getResult()) {
           log.info("ask " + askPosition.getOrderId() + " canceled");
           removeChildren(cancelStrategy);
           askIdStrategy.setContext(Optional.of(bidPosition), Optional.of(askPosition));
-          this.state = ScamState.IDENTIFY_ASK;
+          state = State.IDENTIFY_ASK;
         }
         break;
     }

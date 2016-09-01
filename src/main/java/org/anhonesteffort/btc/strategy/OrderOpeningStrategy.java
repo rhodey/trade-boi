@@ -27,7 +27,7 @@ import org.anhonesteffort.btc.state.StateProcessingException;
 import java.io.IOException;
 import java.util.Optional;
 
-public class OrderOpeningStrategy extends Strategy<Optional<Order>> {
+public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
 
   private final PostOrderRequest postOrder;
 
@@ -39,7 +39,7 @@ public class OrderOpeningStrategy extends Strategy<Optional<Order>> {
         if (err != null) {
           handleAsyncError(new CriticalStateProcessingException("post order request completed with error", err));
         } else if (!ok) {
-          abort();
+          abort(); // todo: not thread safe
         }
       });
 

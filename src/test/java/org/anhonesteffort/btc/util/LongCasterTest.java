@@ -27,9 +27,9 @@ public class LongCasterTest {
 
     assert CASTER.toDouble(CASTER.fromDouble(1020d))  == 1020d;
     assert CASTER.toDouble(CASTER.fromDouble(10.20d)) == 10.20d;
-    assert CASTER.toDouble(CASTER.fromDouble(1.337d)) == 1.337d;
+    assert CASTER.toDouble(CASTER.fromDouble(1.337d)) == 1.34d;
 
-    assert CASTER.toDouble(CASTER.fromDouble(12345.333333333337d)) == 12345.333333333337d;
+    assert CASTER.toDouble(CASTER.fromDouble(12345.333333333337d)) == 12345.33d;
   }
 
 }

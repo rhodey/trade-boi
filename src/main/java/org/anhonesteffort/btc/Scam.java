@@ -25,14 +25,14 @@ import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.stats.StatsHandlerFactory;
 import org.anhonesteffort.btc.stats.StatsService;
+import org.anhonesteffort.btc.strategy.StrategyFactory;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.OrderEvent;
-import org.anhonesteffort.btc.strategy.ScamStrategy;
+import org.anhonesteffort.btc.strategy.MetaStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
@@ -40,14 +40,11 @@ import java.util.concurrent.Executors;
 
 public class Scam {
 
-  private final LongCaster        caster = new LongCaster(0.000000000001d);
-  private final ExecutorService   pool   = Executors.newFixedThreadPool(2);
-  private final ScamConfig        config;
-  private final HttpClientWrapper http;
+  private final ExecutorService pool = Executors.newFixedThreadPool(2);
+  private final ScamConfig config;
 
-  public Scam() throws IOException, NoSuchAlgorithmException {
+  public Scam() throws IOException {
     config = new ScamConfig();
-    http   = new HttpClientWrapper(config);
   }
 
   private EventHandler<OrderEvent> handlerFor(StateListener... listeners) {
@@ -58,19 +55,24 @@ public class Scam {
   }
 
   public void run() throws Exception {
-    ScamStrategy        scamStrategy = new ScamStrategy(http, caster);
-    StatsHandlerFactory statsHandler = new StatsHandlerFactory();
+    LongCaster        caster = new LongCaster(config.getPrecision());
+    HttpClientWrapper http   = new HttpClientWrapper(config);
+
+    StrategyFactory     strategies    = new ScamStrategyFactory(http, caster);
+    MetaStrategy        metaStrategy  = new MetaStrategy(strategies);
+    StatsHandlerFactory statsHandlers = null;
 
     if (config.getStatsEnabled()) {
+      statsHandlers = new StatsHandlerFactory();
       config.setWaitStrategy(new BlockingWaitStrategy());
-      config.setEventHandlers(new EventHandler[]{handlerFor(scamStrategy, statsHandler)});
+      config.setEventHandlers(new EventHandler[] { handlerFor(metaStrategy, statsHandlers) });
     } else {
       config.setWaitStrategy(new YieldingWaitStrategy());
-      config.setEventHandlers(new EventHandler[]{handlerFor(scamStrategy)});
+      config.setEventHandlers(new EventHandler[] { handlerFor(metaStrategy) });
     }
 
     WsService    wsService    = new WsService(config, http, caster);
-    StatsService statsService = new StatsService(config, statsHandler);
+    StatsService statsService = new StatsService(config, statsHandlers);
 
     wsService.start();
     if (config.getStatsEnabled()) { statsService.start(); }

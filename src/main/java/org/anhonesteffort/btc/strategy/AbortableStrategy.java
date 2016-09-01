@@ -17,22 +17,16 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.request.RequestFactory;
-import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+public abstract class AbortableStrategy<T> extends Strategy<T> {
 
-import java.util.Optional;
+  private boolean abort = false;
 
-public abstract class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
-
-  private final RequestFactory requests;
-
-  public BidIdentifyingStrategy(RequestFactory requests) {
-    this.requests = requests;
+  public boolean isAborted() {
+    return abort;
   }
 
-  protected PostOrderRequest bidRequest(double price, double size) {
-    return requests.newOrder(Order.Side.BID, price, size);
+  protected void abort() {
+    abort = true;
   }
 
 }

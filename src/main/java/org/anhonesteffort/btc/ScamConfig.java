@@ -26,8 +26,9 @@ import java.util.Properties;
 
 public class ScamConfig {
 
-  private final Boolean useSandbox;
+  private final Double  precision;
   private final Integer limitInitSize;
+  private final Boolean useSandbox;
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
   private final Long    wsReadTimeoutMs;
@@ -44,8 +45,9 @@ public class ScamConfig {
     Properties properties = new Properties();
     properties.load(new FileInputStream("scam.properties"));
 
-    useSandbox         = Boolean.parseBoolean(properties.getProperty("use_sandbox"));
+    precision          = Double.parseDouble(properties.getProperty("precision"));
     limitInitSize      = Integer.parseInt(properties.getProperty("limit_init_size"));
+    useSandbox         = Boolean.parseBoolean(properties.getProperty("use_sandbox"));
     wsBufferSize       = Integer.parseInt(properties.getProperty("ws_buffer_size"));
     wsConnectTimeoutMs = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
     wsReadTimeoutMs    = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
@@ -56,12 +58,16 @@ public class ScamConfig {
     statsPort          = Integer.parseInt(properties.getProperty("stats_port"));
   }
 
-  public Boolean getUseSandbox() {
-    return useSandbox;
+  public Double getPrecision() {
+    return precision;
   }
 
   public Integer getLimitInitSize() {
     return limitInitSize;
+  }
+
+  public Boolean getUseSandbox() {
+    return useSandbox;
   }
 
   public Integer getWsBufferSize() {

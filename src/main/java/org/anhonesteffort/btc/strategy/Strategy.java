@@ -25,11 +25,7 @@ import java.util.Optional;
 
 public abstract class Strategy<T> extends Computation<T> {
 
-  private boolean abort = false;
   private Optional<StateProcessingException> error = Optional.empty();
-
-  protected boolean isAborted() { return abort; }
-  protected void abort() { abort = true; }
 
   // todo: not thread safe
   protected void handleAsyncError(StateProcessingException error) {

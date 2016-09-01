@@ -26,18 +26,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class OrderMatchingStrategy extends Strategy<Boolean> {
+public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
 
   private static final Logger log = LoggerFactory.getLogger(OrderMatchingStrategy.class);
   private final String orderId;
-  private final long abortNs;
-  private long startNs;
 
-  public OrderMatchingStrategy(String orderId, long abortMs) {
+  public OrderMatchingStrategy(String orderId) {
     this.orderId = orderId;
-    this.abortNs = abortMs * 1_000_000l;
-    startNs      = -1l;
   }
+
+  protected abstract boolean shouldAbort(State state, long nanoseconds);
 
   @Override
   protected Boolean advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
@@ -45,16 +43,12 @@ public class OrderMatchingStrategy extends Strategy<Boolean> {
       throw new CriticalStateProcessingException("order canceled unexpectedly");
     } else if (state.getTake().isPresent() && state.getTake().get().getTaker().getOrderId().equals(orderId)) {
       throw new CriticalStateProcessingException("order took from the book");
-    } else if (startNs == -1l) {
-      startNs = nanoseconds;
-    } else if ((nanoseconds - startNs) >= abortNs) {
+    } else if (shouldAbort(state, nanoseconds)) {
       abort();
       return false;
     }
 
-    if (!state.getTake().isPresent()) {
-      return false;
-    }
+    if (!state.getTake().isPresent()) { return false; }
 
     Optional<Order> maker = state.getTake().get().getMakers().stream()
                                  .filter(m -> m.getOrderId().equals(orderId))

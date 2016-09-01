@@ -15,24 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.strategy;
+package org.anhonesteffort.btc.strategy.impl;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.request.RequestFactory;
-import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.strategy.OrderMatchingStrategy;
 
-import java.util.Optional;
+public class SimpleOrderMatchingStrategy extends OrderMatchingStrategy {
 
-public abstract class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
+  private final long abortNs;
+  private long startNs;
 
-  private final RequestFactory requests;
-
-  public BidIdentifyingStrategy(RequestFactory requests) {
-    this.requests = requests;
+  public SimpleOrderMatchingStrategy(String orderId, long abortMs) {
+    super(orderId);
+    this.abortNs = abortMs * 1_000_000l;
+    startNs      = -1l;
   }
 
-  protected PostOrderRequest bidRequest(double price, double size) {
-    return requests.newOrder(Order.Side.BID, price, size);
+  @Override
+  protected boolean shouldAbort(State state, long nanoseconds) {
+    if (startNs == -1l) {
+      startNs = nanoseconds;
+      return false;
+    } else {
+      return (nanoseconds - startNs) >= abortNs;
+    }
   }
 
 }

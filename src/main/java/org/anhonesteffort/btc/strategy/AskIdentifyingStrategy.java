@@ -25,15 +25,17 @@ import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Optional;
 
-public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
+public abstract class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
-  private final RequestFactory requests = new RequestFactory();
-  private final LongCaster caster;
-  private Optional<Order> lastAsk = Optional.empty();
+  protected final LongCaster caster;
+  private final RequestFactory requests;
+
+  private Optional<Order> lastAsk     = Optional.empty();
   private Optional<Order> bidPosition = Optional.empty();
 
-  public AskIdentifyingStrategy(LongCaster caster) {
-    this.caster = caster;
+  public AskIdentifyingStrategy(LongCaster caster, RequestFactory requests) {
+    this.caster   = caster;
+    this.requests = requests;
   }
 
   public void setContext(Optional<Order> bidPosition, Optional<Order> lastAsk) {
@@ -41,27 +43,25 @@ public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
     this.lastAsk     = lastAsk;
   }
 
-  private Optional<PostOrderRequest> askOrder(double price) {
-    return Optional.of(requests.newOrder(
-        Order.Side.ASK, price, caster.toDouble(bidPosition.get().getSize()))
-    );
-  }
+  protected abstract Optional<Double> identifyPrice(
+      Order bidPosition, Optional<Order> lastAsk, State state, long nanoseconds
+  );
 
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
-    if (!bidPosition.isPresent()) { return Optional.empty(); }
-
-    double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-    double lastPrice  = lastAsk.isPresent() ? caster.toDouble(lastAsk.get().getPrice()) : -1l;
-    double bidPrice   = caster.toDouble(bidPosition.get().getPrice());
-
-    if (!lastAsk.isPresent()) {
-      return askOrder(askCeiling);
-    } else if (lastPrice > bidPrice) {
-      return askOrder(lastPrice - 0.01d);
-    } else {
-      return askOrder(bidPrice);
+    if (!bidPosition.isPresent()) {
+      return Optional.empty();
     }
+
+    Optional<Double> askPrice = identifyPrice(bidPosition.get(), lastAsk, state, nanoseconds);
+    if (askPrice.isPresent()) {
+      return Optional.of(requests.newOrder(
+          Order.Side.ASK, askPrice.get(), caster.toDouble(bidPosition.get().getSize())
+      ));
+    } else {
+      return Optional.empty();
+    }
+
   }
 
 }

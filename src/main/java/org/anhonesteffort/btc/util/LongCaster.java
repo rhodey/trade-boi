@@ -30,7 +30,7 @@ public class LongCaster {
   }
 
   public double toDouble(long value) {
-    return (value * precision);
+    return Math.round((value * precision) * 100d) / 100d;
   }
 
 }

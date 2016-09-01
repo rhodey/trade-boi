@@ -18,21 +18,29 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.http.request.RequestFactory;
+import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 
-import java.util.Optional;
+public abstract class StrategyFactory {
 
-public abstract class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
+  private final HttpClientWrapper http;
 
-  private final RequestFactory requests;
-
-  public BidIdentifyingStrategy(RequestFactory requests) {
-    this.requests = requests;
+  public StrategyFactory(HttpClientWrapper http) {
+    this.http = http;
   }
 
-  protected PostOrderRequest bidRequest(double price, double size) {
-    return requests.newOrder(Order.Side.BID, price, size);
+  public abstract BidIdentifyingStrategy newBidIdentifying();
+
+  public abstract AskIdentifyingStrategy newAskIdentifying();
+
+  public abstract OrderMatchingStrategy newOrderMatching(Order.Side side, String orderId);
+
+  public OrderOpeningStrategy newOrderOpening(PostOrderRequest order) {
+    return new OrderOpeningStrategy(http, order);
+  }
+
+  public OrderCancelingStrategy newOrderCanceling(String orderId) {
+    return new OrderCancelingStrategy(http, orderId);
   }
 
 }
