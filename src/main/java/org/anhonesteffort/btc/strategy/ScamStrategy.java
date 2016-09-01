@@ -157,7 +157,7 @@ public class ScamStrategy extends Strategy<Void> {
         if (cancelStrategy.getResult() && askPosition == null) {
           log.info("bid " + bidPosition.getOrderId() + " canceled");
           removeChildren(cancelStrategy);
-          this.state = ScamState.COMPLETE;
+          this.state = ScamState.IDENTIFY_BID;
         } else if (cancelStrategy.getResult()) {
           log.info("ask " + askPosition.getOrderId() + " canceled");
           removeChildren(cancelStrategy);
