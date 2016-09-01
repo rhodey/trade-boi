@@ -55,8 +55,9 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
 
   private static final Logger log = LoggerFactory.getLogger(WsService.class);
 
-  private static final String  WS_HOST = "ws-feed.exchange.coinbase.com";
-  private static final String  WS_URI  = "wss://" + WS_HOST;
+
+  private static final String  SANDBOX_WS_HOST = "ws-feed.exchange.gdax.com";
+  private static final String  WS_HOST = "ws-feed.exchange.gdax.com";
   private static final Integer WS_PORT = 443;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
@@ -66,11 +67,16 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
   private final EventHandler[]        handlers;
   private final WsMessageSorter       messageSorter;
 
+  private final String configHost;
+  private final String configWSUri;
+
   private Channel channel;
 
   public WsService(ScamConfig config, HttpClientWrapper http, LongCaster caster) {
     this.config   = config;
     this.handlers = config.getEventHandlers();
+    this.configHost = config.getUseSandbox() ? SANDBOX_WS_HOST : WS_HOST;
+    this.configWSUri = "wss://" + configHost;
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),
         ProducerType.SINGLE, config.getWaitStrategy()
@@ -88,7 +94,7 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     final SslContext                sslContext      = SslContextBuilder.forClient().build();
     final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
     final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
-        new URI(WS_URI), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
+        new URI(configWSUri), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
 
     bootstrap.group(new NioEventLoopGroup())
