@@ -40,8 +40,8 @@ public class ScamStrategy extends Strategy<Void> {
   private ScamState              state;
 
   private enum ScamState {
-    WAIT_TO_BID, BIDDING, MATCHING_BID,
-    WAIT_TO_ASK, ASKING,  MATCHING_ASK,
+    IDENTIFY_BID, BIDDING, MATCHING_BID,
+    IDENTIFY_ASK, ASKING,  MATCHING_ASK,
     COMPLETE
   }
 
@@ -58,10 +58,10 @@ public class ScamStrategy extends Strategy<Void> {
         log.info("awaiting buy opportunity");
         bidIdStrategy = new BidIdentifyingStrategy(caster);
         addChildren(bidIdStrategy);
-        this.state = ScamState.WAIT_TO_BID;
+        this.state = ScamState.IDENTIFY_BID;
         break;
 
-      case WAIT_TO_BID:
+      case IDENTIFY_BID:
         Optional<PostOrderRequest> bid = bidIdStrategy.getResult();
         if (bid.isPresent()) {
           log.info("opening bid for " + bid.get().getSize() + " at " + bid.get().getPrice());
@@ -90,11 +90,11 @@ public class ScamStrategy extends Strategy<Void> {
           removeChildren(orderMatchingStrategy);
           askIdStrategy = new AskIdentifyingStrategy(caster, matchedBid.get());
           addChildren(askIdStrategy);
-          this.state = ScamState.WAIT_TO_ASK;
+          this.state = ScamState.IDENTIFY_ASK;
         }
         break;
 
-      case WAIT_TO_ASK:
+      case IDENTIFY_ASK:
         Optional<PostOrderRequest> ask = askIdStrategy.getResult();
         if (ask.isPresent()) {
           log.info("opening ask for " + ask.get().getSize() + " at " + ask.get().getPrice());
