@@ -26,7 +26,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.anhonesteffort.btc.http.response.GetAccountsCallback;
-import org.anhonesteffort.btc.http.response.PostOrderCallback;
+import org.anhonesteffort.btc.http.response.ResponseCallback;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
@@ -99,8 +99,29 @@ public class HttpClientWrapper implements Closeable {
       RequestBody     body    = RequestBody.create(TYPE_JSON, writer.writeValueAsString(order));
       Request.Builder request = new Request.Builder().url(API_BASE + API_PATH_ORDERS).post(body);
       signer.sign(request, "POST", API_PATH_ORDERS, Optional.of(body));
-      client.newCall(request.build()).enqueue(new PostOrderCallback(future));
+      client.newCall(request.build()).enqueue(new ResponseCallback(future));
     }
+
+    return future;
+  }
+
+  public CompletableFuture<Response> cancelOrder(String orderId) throws IOException {
+    CompletableFuture<Response> future  = new CompletableFuture<>();
+    String                      path    = API_PATH_ORDERS + "/" + orderId;
+    Request.Builder             request = new Request.Builder().url(API_BASE + path).delete();
+
+    signer.sign(request, "DELETE", path, Optional.empty());
+    client.newCall(request.build()).enqueue(new ResponseCallback(future));
+
+    return future;
+  }
+
+  public CompletableFuture<Response> cancelAllOrders() throws IOException {
+    CompletableFuture<Response> future  = new CompletableFuture<>();
+    Request.Builder             request = new Request.Builder().url(API_BASE + API_PATH_ORDERS).delete();
+
+    signer.sign(request, "DELETE", API_PATH_ORDERS, Optional.empty());
+    client.newCall(request.build()).enqueue(new ResponseCallback(future));
 
     return future;
   }

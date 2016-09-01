@@ -30,13 +30,24 @@ public class OrderMatchingStrategy extends Strategy<Optional<Order>> {
 
   private static final Logger log = LoggerFactory.getLogger(OrderMatchingStrategy.class);
   private final String orderId;
+  private final long abortNs;
+  private long startNs;
 
-  public OrderMatchingStrategy(String orderId) {
+  public OrderMatchingStrategy(String orderId, long abortMs) {
     this.orderId = orderId;
+    this.abortNs = abortMs * 1000l;
+    startNs      = -1l;
   }
 
   @Override
   protected Optional<Order> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+    if (startNs == -1l) {
+      startNs = nanoseconds;
+    } else if ((nanoseconds - startNs) >= abortNs) {
+      abort();
+      return Optional.empty();
+    }
+
     if (!state.getTake().isPresent()) {
       return Optional.empty();
     } else if (state.getTake().get().getTaker().getOrderId().equals(orderId)) {

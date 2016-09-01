@@ -29,6 +29,9 @@ import java.util.Optional;
 
 public class ScamStrategy extends Strategy<Void> {
 
+  private static final Long BID_ABORT_MS = 6_000l;
+  private static final Long ASK_ABORT_MS = 6_000l;
+
   private static final Logger log = LoggerFactory.getLogger(ScamStrategy.class);
   private final HttpClientWrapper http;
   private final LongCaster caster;
@@ -77,7 +80,7 @@ public class ScamStrategy extends Strategy<Void> {
         if (bidId.isPresent()) {
           log.info("bid opened with id " + bidId.get() + ", waiting to match");
           removeChildren(orderOpenStrategy);
-          orderMatchingStrategy = new OrderMatchingStrategy(bidId.get());
+          orderMatchingStrategy = new OrderMatchingStrategy(bidId.get(), BID_ABORT_MS);
           addChildren(orderMatchingStrategy);
           this.state = ScamState.MATCHING_BID;
         }
@@ -110,7 +113,7 @@ public class ScamStrategy extends Strategy<Void> {
         if (askId.isPresent()) {
           log.info("ask opened with id " + askId.get() + ", waiting to match");
           removeChildren(orderOpenStrategy);
-          orderMatchingStrategy = new OrderMatchingStrategy(askId.get());
+          orderMatchingStrategy = new OrderMatchingStrategy(askId.get(), ASK_ABORT_MS);
           addChildren(orderMatchingStrategy);
           this.state = ScamState.MATCHING_ASK;
         }

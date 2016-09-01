@@ -70,20 +70,26 @@ public class ShutdownProcedure implements Callable<Void> {
     return null;
   }
 
-  private static class OrderClosingRunnable implements Runnable {
+  private class OrderClosingRunnable implements Runnable {
     @Override
     public void run() {
+      log.warn("shutdown procedure initiated");
       try {
 
-        log.warn("shutdown procedure initiated");
-        Thread.sleep(1000); // todo: close orders
-        log.info("successfully closed open orders, exiting");
+        http.cancelAllOrders().whenComplete((ok, err) -> {
+          if (err == null) {
+            log.info("successfully canceled open orders");
+            System.exit(0);
+          } else {
+            log.error("failed to cancel open orders", err);
+            System.exit(1);
+          }
+        });
 
       } catch (Throwable e) {
-        log.error("failed to close open orders, exiting", e);
+        log.error("failed to cancel open orders", e);
+        System.exit(1);
       }
-
-      System.exit(1);
     }
   }
 

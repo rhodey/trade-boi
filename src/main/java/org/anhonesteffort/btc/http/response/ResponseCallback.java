@@ -23,9 +23,9 @@ import org.anhonesteffort.btc.http.HttpCallback;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PostOrderCallback extends HttpCallback<Response> {
+public class ResponseCallback extends HttpCallback<Response> {
 
-  public PostOrderCallback(CompletableFuture<Response> future) {
+  public ResponseCallback(CompletableFuture<Response> future) {
     super(future);
   }
 
