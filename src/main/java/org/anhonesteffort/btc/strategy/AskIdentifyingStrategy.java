@@ -28,31 +28,39 @@ import java.util.Optional;
 public class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
   private final RequestFactory requests = new RequestFactory();
+  private final LongCaster caster;
+  private Optional<Order> lastAsk = Optional.empty();
+  private Optional<Order> bidPosition = Optional.empty();
 
-  private final LongCaster      caster;
-  private final Order           bidPosition;
-  private final Optional<Order> lastAsk;
+  public AskIdentifyingStrategy(LongCaster caster) {
+    this.caster = caster;
+  }
 
-  public AskIdentifyingStrategy(LongCaster caster, Order bidPosition, Optional<Order> lastAsk) {
-    this.caster      = caster;
+  public void setContext(Optional<Order> bidPosition, Optional<Order> lastAsk) {
     this.bidPosition = bidPosition;
     this.lastAsk     = lastAsk;
   }
 
+  private Optional<PostOrderRequest> askOrder(double price) {
+    return Optional.of(requests.newOrder(
+        Order.Side.ASK, price, caster.toDouble(bidPosition.get().getSize()))
+    );
+  }
+
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
-    double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
+    if (!bidPosition.isPresent()) { return Optional.empty(); }
+
     double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
     double lastPrice  = lastAsk.isPresent() ? caster.toDouble(lastAsk.get().getPrice()) : -1l;
-    double askSize    = caster.toDouble(bidPosition.getSize());
-    double minPrice   = bidFloor + 0.01d;
+    double bidPrice   = caster.toDouble(bidPosition.get().getPrice());
 
     if (!lastAsk.isPresent()) {
-      return Optional.of(requests.newOrder(Order.Side.ASK, askCeiling, askSize));
-    } else if (lastPrice > minPrice) {
-      return Optional.of(requests.newOrder(Order.Side.ASK, (lastPrice - 0.01d), askSize));
+      return askOrder(askCeiling);
+    } else if (lastPrice > bidPrice) {
+      return askOrder(lastPrice - 0.01d);
     } else {
-      return Optional.of(requests.newOrder(Order.Side.ASK, minPrice, askSize));
+      return askOrder(bidPrice);
     }
   }
 

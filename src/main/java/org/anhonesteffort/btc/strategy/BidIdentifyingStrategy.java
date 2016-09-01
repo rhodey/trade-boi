@@ -31,7 +31,7 @@ import java.util.Optional;
 public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
   private static final Double  BID_SIZE                = 0.01d;
-  private static final Integer RECENT_PERIOD_MS        = 1000 * 22;
+  private static final Integer RECENT_PERIOD_MS        = 1000 * 16;
   private static final Integer NOW_PERIOD_MS           = 1000 *  4;
   private static final Double  BULLISH_THRESHOLD_SCORE = 1.25d;
   private static final Double  BULLISH_THRESHOLD_BTC   = 1.50d;
@@ -88,7 +88,7 @@ public class BidIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>>
     if (isBullish() && caster.toDouble(spread.getResult().get()) >= 0.02d) {
       double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-      double bidPrice   = (askCeiling + bidFloor) / 2.00d;
+      double bidPrice   = bidFloor + ((askCeiling - bidFloor) * 0.75d);
 
       return Optional.of(requests.newOrder(Order.Side.BID, bidPrice, BID_SIZE));
     } else {
