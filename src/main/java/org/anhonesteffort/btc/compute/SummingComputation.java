@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.util.ArrayDeque;
@@ -38,7 +38,7 @@ public class SummingComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  protected Optional<Long> computeNextResult(State state, long nanoseconds) {
+  protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
     sum += child.getResult();
     history.add(new long[] { nanoseconds, child.getResult() });
 

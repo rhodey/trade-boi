@@ -18,53 +18,52 @@
 package org.anhonesteffort.btc;
 
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.stats.StatsService;
-import org.anhonesteffort.btc.ws.WsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ShutdownProcedure implements Callable<Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownProcedure.class);
+
+  private final ExecutorService pool = Executors.newFixedThreadPool(1);
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
-
-  private final ExecutorService   pool;
-  private final WsService         wsService;
-  private final StatsService      statService;
   private final HttpClientWrapper http;
+  private final Service[] services;
 
-  public ShutdownProcedure(
-      ExecutorService pool, WsService wsService,
-      StatsService statService, HttpClientWrapper http
-  ) {
-    this.pool        = pool;
-    this.wsService   = wsService;
-    this.statService = statService;
-    this.http        = http;
+  public ShutdownProcedure(HttpClientWrapper http, Service... services) {
+    this.http     = http;
+    this.services = services;
   }
 
-  private void shutdown() {
+  private void shutdown(Throwable error) {
     if (!shutdown.getAndSet(true)) {
+      if (error != null) {
+        log.error("initiating shutdown procedure", error);
+      } else {
+        log.info("initiating shutdown procedure");
+      }
+
       http.close();
-      wsService.shutdown();
-      statService.shutdown();
+      for (Service service : services) { service.shutdown(); }
       pool.submit(new OrderClosingRunnable());
     }
   }
 
   @Override
   public Void call() {
-    wsService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
-    statService.getShutdownFuture().whenComplete((ok, err) -> shutdown());
+    for (Service service : services) {
+      service.shutdownFuture().whenComplete((ok, err) -> shutdown(err));
+    }
 
     Scanner console = new Scanner(System.in);
     while (console.hasNextLine()) { console.nextLine(); }
-    shutdown();
+    shutdown(null);
 
     console.close();
     return null;
@@ -73,7 +72,6 @@ public class ShutdownProcedure implements Callable<Void> {
   private class OrderClosingRunnable implements Runnable {
     @Override
     public void run() {
-      log.warn("shutdown procedure initiated");
       try {
 
         http.cancelAllOrders().whenComplete((ok, err) -> {

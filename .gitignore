@@ -1,6 +1,7 @@
 scam.properties
 notes.txt
 
+persistence/
 target/
 .idea/
 

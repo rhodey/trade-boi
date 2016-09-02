@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.strategy.impl;
 
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.RequestFactory;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.strategy.AskIdentifyingStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
@@ -33,7 +33,7 @@ public class SimpleAskIdentifyingStrategy extends AskIdentifyingStrategy {
 
   @Override
   protected Optional<Double> identifyPrice(
-      Order bidPosition, Optional<Order> lastAsk, State state, long nanoseconds
+      Order bidPosition, Optional<Order> lastAsk, GdaxState state, long nanoseconds
   ) {
     double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
     double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());

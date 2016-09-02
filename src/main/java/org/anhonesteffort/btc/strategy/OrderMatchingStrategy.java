@@ -18,9 +18,8 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.state.CriticalStateProcessingException;
-import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.state.StateProcessingException;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,22 +34,18 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
     this.orderId = orderId;
   }
 
-  protected abstract boolean shouldAbort(State state, long nanoseconds);
+  protected abstract boolean shouldAbort(GdaxState state, long nanoseconds);
 
   @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
-    if (state.getCanceled().isPresent() && state.getCanceled().get().equals(orderId)) {
-      throw new CriticalStateProcessingException("order canceled unexpectedly");
-    } else if (state.getTake().isPresent() && state.getTake().get().getTaker().getOrderId().equals(orderId)) {
-      throw new CriticalStateProcessingException("order took from the book");
+  protected Boolean advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException {
+    if (state.getEvent().isPresent() && state.getEvent().get().getOrderId().equals(orderId)) {
+      throw new StateProcessingException("order opened, took, reduced, or canceled unexpectedly");
     } else if (shouldAbort(state, nanoseconds)) {
       abort();
       return false;
     }
 
-    if (!state.getTake().isPresent()) { return false; }
-
-    Optional<Order> maker = state.getTake().get().getMakers().stream()
+    Optional<Order> maker = state.getMakers().stream()
                                  .filter(m -> m.getOrderId().equals(orderId))
                                  .findAny();
 
@@ -66,7 +61,7 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
 
   @Override
   public void onStateReset() throws StateProcessingException {
-    throw new CriticalStateProcessingException("unable to handle state reset");
+    throw new StateProcessingException("unable to handle state reset");
   }
 
 }

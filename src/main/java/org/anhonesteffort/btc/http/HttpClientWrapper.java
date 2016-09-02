@@ -61,7 +61,7 @@ public class HttpClientWrapper implements Closeable {
 
   // todo: run callback on source thread
   public HttpClientWrapper(ScamConfig config) throws NoSuchAlgorithmException {
-    API_BASE = config.getUseSandbox() ? SANDBOX_API_BASE : PROD_API_BASE;
+    API_BASE = config.getGdaxSandbox() ? SANDBOX_API_BASE : PROD_API_BASE;
     signer   = new RequestSigner(
         config.getGdaxAccessKey(), config.getGdaxSecretKey(), config.getGdaxPassword()
     );

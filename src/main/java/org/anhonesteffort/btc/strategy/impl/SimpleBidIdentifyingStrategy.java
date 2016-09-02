@@ -23,7 +23,7 @@ import org.anhonesteffort.btc.compute.SummingComputation;
 import org.anhonesteffort.btc.compute.TakeVolumeComputation;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.http.request.RequestFactory;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
@@ -88,7 +88,7 @@ public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
   }
 
   @Override
-  protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
+  protected Optional<PostOrderRequest> advanceStrategy(GdaxState state, long nanoseconds) {
     if (isBullish()) {
       double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());

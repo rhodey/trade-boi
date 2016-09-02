@@ -25,18 +25,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-public abstract class StateCurator implements EventHandler<OrderEvent> {
+public abstract class StateCurator implements EventHandler<GdaxEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
 
-  protected final State state;
+  protected final GdaxState state;
   protected final Set<StateListener> listeners;
-
-  private boolean rebuilding    = false;
-  private long    nanosecondSum = 0l;
+  private boolean rebuilding = false;
 
   public StateCurator(LimitOrderBook book, Set<StateListener> listeners) {
-    state          = new State(book);
+    state          = new GdaxState(book);
     this.listeners = listeners;
   }
 
@@ -45,19 +43,19 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
   }
 
   private void cleanupTempState() {
-    if (state.getTake().isPresent()) {
-      state.getTake().get().getMakers().stream()
+    if (state.getEvent().isPresent()) {
+      state.getMakers().stream()
            .filter(make -> make.getSizeRemaining() > 0l)
            .forEach(Order::clearValueRemoved);
-      state.setTake(null);
-      state.setCanceled(null);
+      state.setEvent(null);
+      state.getMakers().clear();
     }
   }
 
-  protected abstract void onEvent(OrderEvent event) throws StateProcessingException;
+  protected abstract void onEvent(GdaxEvent event) throws StateProcessingException;
 
   @Override
-  public void onEvent(OrderEvent event, long sequence, boolean endOfBatch) throws StateProcessingException {
+  public void onEvent(GdaxEvent event, long sequence, boolean endOfBatch) throws StateProcessingException {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();
@@ -77,13 +75,6 @@ public abstract class StateCurator implements EventHandler<OrderEvent> {
           for (StateListener listener : listeners) { listener.onStateChange(state, event.getNanoseconds()); }
         }
         cleanupTempState();
-    }
-
-    if ((sequence % 50l) == 0l) {
-      if (!rebuilding) { log.debug("avg latency -> " + (nanosecondSum / 50d) + "ns"); }
-      nanosecondSum = System.nanoTime() - event.getNanoseconds();
-    } else {
-      nanosecondSum += System.nanoTime() - event.getNanoseconds();
     }
   }
 

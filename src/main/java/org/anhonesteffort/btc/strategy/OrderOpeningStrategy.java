@@ -20,9 +20,8 @@ package org.anhonesteffort.btc.strategy;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
-import org.anhonesteffort.btc.state.CriticalStateProcessingException;
-import org.anhonesteffort.btc.state.State;
 import org.anhonesteffort.btc.state.StateProcessingException;
+import org.anhonesteffort.btc.state.GdaxState;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,14 +36,14 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
 
       http.postOrder(postOrder).whenComplete((ok, err) -> {
         if (err != null) {
-          handleAsyncError(new CriticalStateProcessingException("post order request completed with error", err));
+          handleAsyncError(new StateProcessingException("post order request completed with error", err));
         } else if (!ok) {
           abort(); // todo: not thread safe
         }
       });
 
     } catch (IOException e) {
-      handleAsyncError(new CriticalStateProcessingException("error encoding api request", e));
+      handleAsyncError(new StateProcessingException("error encoding api request", e));
     }
   }
 
@@ -54,7 +53,7 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
   }
 
   @Override
-  protected Optional<Order> advanceStrategy(State state, long nanoseconds) throws StateProcessingException {
+  protected Optional<Order> advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException {
     Optional<String> bookOid   = Optional.ofNullable(state.getOrderIdMap().get(postOrder.getClientOid()));
     Optional<Order>  bookOrder = bookOid.isPresent() ?
         Optional.ofNullable(state.getRxLimitOrders().get(bookOid.get())) : Optional.empty();
@@ -62,9 +61,9 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
     if (!bookOid.isPresent()) {
       return Optional.empty();
     } else if (!bookOrder.isPresent()) {
-      throw new CriticalStateProcessingException("order id map entry not found in rx limit order map");
+      throw new StateProcessingException("order id map entry not found in rx limit order map");
     } else if (!sideMatches(postOrder, bookOrder.get())) {
-      throw new CriticalStateProcessingException("posted order ended up on wrong side of the book");
+      throw new StateProcessingException("posted order ended up on wrong side of the book");
     } else {
       return bookOrder;
     }
@@ -72,7 +71,7 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
 
   @Override
   public void onStateReset() throws StateProcessingException {
-    throw new CriticalStateProcessingException("unable to handle state reset");
+    throw new StateProcessingException("unable to handle state reset");
   }
 
 }

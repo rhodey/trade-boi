@@ -27,32 +27,36 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.anhonesteffort.btc.ScamConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.anhonesteffort.btc.Service;
+import org.anhonesteffort.btc.state.StateListener;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class StatsService {
-
-  private static final Logger log = LoggerFactory.getLogger(StatsService.class);
+public class StatsService implements Service {
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
+  private final StatsChannelHandlerFactory handlers = new StatsChannelHandlerFactory();
   private final ScamConfig config;
-  private final StatsHandlerFactory handlerFactory;
 
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
   private Channel        channel;
 
-  public StatsService(ScamConfig config, StatsHandlerFactory handlerFactory) {
-    this.config         = config;
-    this.handlerFactory = handlerFactory;
+  public StatsService(ScamConfig config) {
+    this.config = config;
   }
 
-  public CompletableFuture<Void> getShutdownFuture() {
+  public StateListener[] listeners() {
+    return new StateListener[] { handlers };
+  }
+
+  @Override
+  public CompletableFuture<Void> shutdownFuture() {
     return shutdownFuture;
   }
 
+  @Override
   public void start() throws InterruptedException {
     ServerBootstrap bootstrap   = new ServerBootstrap();
                     bossGroup   = new NioEventLoopGroup();
@@ -67,19 +71,18 @@ public class StatsService {
                public void initChannel(SocketChannel ch) {
                  ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
                  ch.pipeline().addLast("msgEncoder", new ProtobufEncoder());
-                 ch.pipeline().addLast("handler", handlerFactory.newHandler());
+                 ch.pipeline().addLast("handler", handlers.newHandler());
                }
              });
 
     channel = bootstrap.bind(config.getStatsPort()).sync().channel();
     channel.closeFuture().addListener(close -> {
       if (close.cause() != null) { shutdown(close.cause()); }
-      else                       { shutdown(); }
+      else                       { shutdown(new IOException("channel closed unexpectedly")); }
     });
-
-    log.info("bound to port " + config.getStatsPort());
   }
 
+  @Override
   public boolean shutdown() {
     if (channel != null && shutdownFuture.complete(null)) {
       channel.close();

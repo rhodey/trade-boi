@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.strategy.impl;
 
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.strategy.OrderMatchingStrategy;
 
 public class SimpleOrderMatchingStrategy extends OrderMatchingStrategy {
@@ -32,7 +32,7 @@ public class SimpleOrderMatchingStrategy extends OrderMatchingStrategy {
   }
 
   @Override
-  protected boolean shouldAbort(State state, long nanoseconds) {
+  protected boolean shouldAbort(GdaxState state, long nanoseconds) {
     if (startNs == -1l) {
       startNs = nanoseconds;
       return false;

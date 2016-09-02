@@ -17,9 +17,6 @@
 
 package org.anhonesteffort.btc;
 
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.WaitStrategy;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -28,18 +25,17 @@ public class ScamConfig {
 
   private final Double  precision;
   private final Integer limitInitSize;
-  private final Boolean useSandbox;
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
   private final Long    wsReadTimeoutMs;
+  private final Boolean gdaxSandbox;
   private final String  gdaxAccessKey;
   private final String  gdaxSecretKey;
   private final String  gdaxPassword;
+  private final Boolean persistenceEnabled;
+  private final String  persistenceDir;
   private final Boolean statsEnabled;
   private final Integer statsPort;
-
-  private WaitStrategy   waitStrategy;
-  private EventHandler[] eventHandlers;
 
   public ScamConfig() throws IOException {
     Properties properties = new Properties();
@@ -47,13 +43,15 @@ public class ScamConfig {
 
     precision          = Double.parseDouble(properties.getProperty("precision"));
     limitInitSize      = Integer.parseInt(properties.getProperty("limit_init_size"));
-    useSandbox         = Boolean.parseBoolean(properties.getProperty("use_sandbox"));
     wsBufferSize       = Integer.parseInt(properties.getProperty("ws_buffer_size"));
     wsConnectTimeoutMs = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
     wsReadTimeoutMs    = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
+    gdaxSandbox        = Boolean.parseBoolean(properties.getProperty("gdax_sandbox"));
     gdaxAccessKey      = properties.getProperty("gdax_access_key");
     gdaxSecretKey      = properties.getProperty("gdax_secret_key");
     gdaxPassword       = properties.getProperty("gdax_key_password");
+    persistenceEnabled = Boolean.parseBoolean(properties.getProperty("persistence_enabled"));
+    persistenceDir     = properties.getProperty("persistence_dir");
     statsEnabled       = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
     statsPort          = Integer.parseInt(properties.getProperty("stats_port"));
   }
@@ -64,10 +62,6 @@ public class ScamConfig {
 
   public Integer getLimitInitSize() {
     return limitInitSize;
-  }
-
-  public Boolean getUseSandbox() {
-    return useSandbox;
   }
 
   public Integer getWsBufferSize() {
@@ -82,6 +76,10 @@ public class ScamConfig {
     return wsReadTimeoutMs;
   }
 
+  public Boolean getGdaxSandbox() {
+    return gdaxSandbox;
+  }
+
   public String getGdaxAccessKey() {
     return gdaxAccessKey;
   }
@@ -94,28 +92,20 @@ public class ScamConfig {
     return gdaxPassword;
   }
 
+  public Boolean getPersistenceEnabled() {
+    return persistenceEnabled;
+  }
+
+  public String getPersistenceDir() {
+    return persistenceDir;
+  }
+
   public Boolean getStatsEnabled() {
     return statsEnabled;
   }
 
   public Integer getStatsPort() {
     return statsPort;
-  }
-
-  public WaitStrategy getWaitStrategy() {
-    return waitStrategy;
-  }
-
-  protected void setWaitStrategy(WaitStrategy waitStrategy) {
-    this.waitStrategy = waitStrategy;
-  }
-
-  public EventHandler[] getEventHandlers() {
-    return eventHandlers;
-  }
-
-  protected void setEventHandlers(EventHandler[] eventHandlers) {
-    this.eventHandlers = eventHandlers;
   }
 
 }

@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.state.StateProcessingException;
 
@@ -43,14 +43,14 @@ public abstract class Computation<T> implements StateListener {
     this.children.removeAll(Arrays.asList(children));
   }
 
-  protected abstract T computeNextResult(State state, long nanoseconds) throws StateProcessingException;
+  protected abstract T computeNextResult(GdaxState state, long nanoseconds) throws StateProcessingException;
 
   public T getResult() {
     return result;
   }
 
   @Override
-  public void onStateChange(State state, long nanoseconds) throws StateProcessingException {
+  public void onStateChange(GdaxState state, long nanoseconds) throws StateProcessingException {
     for (StateListener child : children) { child.onStateChange(state, nanoseconds); }
     result = computeNextResult(state, nanoseconds);
   }

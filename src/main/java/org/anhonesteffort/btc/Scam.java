@@ -19,65 +19,77 @@ package org.anhonesteffort.btc;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.YieldingWaitStrategy;
 import org.anhonesteffort.btc.book.LimitOrderBook;
+import org.anhonesteffort.btc.disruptor.DisruptorService;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
+import org.anhonesteffort.btc.persist.PersistService;
 import org.anhonesteffort.btc.state.StateListener;
-import org.anhonesteffort.btc.stats.StatsHandlerFactory;
 import org.anhonesteffort.btc.stats.StatsService;
+import org.anhonesteffort.btc.strategy.Strategy;
 import org.anhonesteffort.btc.strategy.StrategyFactory;
+import org.anhonesteffort.btc.strategy.impl.SimpleStrategyFactory;
 import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
-import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.strategy.MetaStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Scam {
 
-  private final ExecutorService pool = Executors.newFixedThreadPool(2);
   private final ScamConfig config;
+  private final LongCaster caster;
+  private final HttpClientWrapper http;
 
-  public Scam() throws IOException {
+  public Scam() throws IOException, NoSuchAlgorithmException {
     config = new ScamConfig();
+    caster = new LongCaster(config.getPrecision());
+    http   = new HttpClientWrapper(config);
   }
 
-  private EventHandler<OrderEvent> handlerFor(StateListener... listeners) {
+  private EventHandler<GdaxEvent> handlerFor(StateListener... listeners) {
     return new MatchingStateCurator(
         new LimitOrderBook(config.getLimitInitSize()),
         new HashSet<>(Arrays.asList(listeners))
     );
   }
 
-  public void run() throws Exception {
-    LongCaster        caster = new LongCaster(config.getPrecision());
-    HttpClientWrapper http   = new HttpClientWrapper(config);
-
-    StrategyFactory     strategies    = new ScamStrategyFactory(http, caster);
-    MetaStrategy        metaStrategy  = new MetaStrategy(strategies);
-    StatsHandlerFactory statsHandlers = null;
-
-    if (config.getStatsEnabled()) {
-      statsHandlers = new StatsHandlerFactory();
-      config.setWaitStrategy(new BlockingWaitStrategy());
-      config.setEventHandlers(new EventHandler[] { handlerFor(metaStrategy, statsHandlers) });
+  private EventHandler[] handlersForConfig(Strategy strategy, PersistService persist, StatsService stats) {
+    if (config.getPersistenceEnabled() && config.getStatsEnabled()) {
+      return new EventHandler[] { handlerFor(strategy), handlerFor(persist.listeners()), handlerFor(stats.listeners()) };
+    } else if (config.getPersistenceEnabled()) {
+      return new EventHandler[] { handlerFor(strategy), handlerFor(persist.listeners()) };
+    } else if (config.getStatsEnabled()) {
+      return new EventHandler[] { handlerFor(strategy), handlerFor(stats.listeners()) };
     } else {
-      config.setWaitStrategy(new YieldingWaitStrategy());
-      config.setEventHandlers(new EventHandler[] { handlerFor(metaStrategy) });
+      return new EventHandler[] { handlerFor(strategy) };
     }
+  }
 
-    WsService    wsService    = new WsService(config, http, caster);
-    StatsService statsService = new StatsService(config, statsHandlers);
+  public void run() throws Exception {
+    StrategyFactory strategies   = new SimpleStrategyFactory(http, caster);
+    Strategy        metaStrategy = new MetaStrategy(strategies);
+    PersistService  persistence  = new PersistService(config);
+    StatsService    statistics   = new StatsService(config);
 
+    DisruptorService disruptor = new DisruptorService(
+        config, new BlockingWaitStrategy(), handlersForConfig(metaStrategy, persistence, statistics)
+    );
+
+    WsService wsService = new WsService(config, disruptor.ringBuffer(), http, caster);
+
+    if (config.getPersistenceEnabled()) { persistence.start(); }
+    if (config.getStatsEnabled()) { statistics.start(); }
+    disruptor.start();
     wsService.start();
-    if (config.getStatsEnabled()) { statsService.start(); }
 
-    pool.submit(new ShutdownProcedure(pool, wsService, statsService, http)).get();
+    new ShutdownProcedure(
+        http, persistence, statistics, disruptor, wsService
+    ).call();
   }
 
   public static void main(String[] args) throws Exception {

@@ -20,7 +20,7 @@ package org.anhonesteffort.btc.strategy;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.util.LongCaster;
 
 import java.util.Optional;
@@ -44,11 +44,11 @@ public abstract class AskIdentifyingStrategy extends Strategy<Optional<PostOrder
   }
 
   protected abstract Optional<Double> identifyPrice(
-      Order bidPosition, Optional<Order> lastAsk, State state, long nanoseconds
+      Order bidPosition, Optional<Order> lastAsk, GdaxState state, long nanoseconds
   );
 
   @Override
-  protected Optional<PostOrderRequest> advanceStrategy(State state, long nanoseconds) {
+  protected Optional<PostOrderRequest> advanceStrategy(GdaxState state, long nanoseconds) {
     if (!bidPosition.isPresent()) {
       return Optional.empty();
     }

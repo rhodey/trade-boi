@@ -18,8 +18,8 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.state.CriticalStateProcessingException;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.StateProcessingException;
+import org.anhonesteffort.btc.state.GdaxState;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,19 +33,19 @@ public class OrderCancelingStrategy extends Strategy<Boolean> {
 
       http.cancelOrder(orderId).whenComplete((ok, err) -> {
         if (err != null) {
-          handleAsyncError(new CriticalStateProcessingException("cancel order request completed with error", err));
+          handleAsyncError(new StateProcessingException("cancel order request completed with error", err));
         } else {
           canceled.set(true);
         }
       });
 
     } catch (IOException e) {
-      handleAsyncError(new CriticalStateProcessingException("error encoding api request", e));
+      handleAsyncError(new StateProcessingException("error encoding api request", e));
     }
   }
 
   @Override
-  protected Boolean advanceStrategy(State state, long nanoseconds) {
+  protected Boolean advanceStrategy(GdaxState state, long nanoseconds) {
     return canceled.get();
   }
 

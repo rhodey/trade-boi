@@ -15,16 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc.state;
+package org.anhonesteffort.btc.persist;
 
-public class CriticalStateProcessingException extends StateProcessingException {
+import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.state.GdaxState;
 
-  public CriticalStateProcessingException(String message) {
-    super(message);
+public class OrderEventPersistingChronicle extends StatePersistingChronicle {
+
+  private final EventWriter writer;
+
+  public OrderEventPersistingChronicle(String fsPath) {
+    super(fsPath);
+    writer = appender.methodWriter(EventWriter.class);
   }
 
-  public CriticalStateProcessingException(String message, Throwable cause) {
-    super(message, cause);
+  @Override
+  public void onStateChange(GdaxState state, long nanoseconds) {
+    if (state.getEvent().isPresent()) {
+      writer.write(state.getEvent().get());
+    }
+  }
+
+  private interface EventWriter {
+    void write(OrderEvent event);
   }
 
 }

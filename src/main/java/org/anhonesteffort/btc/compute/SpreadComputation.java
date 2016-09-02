@@ -18,14 +18,14 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.book.Limit;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 
 import java.util.Optional;
 
 public class SpreadComputation extends Computation<Optional<Long>> {
 
   @Override
-  protected Optional<Long> computeNextResult(State state, long nanoseconds) {
+  protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
     Optional<Limit> ask = state.getOrderBook().getAskLimits().peek();
     Optional<Limit> bid = state.getOrderBook().getBidLimits().peek();
 

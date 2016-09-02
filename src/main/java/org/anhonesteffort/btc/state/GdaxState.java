@@ -20,23 +20,24 @@ package org.anhonesteffort.btc.state;
 import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.book.MarketOrder;
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.book.TakeResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class State {
+public class GdaxState {
 
   private final Map<String, String>      orderIdMap    = new HashMap<>();
   private final Map<String, Order>       rxLimitOrders = new HashMap<>();
   private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
-  private       Optional<TakeResult>     take          = Optional.empty();
-  private       Optional<String>         canceled      = Optional.empty();
+  private final List<Order>              makers        = new ArrayList<>();
+  private       Optional<OrderEvent>     event         = Optional.empty();
 
   private final LimitOrderBook orderBook;
 
-  public State(LimitOrderBook orderBook) {
+  public GdaxState(LimitOrderBook orderBook) {
     this.orderBook = orderBook;
   }
 
@@ -56,29 +57,25 @@ public class State {
     return marketOrders;
   }
 
-  public void setTake(TakeResult take) {
-    this.take = Optional.ofNullable(take);
+  public List<Order> getMakers() {
+    return makers;
   }
 
-  public Optional<TakeResult> getTake() {
-    return take;
+  public void setEvent(OrderEvent event) {
+    this.event = Optional.ofNullable(event);
   }
 
-  public void setCanceled(String canceled) {
-    this.canceled = Optional.ofNullable(canceled);
-  }
-
-  public Optional<String> getCanceled() {
-    return canceled;
+  public Optional<OrderEvent> getEvent() {
+    return event;
   }
 
   public void clear() {
-    orderIdMap.clear();
     orderBook.clear();
+    orderIdMap.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
-    take     = Optional.empty();
-    canceled = Optional.empty();
+    makers.clear();
+    event    = Optional.empty();
   }
 
 }

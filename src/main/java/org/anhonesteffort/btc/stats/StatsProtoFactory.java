@@ -18,20 +18,17 @@
 package org.anhonesteffort.btc.stats;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.book.TakeResult;
-
-import java.util.stream.Collectors;
+import org.anhonesteffort.btc.state.OrderEvent;
 
 import static org.anhonesteffort.btc.stats.StatsProto.BaseMessage;
-import static org.anhonesteffort.btc.stats.StatsProto.ErrorEvent;
-import static org.anhonesteffort.btc.stats.StatsProto.TakeEvent;
+import static org.anhonesteffort.btc.stats.StatsProto.Error;
 
 public class StatsProtoFactory {
 
   public BaseMessage errorMsg(String message) {
     return BaseMessage.newBuilder()
         .setType(BaseMessage.Type.ERROR)
-        .setError(ErrorEvent.newBuilder().setMessage(message))
+        .setError(Error.newBuilder().setMessage(message))
         .build();
   }
 
@@ -41,37 +38,41 @@ public class StatsProtoFactory {
         .build();
   }
 
-  private StatsProto.Order order(Order order) {
-    return StatsProto.Order.newBuilder()
-        .setOrderId(order.getOrderId())
-        .setSide((order.getSide() == Order.Side.ASK) ? StatsProto.Order.Side.ASK : StatsProto.Order.Side.BID)
-        .setPrice(order.getPrice())
-        .setSize(order.getSize())
-        .setSizeRemaining(order.getSizeRemaining())
-        .setValueRemoved(order.getValueRemoved())
-        .build();
+  private StatsProto.Event.Type typeFor(OrderEvent.Type type) {
+    if (type == OrderEvent.Type.OPEN) {
+      return StatsProto.Event.Type.OPEN;
+    } else if (type == OrderEvent.Type.TAKE) {
+      return StatsProto.Event.Type.TAKE;
+    } else {
+      return StatsProto.Event.Type.REDUCE;
+    }
   }
 
-  private TakeEvent takeEvent(TakeResult takeResult) {
-    return TakeEvent.newBuilder()
-        .setTaker(order(takeResult.getTaker()))
-        .addAllMakers(takeResult.getMakers().stream().map(this::order).collect(Collectors.toList()))
-        .setTakeSize(takeResult.getTakeSize())
-        .setTakeValue(takeResult.getTakeValue())
-        .build();
+  private StatsProto.Event.Side sideFor(Order.Side side) {
+    if (side == Order.Side.ASK) {
+      return StatsProto.Event.Side.ASK;
+    } else {
+      return StatsProto.Event.Side.BID;
+    }
   }
 
-  public BaseMessage takeMsg(TakeResult takeResult) {
+  public BaseMessage eventMsg(OrderEvent event) {
     return BaseMessage.newBuilder()
-        .setType(BaseMessage.Type.TAKE)
-        .setTake(takeEvent(takeResult))
-        .build();
+        .setType(BaseMessage.Type.EVENT)
+        .setEvent(StatsProto.Event.newBuilder()
+                .setType(typeFor(event.getType()))
+                .setOrderId(event.getOrderId())
+                .setSide(sideFor(event.getSide()))
+                .setPrice(event.getPrice())
+                .setSize(event.getSize())
+                .build()
+        ).build();
   }
 
   public BaseMessage latencyMsg(Long mod, Long nanoseconds) {
     return BaseMessage.newBuilder()
         .setType(BaseMessage.Type.LATENCY)
-        .setLatency(StatsProto.LatencyEvent.newBuilder().setMod(mod).setNanoseconds(nanoseconds))
+        .setLatency(StatsProto.Latency.newBuilder().setMod(mod).setNanoseconds(nanoseconds))
         .build();
   }
 

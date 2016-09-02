@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.anhonesteffort.btc;
+package org.anhonesteffort.btc.strategy.impl;
 
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
@@ -23,13 +23,10 @@ import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.strategy.AskIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.OrderMatchingStrategy;
-import org.anhonesteffort.btc.strategy.impl.SimpleOrderMatchingStrategy;
 import org.anhonesteffort.btc.strategy.StrategyFactory;
-import org.anhonesteffort.btc.strategy.impl.SimpleAskIdentifyingStrategy;
-import org.anhonesteffort.btc.strategy.impl.SimpleBidIdentifyingStrategy;
 import org.anhonesteffort.btc.util.LongCaster;
 
-public class ScamStrategyFactory extends StrategyFactory {
+public class SimpleStrategyFactory extends StrategyFactory {
 
   private static final Double BID_SIZE             = 0.01d;
   private static final Double BID_PLACEMENT        = 0.75d;
@@ -44,7 +41,7 @@ public class ScamStrategyFactory extends StrategyFactory {
   private final RequestFactory requests = new RequestFactory();
   private final LongCaster caster;
 
-  public ScamStrategyFactory(HttpClientWrapper http, LongCaster caster) {
+  public SimpleStrategyFactory(HttpClientWrapper http, LongCaster caster) {
     super(http);
     this.caster = caster;
   }

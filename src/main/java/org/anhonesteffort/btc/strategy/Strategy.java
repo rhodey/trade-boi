@@ -18,7 +18,7 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.compute.Computation;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.util.Optional;
@@ -32,10 +32,10 @@ public abstract class Strategy<T> extends Computation<T> {
     this.error = Optional.of(error);
   }
 
-  protected abstract T advanceStrategy(State state, long nanoseconds) throws StateProcessingException;
+  protected abstract T advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException;
 
   @Override
-  protected T computeNextResult(State state, long nanoseconds) throws StateProcessingException {
+  protected T computeNextResult(GdaxState state, long nanoseconds) throws StateProcessingException {
     if (error.isPresent()) {
       throw error.get();
     } else {

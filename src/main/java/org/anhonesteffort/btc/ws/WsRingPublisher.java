@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lmax.disruptor.RingBuffer;
-import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponseEntry;
@@ -40,16 +40,16 @@ public class WsRingPublisher {
   private final DoneAccessor     done    = new DoneAccessor();
   private final ChangeAccessor   change  = new ChangeAccessor();
 
-  private final RingBuffer<OrderEvent> ringBuffer;
+  private final RingBuffer<GdaxEvent> ringBuffer;
   private final LongCaster caster;
   private long currentSeq;
 
-  public WsRingPublisher(RingBuffer<OrderEvent> ringBuffer, LongCaster caster) {
+  public WsRingPublisher(RingBuffer<GdaxEvent> ringBuffer, LongCaster caster) {
     this.ringBuffer = ringBuffer;
     this.caster     = caster;
   }
 
-  private OrderEvent takeNextEvent() {
+  private GdaxEvent takeNextEvent() {
     currentSeq = ringBuffer.next();
     return ringBuffer.get(currentSeq);
   }
@@ -72,7 +72,7 @@ public class WsRingPublisher {
 
   public void publishMessage(JsonNode root, String type, long nanoseconds) throws WsException {
     Order.Side side  = getSideOrThrow(root);
-    OrderEvent event = takeNextEvent();
+    GdaxEvent event = takeNextEvent();
 
     switch (type) {
       case Accessor.TYPE_RECEIVED:
@@ -141,7 +141,7 @@ public class WsRingPublisher {
   }
 
   private void publishBookOrder(GetOrderBookResponseEntry order, long nanoseconds) {
-    OrderEvent event = takeNextEvent();
+    GdaxEvent event = takeNextEvent();
     event.initLimitOpen(
         nanoseconds, order.getOrderId(), order.getSide(),
         caster.fromDouble(order.getPrice()), caster.fromDouble(order.getSize())
@@ -150,7 +150,7 @@ public class WsRingPublisher {
   }
 
   public void publishBook(GetOrderBookResponse book, long nanoseconds) {
-    OrderEvent event = takeNextEvent();
+    GdaxEvent event = takeNextEvent();
     event.initRebuildStart(nanoseconds);
     publishCurrentEvent();
 

@@ -18,7 +18,8 @@
 package org.anhonesteffort.btc.compute;
 
 import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.state.GdaxState;
 
 public class TakeVolumeComputation extends Computation<Long> {
 
@@ -29,13 +30,15 @@ public class TakeVolumeComputation extends Computation<Long> {
   }
 
   @Override
-  protected Long computeNextResult(State state, long nanoseconds) {
-    if (!state.getTake().isPresent()) {
+  protected Long computeNextResult(GdaxState state, long nanoseconds) {
+    if (!state.getEvent().isPresent()) {
       return 0l;
-    } else if (!state.getTake().get().getTaker().getSide().equals(side)) {
+    } else if (!state.getEvent().get().getType().equals(OrderEvent.Type.TAKE)) {
+      return 0l;
+    } else if (!state.getEvent().get().getSide().equals(side)) {
       return 0l;
     } else {
-      return state.getTake().get().getTakeSize();
+      return state.getEvent().get().getSize();
     }
   }
 

@@ -16,11 +16,7 @@
  */
 package org.anhonesteffort.btc.ws;
 
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.ExceptionHandler;
-import com.lmax.disruptor.dsl.Disruptor;
-import com.lmax.disruptor.dsl.ProducerType;
+import com.lmax.disruptor.RingBuffer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -38,57 +34,52 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.anhonesteffort.btc.ScamConfig;
+import org.anhonesteffort.btc.Service;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
-import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.util.LongCaster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<OrderEvent> {
-
-  private static final Logger log = LoggerFactory.getLogger(WsService.class);
+public class WsService implements Service {
 
   private static final String  PROD_WS_HOST    = "ws-feed.exchange.coinbase.com";
   private static final String  SANDBOX_WS_HOST = "ws-feed-public.sandbox.gdax.com";
   private static final Integer WS_PORT         = 443;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-
-  private final ScamConfig            config;
-  private final Disruptor<OrderEvent> wsDisruptor;
-  private final EventHandler[]        handlers;
-  private final WsMessageSorter       messageSorter;
+  private final ScamConfig config;
+  private final WsMessageSorter messageSorter;
 
   private Channel channel;
 
-  public WsService(ScamConfig config, HttpClientWrapper http, LongCaster caster) {
+  public WsService(
+      ScamConfig config, RingBuffer<GdaxEvent> ringBuffer,
+      HttpClientWrapper http, LongCaster caster
+  ) {
     this.config   = config;
-    this.handlers = config.getEventHandlers();
-    wsDisruptor   = new Disruptor<>(
-        this, config.getWsBufferSize(), new DisruptorThreadFactory(),
-        ProducerType.SINGLE, config.getWaitStrategy()
+    messageSorter = new WsMessageSorter(
+        new WsRingPublisher(ringBuffer, caster), http
     );
-    messageSorter = new WsMessageSorter(new WsRingPublisher(wsDisruptor.getRingBuffer(), caster), http);
   }
 
-  public CompletableFuture<Void> getShutdownFuture() {
+  @Override
+  public CompletableFuture<Void> shutdownFuture() {
     return shutdownFuture;
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
   public void start() throws URISyntaxException, SSLException {
     final Bootstrap                 bootstrap       = new Bootstrap();
     final SslContext                sslContext      = SslContextBuilder.forClient().build();
     final WsMessageReceiver         messageReceiver = new WsMessageReceiver(messageSorter);
     final WebSocketClientHandshaker wsHandshake     = WebSocketClientHandshakerFactory.newHandshaker(
-        new URI("wss://" + (config.getUseSandbox() ? SANDBOX_WS_HOST : PROD_WS_HOST)),
+        new URI("wss://" + (config.getGdaxSandbox() ? SANDBOX_WS_HOST : PROD_WS_HOST)),
         WebSocketVersion.V13, null, true, new DefaultHttpHeaders()
     );
 
@@ -107,17 +98,14 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
                }
              });
 
-    wsDisruptor.setDefaultExceptionHandler(this);
-    wsDisruptor.handleEventsWith(handlers);
-    wsDisruptor.start();
-
     channel = bootstrap.connect(PROD_WS_HOST, WS_PORT).channel();
     channel.closeFuture().addListener(close -> {
       if (close.cause() != null) { shutdown(close.cause()); }
-      else                       { shutdown(); }
+      else                       { shutdown(new IOException("channel closed unexpectedly")); }
     });
   }
 
+  @Override
   public boolean shutdown() {
     if (shutdownFuture.complete(null)) {
       channel.close();
@@ -134,43 +122,6 @@ public class WsService implements ExceptionHandler<OrderEvent>, EventFactory<Ord
     } else {
       return false;
     }
-  }
-
-  @Override
-  public void handleOnStartException(Throwable throwable) {
-    if (shutdown(throwable)) {
-      log.error("error starting disruptor", throwable);
-    }
-  }
-
-  @Override
-  public void handleEventException(Throwable throwable, long sequence, OrderEvent event) {
-    if (shutdown(throwable)) {
-      log.error("error processing disruptor event", throwable);
-    }
-  }
-
-  @Override
-  public void handleOnShutdownException(Throwable throwable) {
-    if (shutdown(throwable)) {
-      log.error("error shutting down disruptor", throwable);
-    }
-  }
-
-  private static class DisruptorThreadFactory implements ThreadFactory {
-    private int count = 0;
-
-    @Override
-    public Thread newThread(Runnable runnable) {
-      Thread thread = new Thread(runnable, "ws-disrupt-" + (count++));
-      thread.setDaemon(true);
-      return thread;
-    }
-  }
-
-  @Override
-  public OrderEvent newInstance() {
-    return new OrderEvent();
   }
 
 }

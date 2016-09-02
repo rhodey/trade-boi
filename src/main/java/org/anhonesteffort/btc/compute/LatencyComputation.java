@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ public class LatencyComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  protected Optional<Long> computeNextResult(State state, long nanoseconds) {
+  protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
     if ((++sequence % mod) == 0l) {
       long copy = nanosecondSum;
       nanosecondSum = System.nanoTime() - nanoseconds;

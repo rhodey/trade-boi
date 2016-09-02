@@ -33,29 +33,29 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super(book, listeners);
   }
 
-  private MarketOrder newMarketOrder(OrderEvent marketRx) throws StateProcessingException {
+  private MarketOrder newMarketOrder(GdaxEvent marketRx) throws StateProcessingException {
     if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
       return new MarketOrder(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
     } else {
-      throw new CriticalStateProcessingException("market order rx event has no size or funds");
+      throw new StateProcessingException("market order rx event has no size or funds");
     }
   }
 
   @Override
-  protected void onEvent(OrderEvent event) throws StateProcessingException {
+  protected void onEvent(GdaxEvent event) throws StateProcessingException {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
         MarketOrder rxMarket = newMarketOrder(event);
         if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
-          throw new CriticalStateProcessingException("market order " + rxMarket.getOrderId() + " already in the market state map");
+          throw new StateProcessingException("market order " + rxMarket.getOrderId() + " already in the market state map");
         }
         break;
 
       case MARKET_DONE:
         Optional<MarketOrder> doneMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
         if (!doneMarket.isPresent()) {
-          throw new CriticalStateProcessingException("market order " + event.getOrderId() + " was never in the market state map");
+          throw new StateProcessingException("market order " + event.getOrderId() + " was never in the market state map");
         }
         break;
     }

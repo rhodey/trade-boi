@@ -19,6 +19,7 @@ package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ public class MetaStrategy extends Strategy<Void> {
   }
 
   @Override
-  protected Void advanceStrategy(org.anhonesteffort.btc.state.State bookState, long nanoseconds) {
+  protected Void advanceStrategy(GdaxState bookState, long nanoseconds) {
     switch (state) {
       case COMPLETE:
         log.info("awaiting buy opportunity");

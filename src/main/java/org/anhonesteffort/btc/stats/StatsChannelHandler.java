@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.stats;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.anhonesteffort.btc.state.State;
+import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +31,10 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   private static final Logger log = LoggerFactory.getLogger(StatsChannelHandler.class);
 
   private final StatsProtoFactory proto = new StatsProtoFactory();
-  private final StatsHandlerFactory parent;
+  private final StatsChannelHandlerFactory parent;
   private Optional<ChannelHandlerContext> context = Optional.empty();
 
-  public StatsChannelHandler(StatsHandlerFactory parent) {
+  public StatsChannelHandler(StatsChannelHandlerFactory parent) {
     this.parent = parent;
   }
 
@@ -45,9 +45,9 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   }
 
   @Override
-  public void onStateChange(State state, long nanoseconds) {
-    if (context.isPresent() && state.getTake().isPresent()) {
-      context.get().writeAndFlush(proto.takeMsg(state.getTake().get()));
+  public void onStateChange(GdaxState state, long nanoseconds) {
+    if (context.isPresent() && state.getEvent().isPresent()) {
+      context.get().writeAndFlush(proto.eventMsg(state.getEvent().get()));
     }
   }
 
