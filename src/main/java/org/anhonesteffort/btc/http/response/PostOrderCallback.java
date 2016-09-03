@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import okhttp3.Call;
 import okhttp3.Response;
-import org.anhonesteffort.btc.http.HttpCallback;
+import org.anhonesteffort.trading.http.HttpCallback;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

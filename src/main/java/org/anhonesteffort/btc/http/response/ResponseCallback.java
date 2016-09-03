@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.http.response;
 
 import okhttp3.Call;
 import okhttp3.Response;
-import org.anhonesteffort.btc.http.HttpCallback;
+import org.anhonesteffort.trading.http.HttpCallback;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -34,6 +34,8 @@ import org.anhonesteffort.btc.http.request.RequestSigner;
 import org.anhonesteffort.btc.http.response.GetOrderBookCallback;
 import org.anhonesteffort.btc.http.response.model.GetAccountsResponse;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
+import org.anhonesteffort.trading.http.HttpClient;
+import org.anhonesteffort.trading.http.HttpException;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -18,7 +18,7 @@
 package org.anhonesteffort.btc.http.response.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.anhonesteffort.btc.http.HttpException;
+import org.anhonesteffort.trading.http.HttpException;
 
 import java.util.Iterator;
 import java.util.LinkedList;

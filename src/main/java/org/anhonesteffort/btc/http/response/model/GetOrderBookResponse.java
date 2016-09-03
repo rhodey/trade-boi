@@ -18,8 +18,8 @@
 package org.anhonesteffort.btc.http.response.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.anhonesteffort.btc.http.HttpException;
 import org.anhonesteffort.trading.book.Order;
+import org.anhonesteffort.trading.http.HttpException;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
