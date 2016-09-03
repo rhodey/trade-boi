@@ -17,20 +17,20 @@
 
 package org.anhonesteffort.btc.persist;
 
+import net.openhft.chronicle.queue.ChronicleQueue;
+import net.openhft.chronicle.queue.ChronicleQueueBuilder;
 import net.openhft.chronicle.queue.ExcerptAppender;
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import org.anhonesteffort.btc.state.StateListener;
 
 import java.io.Closeable;
 
 public abstract class StatePersistingChronicle implements StateListener, Closeable {
 
-  private   final SingleChronicleQueue queue;
+  private   final ChronicleQueue queue;
   protected final ExcerptAppender appender;
 
   public StatePersistingChronicle(String fsPath) {
-    queue    = SingleChronicleQueueBuilder.binary(fsPath).build();
+    queue    = ChronicleQueueBuilder.single(fsPath).build();
     appender = queue.acquireAppender();
   }
 

@@ -19,6 +19,8 @@ public class OrderEvent implements Externalizable {
   protected long price;
   protected long size;
 
+  public OrderEvent() { }
+
   public OrderEvent(Type type, String orderId, Order.Side side, long price, long size) {
     this.type    = type;
     this.orderId = orderId;

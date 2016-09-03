@@ -17,27 +17,27 @@
 
 package org.anhonesteffort.btc.persist;
 
-import org.anhonesteffort.btc.state.OrderEvent;
+import net.openhft.chronicle.wire.DocumentContext;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.btc.state.StateProcessingException;
+
+import java.io.IOException;
 
 public class OrderEventPersistingChronicle extends StatePersistingChronicle {
 
-  private final EventWriter writer;
-
   public OrderEventPersistingChronicle(String fsPath) {
     super(fsPath);
-    writer = appender.methodWriter(EventWriter.class);
   }
 
   @Override
-  public void onStateChange(GdaxState state, long nanoseconds) {
+  public void onStateChange(GdaxState state, long nanoseconds) throws StateProcessingException {
     if (state.getEvent().isPresent()) {
-      writer.write(state.getEvent().get());
+      try (DocumentContext context = appender.writingDocument()) {
+        state.getEvent().get().writeExternal(context.wire().objectOutput());
+      } catch (IOException e) {
+        throw new StateProcessingException("error writing OrderEvent to chronicle", e);
+      }
     }
-  }
-
-  private interface EventWriter {
-    void write(OrderEvent event);
   }
 
 }
