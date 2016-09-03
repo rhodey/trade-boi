@@ -33,7 +33,7 @@ public class SummingComputation extends Computation<Optional<Long>> {
 
   public SummingComputation(Computation<Long> child, long periodMs) {
     this.child    = child;
-    this.periodNs = periodMs * 1000l * 1000l;
+    this.periodNs = periodMs * 1_000l * 1_000l;
     addChildren(child);
   }
 

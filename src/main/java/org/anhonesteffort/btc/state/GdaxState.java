@@ -62,7 +62,7 @@ public class GdaxState {
     return makers;
   }
 
-  public void setEvent(OrderEvent event) {
+  protected void setEvent(OrderEvent event) {
     this.event = Optional.ofNullable(event);
   }
 
@@ -70,13 +70,13 @@ public class GdaxState {
     return event;
   }
 
-  public void clear() {
+  protected void clear() {
     orderBook.clear();
     orderIdMap.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
     makers.clear();
-    event    = Optional.empty();
+    event = Optional.empty();
   }
 
 }

@@ -32,9 +32,6 @@ public abstract class Computation<T> implements StateListener {
   protected T result;
 
   protected Computation() { }
-  protected Computation(StateListener ... children) {
-    addChildren(children);
-  }
 
   protected void addChildren(StateListener ... children) {
     this.children.addAll(Arrays.asList(children));
