@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Scam {
 
@@ -59,14 +61,22 @@ public class Scam {
   }
 
   private EventHandler[] handlersForConfig(Strategy strategy, PersistService persist, StatsService stats) {
-    if (config.getPersistenceEnabled() && config.getStatsEnabled()) {
-      return new EventHandler[] { handlerFor(strategy), handlerFor(persist.listeners()), handlerFor(stats.listeners()) };
-    } else if (config.getPersistenceEnabled()) {
-      return new EventHandler[] { handlerFor(strategy), handlerFor(persist.listeners()) };
-    } else if (config.getStatsEnabled()) {
-      return new EventHandler[] { handlerFor(strategy), handlerFor(stats.listeners()) };
+    List<EventHandler> handlerList = new LinkedList<>();
+
+    if (config.getTradingEnabled()) {
+      handlerList.add(handlerFor(strategy));
+    }
+    if (config.getPersistenceEnabled()) {
+      handlerList.add(handlerFor(persist.listeners()));
+    }
+    if (config.getStatsEnabled()) {
+      handlerList.add(handlerFor(stats.listeners()));
+    }
+
+    if (handlerList.isEmpty()) {
+      throw new RuntimeException("you gotta enable something, dude");
     } else {
-      return new EventHandler[] { handlerFor(strategy) };
+      return handlerList.toArray(new EventHandler[handlerList.size()]);
     }
   }
 

@@ -29,6 +29,7 @@ public class ScamConfig {
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
   private final Long    wsReadTimeoutMs;
+  private final Boolean tradingEnabled;
   private final Boolean gdaxSandbox;
   private final String  gdaxAccessKey;
   private final String  gdaxSecretKey;
@@ -48,6 +49,7 @@ public class ScamConfig {
     wsBufferSize       = Integer.parseInt(properties.getProperty("ws_buffer_size"));
     wsConnectTimeoutMs = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
     wsReadTimeoutMs    = Long.parseLong(properties.getProperty("ws_read_timeout_ms"));
+    tradingEnabled     = Boolean.parseBoolean(properties.getProperty("trading_enabled"));
     gdaxSandbox        = Boolean.parseBoolean(properties.getProperty("gdax_sandbox"));
     gdaxAccessKey      = properties.getProperty("gdax_access_key");
     gdaxSecretKey      = properties.getProperty("gdax_secret_key");
@@ -80,6 +82,10 @@ public class ScamConfig {
 
   public Long getWsReadTimeoutMs() {
     return wsReadTimeoutMs;
+  }
+
+  public Boolean getTradingEnabled() {
+    return tradingEnabled;
   }
 
   public Boolean getGdaxSandbox() {
