@@ -30,7 +30,7 @@ import java.util.Optional;
 
 public class GdaxState {
 
-  private final Map<String, String>      orderIdMap    = new HashMap<>();
+  private final Map<String, String>      clientOIdMap  = new HashMap<>();
   private final Map<String, Order>       rxLimitOrders = new HashMap<>();
   private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
   private final List<Order>              makers        = new ArrayList<>();
@@ -46,8 +46,8 @@ public class GdaxState {
     return orderBook;
   }
 
-  public Map<String, String> getOrderIdMap() {
-    return orderIdMap;
+  public Map<String, String> getClientOIdMap() {
+    return clientOIdMap;
   }
 
   public Map<String, Order> getRxLimitOrders() {
@@ -72,7 +72,7 @@ public class GdaxState {
 
   protected void clear() {
     orderBook.clear();
-    orderIdMap.clear();
+    clientOIdMap.clear();
     rxLimitOrders.clear();
     marketOrders.clear();
     makers.clear();

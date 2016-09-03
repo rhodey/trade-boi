@@ -54,7 +54,7 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
 
   @Override
   protected Optional<Order> advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException {
-    Optional<String> bookOid   = Optional.ofNullable(state.getOrderIdMap().get(postOrder.getClientOid()));
+    Optional<String> bookOid   = Optional.ofNullable(state.getClientOIdMap().get(postOrder.getClientOid()));
     Optional<Order>  bookOrder = bookOid.isPresent() ?
         Optional.ofNullable(state.getRxLimitOrders().get(bookOid.get())) : Optional.empty();
 

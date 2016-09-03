@@ -99,7 +99,7 @@ public class LimitOrderStateCurator extends StateCurator {
         if (state.getRxLimitOrders().put(rxOrder.getOrderId(), rxOrder) != null) {
           throw new StateProcessingException("limit order " + rxOrder.getOrderId() + " already in the limit rx state map");
         } else if (event.getClientOid() != null) {
-          state.getOrderIdMap().put(event.getClientOid(), event.getOrderId());
+          state.getClientOIdMap().put(event.getClientOid(), event.getOrderId());
         }
         break;
 
