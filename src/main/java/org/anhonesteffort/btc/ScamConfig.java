@@ -24,6 +24,7 @@ import java.util.Properties;
 public class ScamConfig {
 
   private final Double  precision;
+  private final Double  accuracy;
   private final Integer limitInitSize;
   private final Integer wsBufferSize;
   private final Integer wsConnectTimeoutMs;
@@ -42,6 +43,7 @@ public class ScamConfig {
     properties.load(new FileInputStream("scam.properties"));
 
     precision          = Double.parseDouble(properties.getProperty("precision"));
+    accuracy           = Double.parseDouble(properties.getProperty("accuracy"));
     limitInitSize      = Integer.parseInt(properties.getProperty("limit_init_size"));
     wsBufferSize       = Integer.parseInt(properties.getProperty("ws_buffer_size"));
     wsConnectTimeoutMs = Integer.parseInt(properties.getProperty("ws_connect_timeout_ms"));
@@ -58,6 +60,10 @@ public class ScamConfig {
 
   public Double getPrecision() {
     return precision;
+  }
+
+  public Double getAccuracy() {
+    return accuracy;
   }
 
   public Integer getLimitInitSize() {

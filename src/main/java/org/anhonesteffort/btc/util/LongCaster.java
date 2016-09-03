@@ -20,9 +20,11 @@ package org.anhonesteffort.btc.util;
 public class LongCaster {
 
   private final double precision;
+  private final double accuracy;
 
-  public LongCaster(double precision) {
+  public LongCaster(double precision, double accuracy) {
     this.precision = precision;
+    this.accuracy  = accuracy;
   }
 
   public long fromDouble(double value) {
@@ -30,7 +32,7 @@ public class LongCaster {
   }
 
   public double toDouble(long value) {
-    return Math.round((value * precision) * 100d) / 100d;
+    return Math.round((value * precision) * accuracy) / accuracy;
   }
 
 }

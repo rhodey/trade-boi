@@ -47,7 +47,7 @@ public class Scam {
 
   public Scam() throws IOException, NoSuchAlgorithmException {
     config = new ScamConfig();
-    caster = new LongCaster(config.getPrecision());
+    caster = new LongCaster(config.getPrecision(), config.getAccuracy());
     http   = new HttpClientWrapper(config);
   }
 
