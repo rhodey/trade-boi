@@ -2,6 +2,13 @@
 
 messing around with coinbase trading.
 
+## Setup
+```
+$ git clone https://github.com/rhodey/trading-common
+$ cd trading-common/
+$ mvn install
+```
+
 ## Build
 ```
 $ mvn package
