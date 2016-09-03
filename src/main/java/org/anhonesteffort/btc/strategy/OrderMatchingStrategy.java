@@ -18,6 +18,7 @@
 package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.slf4j.Logger;
@@ -38,8 +39,10 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
 
   @Override
   protected Boolean advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException {
-    if (state.getEvent().isPresent() && state.getEvent().get().getOrderId().equals(orderId)) {
-      throw new StateProcessingException("order opened, took, reduced, or canceled unexpectedly");
+    if (state.getEvent().isPresent() && state.getEvent().get().getType() != OrderEvent.Type.OPEN &&
+        state.getEvent().get().getOrderId().equals(orderId))
+    {
+      throw new StateProcessingException("order took, reduced, or canceled unexpectedly");
     } else if (shouldAbort(state, nanoseconds)) {
       abort();
       return false;
