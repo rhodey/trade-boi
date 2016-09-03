@@ -31,10 +31,6 @@ public class LatencyComputation extends Computation<Optional<Long>> {
     this.mod = mod;
   }
 
-  public Long getMod() {
-    return mod;
-  }
-
   @Override
   protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
     if ((++sequence % mod) == 0l) {

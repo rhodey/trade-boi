@@ -88,7 +88,7 @@ public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
   }
 
   @Override
-  protected Optional<PostOrderRequest> advanceStrategy(GdaxState state, long nanoseconds) {
+  protected Optional<PostOrderRequest> identifyBid(GdaxState state, long nanoseconds) {
     if (isBullish()) {
       double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
       double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());

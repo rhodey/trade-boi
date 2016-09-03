@@ -28,6 +28,7 @@ import java.util.Set;
 public abstract class Computation<T> implements StateListener {
 
   private final Set<StateListener> children = new HashSet<>();
+  private boolean syncing = false;
   protected T result;
 
   protected Computation() { }
@@ -43,6 +44,10 @@ public abstract class Computation<T> implements StateListener {
     this.children.removeAll(Arrays.asList(children));
   }
 
+  protected boolean isSyncing() {
+    return syncing;
+  }
+
   protected abstract T computeNextResult(GdaxState state, long nanoseconds) throws StateProcessingException;
 
   public T getResult() {
@@ -56,8 +61,15 @@ public abstract class Computation<T> implements StateListener {
   }
 
   @Override
-  public void onStateReset() throws StateProcessingException {
-    for (StateListener child : children) { child.onStateReset(); }
+  public void onStateSyncStart() throws StateProcessingException {
+    syncing = true;
+    for (StateListener child : children) { child.onStateSyncStart(); }
+  }
+
+  @Override
+  public void onStateSyncEnd() throws StateProcessingException {
+    syncing = false;
+    for (StateListener child : children) { child.onStateSyncEnd(); }
   }
 
 }

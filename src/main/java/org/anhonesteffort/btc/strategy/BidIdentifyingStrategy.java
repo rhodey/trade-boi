@@ -19,6 +19,8 @@ package org.anhonesteffort.btc.strategy;
 
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.trading.book.Order;
 
 import java.util.Optional;
@@ -33,6 +35,20 @@ public abstract class BidIdentifyingStrategy extends Strategy<Optional<PostOrder
 
   protected PostOrderRequest bidRequest(double price, double size) {
     return requests.newOrder(Order.Side.BID, price, size);
+  }
+
+  protected abstract Optional<PostOrderRequest> identifyBid(GdaxState state, long nanoseconds)
+      throws StateProcessingException;
+
+  @Override
+  protected Optional<PostOrderRequest> advanceStrategy(GdaxState state, long nanoseconds)
+      throws StateProcessingException
+  {
+    if (isSyncing()) {
+      return Optional.empty();
+    } else {
+      return identifyBid(state, nanoseconds);
+    }
   }
 
 }

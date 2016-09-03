@@ -31,15 +31,15 @@ public abstract class StateCurator implements EventHandler<GdaxEvent> {
 
   protected final GdaxState state;
   protected final Set<StateListener> listeners;
-  private boolean rebuilding = false;
+  private boolean syncing = false;
 
   public StateCurator(LimitOrderBook book, Set<StateListener> listeners) {
     state          = new GdaxState(book);
     this.listeners = listeners;
   }
 
-  protected boolean isRebuilding() {
-    return rebuilding;
+  protected boolean isSyncing() {
+    return syncing;
   }
 
   private void cleanupTempState() {
@@ -59,21 +59,20 @@ public abstract class StateCurator implements EventHandler<GdaxEvent> {
     switch (event.getType()) {
       case REBUILD_START:
         state.clear();
-        rebuilding = true;
-        log.info("rebuilding order book");
-        for (StateListener listener : listeners) { listener.onStateReset(); }
+        syncing = true;
+        log.info("syncing order book");
+        for (StateListener listener : listeners) { listener.onStateSyncStart(); }
         break;
 
       case REBUILD_END:
-        rebuilding = false;
-        log.info("order book rebuild complete");
+        syncing = false;
+        log.info("order book sync complete");
+        for (StateListener listener : listeners) { listener.onStateSyncEnd(); }
         break;
 
       default:
         onEvent(event);
-        if (!rebuilding) {
-          for (StateListener listener : listeners) { listener.onStateChange(state, event.getNanoseconds()); }
-        }
+        for (StateListener listener : listeners) { listener.onStateChange(state, event.getNanoseconds()); }
         cleanupTempState();
     }
   }

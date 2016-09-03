@@ -41,7 +41,7 @@ public class LimitOrderStateCurator extends StateCurator {
 
   private void checkRxLimitOrderForOpen(GdaxEvent open) throws StateProcessingException {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
-    if (!rxLimit.isPresent() && !isRebuilding()) {
+    if (!rxLimit.isPresent() && !isSyncing()) {
       throw new StateProcessingException("limit order " + open.getOrderId() + " was never in the limit rx state map");
     } else if (rxLimit.isPresent() && Math.abs(rxLimit.get().getSizeRemaining() - open.getSize()) > 1l) {
       throw new StateProcessingException(

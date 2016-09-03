@@ -51,7 +51,7 @@ public class StatsChannelHandlerFactory extends Computation<Void> {
   @Override
   protected Void computeNextResult(GdaxState state, long nanoseconds) {
     if (latency.getResult().isPresent()) {
-      handlers.forEach(handler -> handler.onLatencyMeasured(latency.getMod(), latency.getResult().get()));
+      handlers.forEach(handler -> handler.onLatencyMeasured(latency.getResult().get()));
     }
     return null;
   }

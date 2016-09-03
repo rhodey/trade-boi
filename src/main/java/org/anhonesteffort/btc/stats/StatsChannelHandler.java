@@ -21,6 +21,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateListener;
+import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.proto.TradingProtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,7 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
 
   private static final Logger log = LoggerFactory.getLogger(StatsChannelHandler.class);
 
-  private final StatsProtoFactory proto = new StatsProtoFactory();
+  private final TradingProtoFactory proto = new TradingProtoFactory();
   private final StatsChannelHandlerFactory parent;
   private Optional<ChannelHandlerContext> context = Optional.empty();
 
@@ -47,33 +49,40 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   @Override
   public void onStateChange(GdaxState state, long nanoseconds) {
     if (context.isPresent() && state.getEvent().isPresent()) {
-      context.get().writeAndFlush(proto.eventMsg(state.getEvent().get()));
-    }
-  }
-
-  public void onLatencyMeasured(Long mod, Long nanoseconds) {
-    if (context.isPresent()) {
-      context.get().writeAndFlush(proto.latencyMsg(mod, nanoseconds));
+      context.get().writeAndFlush(proto.orderEvent(state.getEvent().get()));
     }
   }
 
   @Override
-  public void onStateReset() {
+  public void onStateSyncStart() {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.resetMsg());
+      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncStart()));
+    }
+  }
+
+  @Override
+  public void onStateSyncEnd() {
+    if (context.isPresent()) {
+      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncEnd()));
+    }
+  }
+
+  public void onLatencyMeasured(Long nanoseconds) {
+    if (context.isPresent()) {
+      context.get().writeAndFlush(proto.latency("ws-disruptor-latency", nanoseconds));
     }
   }
 
   @Override
   public void channelRead(ChannelHandlerContext context, Object msg) {
     log.warn("received unexpected message from client, closing");
-    context.writeAndFlush(proto.errorMsg("don't talk to me.")).addListener(future -> context.close());
+    context.writeAndFlush(proto.error("don't talk to me.")).addListener(future -> context.close());
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
     log.error("caught unexpected exception, closing", cause);
-    context.writeAndFlush(proto.errorMsg("what did you do?")).addListener(future -> context.close());
+    context.writeAndFlush(proto.error("what did you do?")).addListener(future -> context.close());
   }
 
   @Override

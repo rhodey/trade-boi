@@ -39,9 +39,10 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
 
   @Override
   protected Boolean advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException {
-    if (state.getEvent().isPresent() && state.getEvent().get().getType() != OrderEvent.Type.OPEN &&
-        state.getEvent().get().getOrderId().equals(orderId))
-    {
+    if (isSyncing()) {
+      throw new StateProcessingException("unable to handle state synchronization");
+    } else if (state.getEvent().isPresent() && state.getEvent().get().getType() != OrderEvent.Type.OPEN &&
+               state.getEvent().get().getOrderId().equals(orderId)) {
       throw new StateProcessingException("order took, reduced, or canceled unexpectedly");
     } else if (shouldAbort(state, nanoseconds)) {
       abort();
@@ -60,11 +61,6 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
     } else {
       return true;
     }
-  }
-
-  @Override
-  public void onStateReset() throws StateProcessingException {
-    throw new StateProcessingException("unable to handle state reset");
   }
 
 }

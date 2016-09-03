@@ -26,15 +26,15 @@ import java.util.concurrent.CompletableFuture;
 public class PersistService implements Service {
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-  private final StateAppendingChronicle[] chronicles;
+  private final OrderEventAppendingChronicle[] chronicles;
 
   public PersistService(ScamConfig config) {
     if (config.getPersistenceEnabled()) {
-      chronicles = new StateAppendingChronicle[] {
+      chronicles = new OrderEventAppendingChronicle[] {
           new OrderEventAppendingChronicle(config.getPersistenceDir())
       };
     } else {
-      chronicles = new StateAppendingChronicle[0];
+      chronicles = new OrderEventAppendingChronicle[0];
     }
   }
 
@@ -53,7 +53,7 @@ public class PersistService implements Service {
   @Override
   public boolean shutdown() {
     if (shutdownFuture.complete(null)) {
-      for (StateAppendingChronicle chronicle : chronicles) { chronicle.close(); }
+      for (OrderEventAppendingChronicle chronicle : chronicles) { chronicle.close(); }
       return true;
     } else {
       return false;

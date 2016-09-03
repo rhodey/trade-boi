@@ -24,11 +24,6 @@ $ cp example-scam.properties scam.properties
 $ java -jar target/coinbase-0.1.jar
 ```
 
-## Development
-```
-$ build-proto.sh
-```
-
 ## License
 
 Copyright 2016 An Honest Effort LLC

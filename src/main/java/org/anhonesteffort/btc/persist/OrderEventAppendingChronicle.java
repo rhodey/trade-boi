@@ -19,11 +19,14 @@ package org.anhonesteffort.btc.persist;
 
 import net.openhft.chronicle.wire.DocumentContext;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.state.StateProcessingException;
+import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.chronicle.ChronicleAppender;
 
 import java.io.IOException;
 
-public class OrderEventAppendingChronicle extends StateAppendingChronicle {
+public class OrderEventAppendingChronicle extends ChronicleAppender implements StateListener {
 
   public OrderEventAppendingChronicle(String fsPath) {
     super(fsPath);
@@ -33,10 +36,34 @@ public class OrderEventAppendingChronicle extends StateAppendingChronicle {
   public void onStateChange(GdaxState state, long nanoseconds) throws StateProcessingException {
     if (state.getEvent().isPresent()) {
       try (DocumentContext context = appender.writingDocument()) {
+
         state.getEvent().get().writeExternal(context.wire().objectOutput());
+
       } catch (IOException e) {
         throw new StateProcessingException("error writing OrderEvent to chronicle", e);
       }
+    }
+  }
+
+  @Override
+  public void onStateSyncStart() throws StateProcessingException {
+    try (DocumentContext context = appender.writingDocument()) {
+
+      OrderEvent.syncStart().writeExternal(context.wire().objectOutput());
+
+    } catch (IOException e) {
+      throw new StateProcessingException("error writing OrderEvent to chronicle", e);
+    }
+  }
+
+  @Override
+  public void onStateSyncEnd() throws StateProcessingException {
+    try (DocumentContext context = appender.writingDocument()) {
+
+      OrderEvent.syncEnd().writeExternal(context.wire().objectOutput());
+
+    } catch (IOException e) {
+      throw new StateProcessingException("error writing OrderEvent to chronicle", e);
     }
   }
 

@@ -39,6 +39,8 @@ public class SummingComputation extends Computation<Optional<Long>> {
 
   @Override
   protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
+    if (isSyncing()) return Optional.empty();
+
     sum += child.getResult();
     history.add(new long[] { nanoseconds, child.getResult() });
 
@@ -60,8 +62,8 @@ public class SummingComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  public void onStateReset() throws StateProcessingException {
-    super.onStateReset();
+  public void onStateSyncStart() throws StateProcessingException {
+    super.onStateSyncStart();
     history.clear();
     sum = 0l;
   }

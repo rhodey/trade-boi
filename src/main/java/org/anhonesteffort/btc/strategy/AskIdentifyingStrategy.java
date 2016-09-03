@@ -49,7 +49,7 @@ public abstract class AskIdentifyingStrategy extends Strategy<Optional<PostOrder
 
   @Override
   protected Optional<PostOrderRequest> advanceStrategy(GdaxState state, long nanoseconds) {
-    if (!bidPosition.isPresent()) {
+    if (isSyncing() || !bidPosition.isPresent()) {
       return Optional.empty();
     }
 

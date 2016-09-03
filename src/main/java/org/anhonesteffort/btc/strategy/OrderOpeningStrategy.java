@@ -58,7 +58,9 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
     Optional<Order>  bookOrder = bookOid.isPresent() ?
         Optional.ofNullable(state.getRxLimitOrders().get(bookOid.get())) : Optional.empty();
 
-    if (!bookOid.isPresent()) {
+    if (isSyncing()) {
+      throw new StateProcessingException("unable to handle state synchronization");
+    } else if (!bookOid.isPresent()) {
       return Optional.empty();
     } else if (!bookOrder.isPresent()) {
       throw new StateProcessingException("order id map entry not found in rx limit order map");
@@ -67,11 +69,6 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
     } else {
       return bookOrder;
     }
-  }
-
-  @Override
-  public void onStateReset() throws StateProcessingException {
-    throw new StateProcessingException("unable to handle state reset");
   }
 
 }
