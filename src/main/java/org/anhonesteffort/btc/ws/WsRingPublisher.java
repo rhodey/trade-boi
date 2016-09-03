@@ -23,13 +23,13 @@ import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponse;
 import org.anhonesteffort.btc.http.response.model.GetOrderBookResponseEntry;
-import org.anhonesteffort.btc.util.LongCaster;
 import org.anhonesteffort.btc.ws.message.ChangeAccessor;
 import org.anhonesteffort.btc.ws.message.DoneAccessor;
 import org.anhonesteffort.btc.ws.message.Accessor;
 import org.anhonesteffort.btc.ws.message.MatchAccessor;
 import org.anhonesteffort.btc.ws.message.OpenAccessor;
 import org.anhonesteffort.btc.ws.message.ReceivedAccessor;
+import org.anhonesteffort.trading.util.LongCaster;
 
 public class WsRingPublisher {
 

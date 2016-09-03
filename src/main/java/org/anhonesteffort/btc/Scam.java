@@ -32,7 +32,7 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.strategy.MetaStrategy;
-import org.anhonesteffort.btc.util.LongCaster;
+import org.anhonesteffort.trading.util.LongCaster;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

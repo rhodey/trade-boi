@@ -37,7 +37,7 @@ import org.anhonesteffort.btc.ScamConfig;
 import org.anhonesteffort.btc.Service;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.state.GdaxEvent;
-import org.anhonesteffort.btc.util.LongCaster;
+import org.anhonesteffort.trading.util.LongCaster;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;

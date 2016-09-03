@@ -24,7 +24,7 @@ import org.anhonesteffort.btc.strategy.AskIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.OrderMatchingStrategy;
 import org.anhonesteffort.btc.strategy.StrategyFactory;
-import org.anhonesteffort.btc.util.LongCaster;
+import org.anhonesteffort.trading.util.LongCaster;
 
 public class SimpleStrategyFactory extends StrategyFactory {
 

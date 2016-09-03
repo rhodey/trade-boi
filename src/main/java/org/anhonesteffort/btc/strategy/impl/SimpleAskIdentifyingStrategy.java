@@ -21,7 +21,7 @@ import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.strategy.AskIdentifyingStrategy;
-import org.anhonesteffort.btc.util.LongCaster;
+import org.anhonesteffort.trading.util.LongCaster;
 
 import java.util.Optional;
 
