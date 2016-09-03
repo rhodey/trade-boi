@@ -21,7 +21,7 @@ import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import net.openhft.chronicle.wire.DocumentContext;
-import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.trading.book.OrderEvent;
 
 import java.io.IOException;
 

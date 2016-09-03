@@ -17,10 +17,10 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.trading.book.Order;
 import org.anhonesteffort.trading.util.LongCaster;
 
 import java.util.Optional;

@@ -17,8 +17,8 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.book.Limit;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.trading.book.Limit;
 
 import java.util.Optional;
 

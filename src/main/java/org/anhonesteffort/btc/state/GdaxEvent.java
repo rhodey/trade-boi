@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.trading.book.Order;
 
 public class GdaxEvent {
 

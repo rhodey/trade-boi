@@ -18,8 +18,8 @@
 package org.anhonesteffort.btc.state;
 
 import com.lmax.disruptor.EventHandler;
-import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.trading.book.LimitOrderBook;
+import org.anhonesteffort.trading.book.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

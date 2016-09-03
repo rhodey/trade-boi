@@ -17,13 +17,13 @@
 
 package org.anhonesteffort.btc.strategy.impl;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.strategy.AskIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.btc.strategy.OrderMatchingStrategy;
 import org.anhonesteffort.btc.strategy.StrategyFactory;
+import org.anhonesteffort.trading.book.Order;
 import org.anhonesteffort.trading.util.LongCaster;
 
 public class SimpleStrategyFactory extends StrategyFactory {

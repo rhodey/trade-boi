@@ -17,9 +17,9 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.RequestFactory;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.trading.book.Order;
 
 import java.util.Optional;
 

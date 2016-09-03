@@ -17,9 +17,10 @@
 
 package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.MarketOrder;
-import org.anhonesteffort.btc.book.Order;
+import org.anhonesteffort.trading.book.LimitOrderBook;
+import org.anhonesteffort.trading.book.MarketOrder;
+import org.anhonesteffort.trading.book.Order;
+import org.anhonesteffort.trading.book.OrderEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

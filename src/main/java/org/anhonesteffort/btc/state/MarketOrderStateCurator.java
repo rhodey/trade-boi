@@ -17,8 +17,8 @@
 
 package org.anhonesteffort.btc.state;
 
-import org.anhonesteffort.btc.book.LimitOrderBook;
-import org.anhonesteffort.btc.book.MarketOrder;
+import org.anhonesteffort.trading.book.LimitOrderBook;
+import org.anhonesteffort.trading.book.MarketOrder;
 
 import java.util.Optional;
 import java.util.Set;

@@ -17,9 +17,9 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.trading.book.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

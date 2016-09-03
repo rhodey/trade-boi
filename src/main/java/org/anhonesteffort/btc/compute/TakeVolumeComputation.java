@@ -17,9 +17,9 @@
 
 package org.anhonesteffort.btc.compute;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.state.OrderEvent;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.trading.book.Order;
+import org.anhonesteffort.trading.book.OrderEvent;
 
 public class TakeVolumeComputation extends Computation<Long> {
 

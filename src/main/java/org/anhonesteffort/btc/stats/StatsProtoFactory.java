@@ -17,8 +17,8 @@
 
 package org.anhonesteffort.btc.stats;
 
-import org.anhonesteffort.btc.book.Order;
-import org.anhonesteffort.btc.state.OrderEvent;
+import org.anhonesteffort.trading.book.Order;
+import org.anhonesteffort.trading.book.OrderEvent;
 
 import static org.anhonesteffort.btc.stats.StatsProto.BaseMessage;
 import static org.anhonesteffort.btc.stats.StatsProto.Error;

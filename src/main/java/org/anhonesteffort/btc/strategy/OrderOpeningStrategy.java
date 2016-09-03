@@ -17,11 +17,11 @@
 
 package org.anhonesteffort.btc.strategy;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
 import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.state.GdaxState;
+import org.anhonesteffort.trading.book.Order;
 
 import java.io.IOException;
 import java.util.Optional;

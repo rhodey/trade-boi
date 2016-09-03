@@ -19,7 +19,6 @@ package org.anhonesteffort.btc;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
-import org.anhonesteffort.btc.book.LimitOrderBook;
 import org.anhonesteffort.btc.disruptor.DisruptorService;
 import org.anhonesteffort.btc.http.HttpClientWrapper;
 import org.anhonesteffort.btc.persist.PersistService;
@@ -32,6 +31,7 @@ import org.anhonesteffort.btc.ws.WsService;
 import org.anhonesteffort.btc.state.MatchingStateCurator;
 import org.anhonesteffort.btc.state.GdaxEvent;
 import org.anhonesteffort.btc.strategy.MetaStrategy;
+import org.anhonesteffort.trading.book.LimitOrderBook;
 import org.anhonesteffort.trading.util.LongCaster;
 
 import java.io.IOException;

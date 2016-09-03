@@ -17,8 +17,8 @@
 
 package org.anhonesteffort.btc.http.request;
 
-import org.anhonesteffort.btc.book.Order;
 import org.anhonesteffort.btc.http.request.model.PostOrderRequest;
+import org.anhonesteffort.trading.book.Order;
 
 import java.security.SecureRandom;
 import java.util.Locale;
