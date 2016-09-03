@@ -23,9 +23,9 @@ import org.anhonesteffort.btc.state.StateProcessingException;
 
 import java.io.IOException;
 
-public class OrderEventPersistingChronicle extends StatePersistingChronicle {
+public class OrderEventAppendingChronicle extends StateAppendingChronicle {
 
-  public OrderEventPersistingChronicle(String fsPath) {
+  public OrderEventAppendingChronicle(String fsPath) {
     super(fsPath);
   }
 

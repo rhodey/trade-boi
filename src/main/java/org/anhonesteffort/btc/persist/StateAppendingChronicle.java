@@ -17,26 +17,13 @@
 
 package org.anhonesteffort.btc.persist;
 
-import net.openhft.chronicle.queue.ChronicleQueue;
-import net.openhft.chronicle.queue.ChronicleQueueBuilder;
-import net.openhft.chronicle.queue.ExcerptAppender;
 import org.anhonesteffort.btc.state.StateListener;
+import org.anhonesteffort.trading.chronicle.ChronicleAppender;
 
-import java.io.Closeable;
+public abstract class StateAppendingChronicle extends ChronicleAppender implements StateListener {
 
-public abstract class StatePersistingChronicle implements StateListener, Closeable {
-
-  private   final ChronicleQueue queue;
-  protected final ExcerptAppender appender;
-
-  public StatePersistingChronicle(String fsPath) {
-    queue    = ChronicleQueueBuilder.single(fsPath).build();
-    appender = queue.acquireAppender();
-  }
-
-  @Override
-  public void close() {
-    queue.close();
+  public StateAppendingChronicle(String fsPath) {
+    super(fsPath);
   }
 
   @Override
