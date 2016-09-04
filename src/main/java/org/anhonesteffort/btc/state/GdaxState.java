@@ -18,23 +18,24 @@
 package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.trading.book.LimitOrderBook;
-import org.anhonesteffort.trading.book.MarketOrder;
 import org.anhonesteffort.trading.book.Order;
 import org.anhonesteffort.trading.book.OrderEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class GdaxState {
 
-  private final Map<String, String>      clientOIdMap  = new HashMap<>();
-  private final Map<String, Order>       rxLimitOrders = new HashMap<>();
-  private final Map<String, MarketOrder> marketOrders  = new HashMap<>();
-  private final List<Order>              makers        = new ArrayList<>();
-  private       Optional<OrderEvent>     event         = Optional.empty();
+  private final Map<String, String>  clientOIdMap  = new HashMap<>();
+  private final Map<String, Order>   rxLimitOrders = new HashMap<>();
+  private final Set<String>          marketOrders  = new HashSet<>();
+  private final List<Order>          makers        = new ArrayList<>();
+  private       Optional<OrderEvent> event         = Optional.empty();
 
   private final LimitOrderBook orderBook;
 
@@ -54,7 +55,7 @@ public class GdaxState {
     return rxLimitOrders;
   }
 
-  public Map<String, MarketOrder> getMarketOrders() {
+  public Set<String> getMarketOrders() {
     return marketOrders;
   }
 

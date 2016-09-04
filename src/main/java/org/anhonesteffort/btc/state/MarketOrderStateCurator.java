@@ -20,7 +20,6 @@ package org.anhonesteffort.btc.state;
 import org.anhonesteffort.trading.book.LimitOrderBook;
 import org.anhonesteffort.trading.book.MarketOrder;
 
-import java.util.Optional;
 import java.util.Set;
 
 public class MarketOrderStateCurator extends LimitOrderStateCurator {
@@ -47,14 +46,13 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     switch (event.getType()) {
       case MARKET_RX:
         MarketOrder rxMarket = newMarketOrder(event);
-        if (state.getMarketOrders().put(rxMarket.getOrderId(), rxMarket) != null) {
+        if (!state.getMarketOrders().add(rxMarket.getOrderId())) {
           throw new StateProcessingException("market order " + rxMarket.getOrderId() + " already in the market state map");
         }
         break;
 
       case MARKET_DONE:
-        Optional<MarketOrder> doneMarket = Optional.ofNullable(state.getMarketOrders().remove(event.getOrderId()));
-        if (!doneMarket.isPresent()) {
+        if (!state.getMarketOrders().remove(event.getOrderId())) {
           throw new StateProcessingException("market order " + event.getOrderId() + " was never in the market state map");
         }
         break;
