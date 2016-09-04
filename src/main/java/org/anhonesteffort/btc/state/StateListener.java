@@ -21,8 +21,8 @@ public interface StateListener {
 
   void onStateChange(GdaxState state, long nanoseconds) throws StateProcessingException;
 
-  void onStateSyncStart() throws StateProcessingException;
+  void onStateSyncStart(long nanoseconds) throws StateProcessingException;
 
-  void onStateSyncEnd() throws StateProcessingException;
+  void onStateSyncEnd(long nanoseconds) throws StateProcessingException;
 
 }

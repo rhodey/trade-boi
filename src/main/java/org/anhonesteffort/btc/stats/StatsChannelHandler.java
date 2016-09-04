@@ -54,22 +54,16 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
   }
 
   @Override
-  public void onStateSyncStart() {
+  public void onStateSyncStart(long nanoseconds) {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncStart()));
+      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncStart(nanoseconds)));
     }
   }
 
   @Override
-  public void onStateSyncEnd() {
+  public void onStateSyncEnd(long nanoseconds) {
     if (context.isPresent()) {
-      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncEnd()));
-    }
-  }
-
-  public void onLatencyMeasured(Long nanoseconds) {
-    if (context.isPresent()) {
-      context.get().writeAndFlush(proto.latency("ws-disruptor-latency", nanoseconds));
+      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncEnd(nanoseconds)));
     }
   }
 

@@ -87,11 +87,11 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     checkEventAgainstTakeResult(event, taker, result);
 
     if (state.getMarketOrderIds().contains(taker.getOrderId())) {
-      state.setEvent(OrderEvent.take(taker));
+      state.setEvent(OrderEvent.take(taker, event.getNanoseconds()));
       state.getMakers().addAll(result.getMakers());
     } else {
       updateRxLimitOrder(taker.getOrderId(), event.getSize());
-      state.setEvent(OrderEvent.take(taker));
+      state.setEvent(OrderEvent.take(taker, event.getNanoseconds()));
       state.getMakers().addAll(result.getMakers());
     }
   }

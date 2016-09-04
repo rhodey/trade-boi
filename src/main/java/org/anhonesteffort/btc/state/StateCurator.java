@@ -61,13 +61,13 @@ public abstract class StateCurator implements EventHandler<GdaxEvent> {
         state.clear();
         syncing = true;
         log.info("syncing order book");
-        for (StateListener listener : listeners) { listener.onStateSyncStart(); }
+        for (StateListener listener : listeners) { listener.onStateSyncStart(event.getNanoseconds()); }
         break;
 
       case REBUILD_END:
         syncing = false;
         log.info("order book sync complete");
-        for (StateListener listener : listeners) { listener.onStateSyncEnd(); }
+        for (StateListener listener : listeners) { listener.onStateSyncEnd(event.getNanoseconds()); }
         break;
 
       default:

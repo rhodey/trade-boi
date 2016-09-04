@@ -46,10 +46,10 @@ public class OrderEventAppendingChronicle extends ChronicleAppender implements S
   }
 
   @Override
-  public void onStateSyncStart() throws StateProcessingException {
+  public void onStateSyncStart(long nanoseconds) throws StateProcessingException {
     try (DocumentContext context = appender.writingDocument()) {
 
-      OrderEvent.syncStart().writeExternal(context.wire().objectOutput());
+      OrderEvent.syncStart(nanoseconds).writeExternal(context.wire().objectOutput());
 
     } catch (IOException e) {
       throw new StateProcessingException("error writing OrderEvent to chronicle", e);
@@ -57,10 +57,10 @@ public class OrderEventAppendingChronicle extends ChronicleAppender implements S
   }
 
   @Override
-  public void onStateSyncEnd() throws StateProcessingException {
+  public void onStateSyncEnd(long nanoseconds) throws StateProcessingException {
     try (DocumentContext context = appender.writingDocument()) {
 
-      OrderEvent.syncEnd().writeExternal(context.wire().objectOutput());
+      OrderEvent.syncEnd(nanoseconds).writeExternal(context.wire().objectOutput());
 
     } catch (IOException e) {
       throw new StateProcessingException("error writing OrderEvent to chronicle", e);

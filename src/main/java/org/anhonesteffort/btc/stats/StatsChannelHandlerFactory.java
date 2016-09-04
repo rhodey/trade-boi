@@ -19,20 +19,9 @@ package org.anhonesteffort.btc.stats;
 
 import io.netty.channel.ChannelInboundHandler;
 import org.anhonesteffort.btc.compute.Computation;
-import org.anhonesteffort.btc.compute.LatencyComputation;
 import org.anhonesteffort.btc.state.GdaxState;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class StatsChannelHandlerFactory extends Computation<Void> {
-
-  private final Set<StatsChannelHandler> handlers = new HashSet<>();
-  private final LatencyComputation       latency  = new LatencyComputation(50l);
-
-  public StatsChannelHandlerFactory() {
-    addChildren(latency);
-  }
 
   public ChannelInboundHandler newHandler() {
     return new StatsChannelHandler(this);
@@ -40,19 +29,14 @@ public class StatsChannelHandlerFactory extends Computation<Void> {
 
   protected void onChannelActive(StatsChannelHandler handler) {
     addChildren(handler);
-    handlers.add(handler);
   }
 
   protected void onChannelInactive(StatsChannelHandler handler) {
     removeChildren(handler);
-    handlers.remove(handler);
   }
 
   @Override
   protected Void computeNextResult(GdaxState state, long nanoseconds) {
-    if (latency.getResult().isPresent()) {
-      handlers.forEach(handler -> handler.onLatencyMeasured(latency.getResult().get()));
-    }
     return null;
   }
 

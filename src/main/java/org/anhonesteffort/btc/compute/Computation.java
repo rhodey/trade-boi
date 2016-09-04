@@ -58,15 +58,15 @@ public abstract class Computation<T> implements StateListener {
   }
 
   @Override
-  public void onStateSyncStart() throws StateProcessingException {
+  public void onStateSyncStart(long nanoseconds) throws StateProcessingException {
     syncing = true;
-    for (StateListener child : children) { child.onStateSyncStart(); }
+    for (StateListener child : children) { child.onStateSyncStart(nanoseconds); }
   }
 
   @Override
-  public void onStateSyncEnd() throws StateProcessingException {
+  public void onStateSyncEnd(long nanoseconds) throws StateProcessingException {
     syncing = false;
-    for (StateListener child : children) { child.onStateSyncEnd(); }
+    for (StateListener child : children) { child.onStateSyncEnd(nanoseconds); }
   }
 
 }

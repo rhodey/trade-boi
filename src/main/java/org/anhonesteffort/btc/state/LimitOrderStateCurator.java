@@ -110,7 +110,7 @@ public class LimitOrderStateCurator extends StateCurator {
         if (result.getTakeSize() > 0l) {
           throw new StateProcessingException("opened limit order took " + result.getTakeSize() + " from the book");
         } else {
-          state.setEvent(OrderEvent.open(openOrder));
+          state.setEvent(OrderEvent.open(openOrder, event.getNanoseconds()));
         }
         break;
 
@@ -127,7 +127,7 @@ public class LimitOrderStateCurator extends StateCurator {
         } else if (!changedOpenOrder.isPresent()) {
           throw new StateProcessingException("order for limit change event not found on the book");
         } else {
-          state.setEvent(OrderEvent.reduce(changedOpenOrder.get(), reducedBy));
+          state.setEvent(OrderEvent.reduce(changedOpenOrder.get(), reducedBy, event.getNanoseconds()));
         }
         break;
 
@@ -148,7 +148,7 @@ public class LimitOrderStateCurator extends StateCurator {
           throw new StateProcessingException("order for cancel order event not found on the book");
         } else if (event.getSize() > 0l && doneOpenOrder.isPresent()) {
           checkCanceledLimitOrder(event, doneOpenOrder.get());
-          state.setEvent(OrderEvent.cancel(doneOpenOrder.get()));
+          state.setEvent(OrderEvent.cancel(doneOpenOrder.get(), event.getNanoseconds()));
         }
         break;
     }

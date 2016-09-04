@@ -62,8 +62,8 @@ public class SummingComputation extends Computation<Optional<Long>> {
   }
 
   @Override
-  public void onStateSyncStart() throws StateProcessingException {
-    super.onStateSyncStart();
+  public void onStateSyncStart(long nanoseconds) throws StateProcessingException {
+    super.onStateSyncStart(nanoseconds);
     history.clear();
     sum = 0l;
   }

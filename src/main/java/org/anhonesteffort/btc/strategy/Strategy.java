@@ -44,14 +44,14 @@ public abstract class Strategy<T> extends Computation<T> {
   }
 
   @Override
-  public void onStateSyncStart() throws StateProcessingException {
-    super.onStateSyncStart();
+  public void onStateSyncStart(long nanoseconds) throws StateProcessingException {
+    super.onStateSyncStart(nanoseconds);
     if (error.isPresent()) { throw error.get(); }
   }
 
   @Override
-  public void onStateSyncEnd() throws StateProcessingException {
-    super.onStateSyncEnd();
+  public void onStateSyncEnd(long nanoseconds) throws StateProcessingException {
+    super.onStateSyncEnd(nanoseconds);
     if (error.isPresent()) { throw error.get(); }
   }
 
