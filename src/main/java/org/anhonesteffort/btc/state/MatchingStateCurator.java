@@ -86,7 +86,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
 
     checkEventAgainstTakeResult(event, taker, result);
 
-    if (state.getMarketOrders().contains(taker.getOrderId())) {
+    if (state.getMarketOrderIds().contains(taker.getOrderId())) {
       state.setEvent(OrderEvent.take(taker));
       state.getMakers().addAll(result.getMakers());
     } else {

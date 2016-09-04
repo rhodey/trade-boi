@@ -46,13 +46,13 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     switch (event.getType()) {
       case MARKET_RX:
         MarketOrder rxMarket = newMarketOrder(event);
-        if (!state.getMarketOrders().add(rxMarket.getOrderId())) {
+        if (!state.getMarketOrderIds().add(rxMarket.getOrderId())) {
           throw new StateProcessingException("market order " + rxMarket.getOrderId() + " already in the market state map");
         }
         break;
 
       case MARKET_DONE:
-        if (!state.getMarketOrders().remove(event.getOrderId())) {
+        if (!state.getMarketOrderIds().remove(event.getOrderId())) {
           throw new StateProcessingException("market order " + event.getOrderId() + " was never in the market state map");
         }
         break;

@@ -31,11 +31,11 @@ import java.util.Set;
 
 public class GdaxState {
 
-  private final Map<String, String>  clientOIdMap  = new HashMap<>();
-  private final Map<String, Order>   rxLimitOrders = new HashMap<>();
-  private final Set<String>          marketOrders  = new HashSet<>();
-  private final List<Order>          makers        = new ArrayList<>();
-  private       Optional<OrderEvent> event         = Optional.empty();
+  private final Map<String, String>  clientOIdMap   = new HashMap<>();
+  private final Map<String, Order>   rxLimitOrders  = new HashMap<>();
+  private final Set<String>          marketOrderIds = new HashSet<>();
+  private final List<Order>          makers         = new ArrayList<>();
+  private       Optional<OrderEvent> event          = Optional.empty();
 
   private final LimitOrderBook orderBook;
 
@@ -55,8 +55,8 @@ public class GdaxState {
     return rxLimitOrders;
   }
 
-  public Set<String> getMarketOrders() {
-    return marketOrders;
+  public Set<String> getMarketOrderIds() {
+    return marketOrderIds;
   }
 
   public List<Order> getMakers() {
@@ -75,7 +75,7 @@ public class GdaxState {
     orderBook.clear();
     clientOIdMap.clear();
     rxLimitOrders.clear();
-    marketOrders.clear();
+    marketOrderIds.clear();
     makers.clear();
     event = Optional.empty();
   }
