@@ -18,7 +18,6 @@
 package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.trading.book.LimitOrderBook;
-import org.anhonesteffort.trading.book.MarketOrder;
 
 import java.util.Set;
 
@@ -32,22 +31,13 @@ public class MarketOrderStateCurator extends LimitOrderStateCurator {
     super(book, listeners);
   }
 
-  private MarketOrder newMarketOrder(GdaxEvent marketRx) throws StateProcessingException {
-    if (marketRx.getSize() > 0l || marketRx.getFunds() > 0l) {
-      return new MarketOrder(marketRx.getOrderId(), marketRx.getSide(), marketRx.getSize(), marketRx.getFunds());
-    } else {
-      throw new StateProcessingException("market order rx event has no size or funds");
-    }
-  }
-
   @Override
   protected void onEvent(GdaxEvent event) throws StateProcessingException {
     super.onEvent(event);
     switch (event.getType()) {
       case MARKET_RX:
-        MarketOrder rxMarket = newMarketOrder(event);
-        if (!state.getMarketOrderIds().add(rxMarket.getOrderId())) {
-          throw new StateProcessingException("market order " + rxMarket.getOrderId() + " already in the market state map");
+        if (!state.getMarketOrderIds().add(event.getOrderId())) {
+          throw new StateProcessingException("market order " + event.getOrderId() + " already in the market state map");
         }
         break;
 
