@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateListener;
-import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.proto.OrderEvent;
 import org.anhonesteffort.trading.proto.TradingProtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -20,7 +20,7 @@ package org.anhonesteffort.btc.strategy;
 import org.anhonesteffort.btc.state.StateProcessingException;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.proto.OrderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

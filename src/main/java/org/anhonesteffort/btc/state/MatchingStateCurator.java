@@ -19,7 +19,7 @@ package org.anhonesteffort.btc.state;
 
 import org.anhonesteffort.trading.book.LimitOrderBook;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.proto.OrderEvent;
 import org.anhonesteffort.trading.book.TakeResult;
 
 import java.util.Optional;

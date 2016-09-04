@@ -21,7 +21,7 @@ import net.openhft.chronicle.wire.DocumentContext;
 import org.anhonesteffort.btc.state.GdaxState;
 import org.anhonesteffort.btc.state.StateListener;
 import org.anhonesteffort.btc.state.StateProcessingException;
-import org.anhonesteffort.trading.book.OrderEvent;
+import org.anhonesteffort.trading.proto.OrderEvent;
 import org.anhonesteffort.trading.chronicle.ChronicleAppender;
 
 import java.io.IOException;
