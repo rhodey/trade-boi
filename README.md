@@ -1,6 +1,6 @@
 # trade-boi
 
-trading on gdax.
+dat boi trading on gdax.
 
 ## Setup
 ```
