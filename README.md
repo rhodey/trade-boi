@@ -1,6 +1,6 @@
-# coinbase
+# trade-boi
 
-messing around with coinbase trading.
+trading on gdax.
 
 ## Setup
 ```
@@ -11,7 +11,7 @@ $ mvn install
 
 ## Build
 ```
-$ mvn package
+$ gradle build
 ```
 
 ## Config
@@ -21,7 +21,7 @@ $ cp example-scam.properties scam.properties
 
 ## Run
 ```
-$ java -jar target/coinbase-0.1.jar
+$ java -jar build/libs/trade-boi-0.1.jar
 ```
 
 ## License
