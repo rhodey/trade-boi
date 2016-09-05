@@ -10,7 +10,7 @@ repositories {
 
 sourceCompatibility = 1.8
 version = '0.1'
-mainClassName = 'org.anhonesteffort.btc.Scam'
+mainClassName = 'org.anhonesteffort.trading.Scam'
 
 dependencies {
   compile 'org.anhonesteffort.trading:trading-common:0.1.0'
