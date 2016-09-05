@@ -21,7 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class ScamConfig {
+public class TradeBoiConfig {
 
   private final Double  precision;
   private final Double  accuracy;
@@ -39,7 +39,7 @@ public class ScamConfig {
   private final Boolean statsEnabled;
   private final Integer statsPort;
 
-  public ScamConfig() throws IOException {
+  public TradeBoiConfig() throws IOException {
     Properties properties = new Properties();
     properties.load(new FileInputStream("scam.properties"));
 

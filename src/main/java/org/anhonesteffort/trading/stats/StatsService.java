@@ -26,7 +26,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
-import org.anhonesteffort.trading.ScamConfig;
+import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.Service;
 import org.anhonesteffort.trading.state.StateListener;
 
@@ -37,13 +37,13 @@ public class StatsService implements Service {
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
   private final StatsChannelHandlerFactory handlers = new StatsChannelHandlerFactory();
-  private final ScamConfig config;
+  private final TradeBoiConfig config;
 
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
   private Channel        channel;
 
-  public StatsService(ScamConfig config) {
+  public StatsService(TradeBoiConfig config) {
     this.config = config;
   }
 

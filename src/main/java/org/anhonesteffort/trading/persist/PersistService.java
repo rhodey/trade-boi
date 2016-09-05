@@ -17,7 +17,7 @@
 
 package org.anhonesteffort.trading.persist;
 
-import org.anhonesteffort.trading.ScamConfig;
+import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.Service;
 import org.anhonesteffort.trading.state.StateListener;
 
@@ -28,7 +28,7 @@ public class PersistService implements Service {
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
   private final OrderEventAppendingChronicle[] chronicles;
 
-  public PersistService(ScamConfig config) {
+  public PersistService(TradeBoiConfig config) {
     if (config.getPersistenceEnabled()) {
       chronicles = new OrderEventAppendingChronicle[] {
           new OrderEventAppendingChronicle(config.getPersistenceDir())

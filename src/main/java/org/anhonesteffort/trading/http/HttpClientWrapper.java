@@ -25,7 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.anhonesteffort.trading.ScamConfig;
+import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.http.response.GetAccountsCallback;
 import org.anhonesteffort.trading.http.response.PostOrderCallback;
 import org.anhonesteffort.trading.http.response.ResponseCallback;
@@ -60,7 +60,7 @@ public class HttpClientWrapper implements Closeable {
   private final String        API_BASE;
 
   // todo: run callback on source thread
-  public HttpClientWrapper(ScamConfig config) throws NoSuchAlgorithmException {
+  public HttpClientWrapper(TradeBoiConfig config) throws NoSuchAlgorithmException {
     API_BASE = config.getGdaxSandbox() ? SANDBOX_API_BASE : PROD_API_BASE;
     signer   = new RequestSigner(
         config.getGdaxAccessKey(), config.getGdaxSecretKey(), config.getGdaxPassword()

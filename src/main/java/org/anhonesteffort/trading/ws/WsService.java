@@ -33,7 +33,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import org.anhonesteffort.trading.ScamConfig;
+import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.Service;
 import org.anhonesteffort.trading.http.HttpClientWrapper;
 import org.anhonesteffort.trading.state.GdaxEvent;
@@ -53,13 +53,13 @@ public class WsService implements Service {
   private static final Integer WS_PORT         = 443;
 
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
-  private final ScamConfig config;
+  private final TradeBoiConfig config;
   private final WsMessageSorter messageSorter;
 
   private Channel channel;
 
   public WsService(
-      ScamConfig config, RingBuffer<GdaxEvent> ringBuffer,
+      TradeBoiConfig config, RingBuffer<GdaxEvent> ringBuffer,
       HttpClientWrapper http, LongCaster caster
   ) {
     this.config   = config;

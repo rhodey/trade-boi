@@ -23,7 +23,7 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import org.anhonesteffort.trading.ScamConfig;
+import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.Service;
 import org.anhonesteffort.trading.state.GdaxEvent;
 
@@ -36,7 +36,7 @@ public class DisruptorService implements Service, ExceptionHandler<GdaxEvent>, E
   private final Disruptor<GdaxEvent> wsDisruptor;
   private final EventHandler[] handlers;
 
-  public DisruptorService(ScamConfig config, WaitStrategy waitStrategy, EventHandler[] handlers) {
+  public DisruptorService(TradeBoiConfig config, WaitStrategy waitStrategy, EventHandler[] handlers) {
     this.handlers = handlers;
     wsDisruptor   = new Disruptor<>(
         this, config.getWsBufferSize(), new DisruptorThreadFactory(),

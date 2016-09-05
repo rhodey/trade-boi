@@ -41,14 +41,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Scam {
+public class TradeBoi {
 
-  private final ScamConfig config;
+  private final TradeBoiConfig config;
   private final LongCaster caster;
   private final HttpClientWrapper http;
 
-  public Scam() throws IOException, NoSuchAlgorithmException {
-    config = new ScamConfig();
+  public TradeBoi() throws IOException, NoSuchAlgorithmException {
+    config = new TradeBoiConfig();
     caster = new LongCaster(config.getPrecision(), config.getAccuracy());
     http   = new HttpClientWrapper(config);
   }
@@ -103,7 +103,7 @@ public class Scam {
   }
 
   public static void main(String[] args) throws Exception {
-    new Scam().run();
+    new TradeBoi().run();
   }
 
 }
