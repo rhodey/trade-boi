@@ -43,7 +43,7 @@ public class LimitOrderStateCurator extends StateCurator {
     Optional<Order> rxLimit = Optional.ofNullable(state.getRxLimitOrders().remove(open.getOrderId()));
     if (!rxLimit.isPresent() && !isSyncing()) {
       throw new StateProcessingException("limit order " + open.getOrderId() + " was never in the limit rx state map");
-    } else if (rxLimit.isPresent() && Math.abs(rxLimit.get().getSizeRemaining() - open.getSize()) > 1l) {
+    } else if (rxLimit.isPresent() && Math.abs(rxLimit.get().getSizeRemaining() - open.getSize()) > FORGIVE_SIZE) {
       throw new StateProcessingException(
           "rx limit order for limit open event disagrees about open size, " +
               "event wants " + open.getSize() + ", rx has " + rxLimit.get().getSizeRemaining()
@@ -68,7 +68,7 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   private void checkDoneRxLimitOrder(GdaxEvent done, Order rxLimit) throws StateProcessingException {
-    if (Math.abs(rxLimit.getSizeRemaining() - done.getSize()) > 1l) {
+    if (Math.abs(rxLimit.getSizeRemaining() - done.getSize()) > FORGIVE_SIZE) {
       throw new StateProcessingException(
           "rx limit order for limit done event disagrees about size remaining, " +
               "event wants " + done.getSize() + ", rx has " + rxLimit.getSizeRemaining()
@@ -77,13 +77,13 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   private void checkFilledLimitOrder(Order fillLimit) throws StateProcessingException {
-    if (fillLimit.getSizeRemaining() > 1l) {
+    if (fillLimit.getSizeRemaining() > FORGIVE_SIZE) {
       throw new StateProcessingException("order for filled order event was still open on the book with " + fillLimit.getSizeRemaining());
     }
   }
 
   private void checkCanceledLimitOrder(GdaxEvent done, Order cancelLimit) throws StateProcessingException {
-    if (Math.abs(done.getSize() - cancelLimit.getSizeRemaining()) > 1l) {
+    if (Math.abs(done.getSize() - cancelLimit.getSizeRemaining()) > FORGIVE_SIZE) {
       throw new StateProcessingException(
           "order for cancel order event disagrees about size remaining, " +
               "event wants " + done.getSize() + ", order has " + cancelLimit.getSizeRemaining()

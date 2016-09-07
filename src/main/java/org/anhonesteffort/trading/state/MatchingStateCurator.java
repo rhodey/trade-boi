@@ -53,12 +53,12 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
   }
 
   private void checkEventAgainstTakeResult(GdaxEvent match, Order taker, TakeResult result) throws StateProcessingException {
-    if (Math.abs(result.getTakeSize() - match.getSize()) > 1l) {
+    if (Math.abs(result.getTakeSize() - match.getSize()) > FORGIVE_SIZE) {
       throw new StateProcessingException(
           "take size for match event does not agree with our book, " +
               "event wants " + match.getSize() + ", book gave " + result.getTakeSize()
       );
-    } else if (taker.getSizeRemaining() > 1l) {
+    } else if (taker.getSizeRemaining() > FORGIVE_SIZE) {
       throw new StateProcessingException("taker for match event was left on the book with " + taker.getSizeRemaining());
     } else if (taker.getSizeRemaining() > 0l) {
       state.getOrderBook().remove(taker.getSide(), taker.getPrice(), taker.getOrderId());
@@ -69,7 +69,7 @@ public class MatchingStateCurator extends MarketOrderStateCurator {
     Optional<Order> limitTaker = Optional.ofNullable(state.getRxLimitOrders().get(takerId));
     if (!limitTaker.isPresent()) {
       throw new StateProcessingException("limit order for match event not found in the limit rx state map");
-    } else if (Math.abs(limitTaker.get().takeSize(takeSize) - takeSize) > 1l) {
+    } else if (Math.abs(limitTaker.get().takeSize(takeSize) - takeSize) > FORGIVE_SIZE) {
       throw new StateProcessingException(
           "limit order for match event disagrees with order size in the limit rx state map"
       );

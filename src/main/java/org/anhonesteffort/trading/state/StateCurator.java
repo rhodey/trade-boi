@@ -28,6 +28,7 @@ import java.util.Set;
 public abstract class StateCurator implements EventHandler<GdaxEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
+  protected static final long FORGIVE_SIZE = 9l;
 
   protected final GdaxState state;
   protected final Set<StateListener> listeners;
