@@ -72,7 +72,7 @@ public class WsRingPublisher {
 
   public void publishMessage(JsonNode root, String type, long nanoseconds) throws WsException {
     Order.Side side  = getSideOrThrow(root);
-    GdaxEvent event = takeNextEvent();
+    GdaxEvent  event = takeNextEvent();
 
     switch (type) {
       case Accessor.TYPE_RECEIVED:
