@@ -21,7 +21,6 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.trading.disruptor.DisruptorService;
 import org.anhonesteffort.trading.http.HttpClientWrapper;
-import org.anhonesteffort.trading.persist.PersistService;
 import org.anhonesteffort.trading.state.StateListener;
 import org.anhonesteffort.trading.stats.StatsService;
 import org.anhonesteffort.trading.strategy.Strategy;
@@ -60,14 +59,11 @@ public class TradeBoi {
     );
   }
 
-  private EventHandler[] handlersForConfig(Strategy strategy, PersistService persist, StatsService stats) {
+  private EventHandler[] handlersForConfig(Strategy strategy, StatsService stats) {
     List<EventHandler> handlerList = new LinkedList<>();
 
     if (config.getTradingEnabled()) {
       handlerList.add(handlerFor(strategy));
-    }
-    if (config.getPersistenceEnabled()) {
-      handlerList.add(handlerFor(persist.listeners()));
     }
     if (config.getStatsEnabled()) {
       handlerList.add(handlerFor(stats.listeners()));
@@ -83,23 +79,19 @@ public class TradeBoi {
   public void run() throws Exception {
     StrategyFactory strategies   = new SimpleStrategyFactory(http, caster);
     Strategy        metaStrategy = new MetaStrategy(strategies);
-    PersistService  persistence  = new PersistService(config);
     StatsService    statistics   = new StatsService(config);
 
     DisruptorService disruptor = new DisruptorService(
-        config, new BlockingWaitStrategy(), handlersForConfig(metaStrategy, persistence, statistics)
+        config, new BlockingWaitStrategy(), handlersForConfig(metaStrategy, statistics)
     );
 
     WsService wsService = new WsService(config, disruptor.ringBuffer(), http, caster);
 
-    if (config.getPersistenceEnabled()) { persistence.start(); }
     if (config.getStatsEnabled()) { statistics.start(); }
     disruptor.start();
     wsService.start();
 
-    new ShutdownProcedure(
-        http, persistence, statistics, disruptor, wsService
-    ).call();
+    new ShutdownProcedure(http, statistics, disruptor, wsService).call();
   }
 
   public static void main(String[] args) throws Exception {
