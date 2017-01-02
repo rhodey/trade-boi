@@ -55,16 +55,16 @@ public class StatsChannelHandler extends ChannelInboundHandlerAdapter implements
 
   @Override
   public void onStateSyncStart(long nanoseconds) {
-    if (context.isPresent()) {
-      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncStart(nanoseconds)));
-    }
+    context.ifPresent(ctx ->
+      ctx.writeAndFlush(proto.orderEvent(OrderEvent.syncStart(nanoseconds)))
+    );
   }
 
   @Override
   public void onStateSyncEnd(long nanoseconds) {
-    if (context.isPresent()) {
-      context.get().writeAndFlush(proto.orderEvent(OrderEvent.syncEnd(nanoseconds)));
-    }
+    context.ifPresent(ctx ->
+        ctx.writeAndFlush(proto.orderEvent(OrderEvent.syncEnd(nanoseconds)))
+    );
   }
 
   @Override
