@@ -21,7 +21,7 @@ import org.anhonesteffort.trading.state.GdaxState;
 import org.anhonesteffort.trading.book.Order;
 import org.anhonesteffort.trading.proto.OrderEvent;
 
-public class TakeVolumeComputation extends Computation<Long> {
+public class TakeVolumeComputation extends Computation<Double> {
 
   private final Order.Side side;
 
@@ -30,13 +30,13 @@ public class TakeVolumeComputation extends Computation<Long> {
   }
 
   @Override
-  protected Long computeNextResult(GdaxState state, long nanoseconds) {
+  protected Double computeNextResult(GdaxState state, long nanoseconds) {
     if (!state.getEvent().isPresent()) {
-      return 0l;
+      return 0d;
     } else if (!state.getEvent().get().getType().equals(OrderEvent.Type.TAKE)) {
-      return 0l;
+      return 0d;
     } else if (!state.getEvent().get().getSide().equals(side)) {
-      return 0l;
+      return 0d;
     } else {
       return state.getEvent().get().getSize();
     }

@@ -29,7 +29,6 @@ import org.anhonesteffort.trading.ws.message.MatchAccessor;
 import org.anhonesteffort.trading.ws.message.OpenAccessor;
 import org.anhonesteffort.trading.ws.message.ReceivedAccessor;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.util.LongCaster;
 
 public class WsRingPublisher {
 
@@ -41,12 +40,10 @@ public class WsRingPublisher {
   private final ChangeAccessor   change  = new ChangeAccessor();
 
   private final RingBuffer<GdaxEvent> ringBuffer;
-  private final LongCaster caster;
   private long currentSeq;
 
-  public WsRingPublisher(RingBuffer<GdaxEvent> ringBuffer, LongCaster caster) {
+  public WsRingPublisher(RingBuffer<GdaxEvent> ringBuffer) {
     this.ringBuffer = ringBuffer;
-    this.caster     = caster;
   }
 
   private GdaxEvent takeNextEvent() {
@@ -60,11 +57,14 @@ public class WsRingPublisher {
 
   private Order.Side getSideOrThrow(JsonNode root) throws WsException {
     String side = base.getSide(root);
+
     switch (side) {
       case "sell":
         return Order.Side.ASK;
+
       case "buy":
         return Order.Side.BID;
+
       default:
         throw new WsException("message has invalid side -> " + side);
     }
@@ -79,57 +79,55 @@ public class WsRingPublisher {
         if (receive.getOrderType(root).equals("limit")) {
           event.initLimitRx(
               nanoseconds, receive.getOrderId(root), receive.getClientOid(root), side,
-              caster.fromDouble(receive.getPrice(root)), caster.fromDouble(receive.getSize(root))
+              receive.getPrice(root), receive.getSize(root)
           );
         } else if (receive.getOrderType(root).equals("market")) {
           event.initMarketRx(
               nanoseconds, receive.getOrderId(root), side,
-              caster.fromDouble(receive.getSize(root)), caster.fromDouble(receive.getFunds(root))
+              receive.getSize(root), receive.getFunds(root)
           );
         } else {
           throw new WsException("received message has invalid order_type");
         }
         break;
 
-      case Accessor.TYPE_MATCH:
-        event.initMatch(
-            nanoseconds, match.getMakerOrderId(root), match.getTakerOrderId(root), side,
-            caster.fromDouble(match.getPrice(root)), caster.fromDouble(match.getSize(root))
-        );
-        break;
-
       case Accessor.TYPE_OPEN:
         event.initLimitOpen(
             nanoseconds, open.getOrderId(root), side,
-            caster.fromDouble(open.getPrice(root)), caster.fromDouble(open.getRemainingSize(root))
+            open.getPrice(root), open.getRemainingSize(root)
         );
         break;
 
-      case Accessor.TYPE_DONE:
-        if (done.getOrderType(root).equals("limit")) {
-          event.initLimitDone(
-              nanoseconds, done.getOrderId(root), side,
-              caster.fromDouble(done.getPrice(root)), caster.fromDouble(done.getRemainingSize(root))
-          );
-        } else if (done.getOrderType(root).equals("market")) {
-          event.initMarketDone(nanoseconds, done.getOrderId(root), side);
-        } else {
-          throw new WsException("done message has invalid order_type");
-        }
+      case Accessor.TYPE_MATCH:
+        event.initMatch(
+            nanoseconds, match.getMakerOrderId(root), match.getTakerOrderId(root), side,
+            match.getPrice(root), match.getSize(root)
+        );
         break;
 
       case Accessor.TYPE_CHANGE:
         if (change.getPrice(root) > 0d) {
           event.initLimitChange(
-              nanoseconds, change.getOrderId(root), side, caster.fromDouble(change.getPrice(root)),
-              caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root))
+              nanoseconds, change.getOrderId(root), side, change.getPrice(root),
+              change.getOldSize(root), change.getNewSize(root)
           );
         } else {
           event.initMarketChange(
               nanoseconds, change.getOrderId(root), side,
-              caster.fromDouble(change.getOldSize(root)), caster.fromDouble(change.getNewSize(root)),
-              caster.fromDouble(change.getOldFunds(root)), caster.fromDouble(change.getNewFunds(root))
+              change.getOldSize(root), change.getNewSize(root),
+              change.getOldFunds(root), change.getNewFunds(root)
           );
+        }
+        break;
+
+      case Accessor.TYPE_DONE:
+        if (done.getPrice(root) > 0d) {
+          event.initLimitDone(
+              nanoseconds, done.getOrderId(root), side,
+              done.getPrice(root), done.getRemainingSize(root)
+          );
+        } else {
+          event.initMarketDone(nanoseconds, done.getOrderId(root), side);
         }
         break;
 
@@ -144,7 +142,7 @@ public class WsRingPublisher {
     GdaxEvent event = takeNextEvent();
     event.initLimitOpen(
         nanoseconds, order.getOrderId(), order.getSide(),
-        caster.fromDouble(order.getPrice()), caster.fromDouble(order.getSize())
+        order.getPrice(), order.getSize()
     );
     publishCurrentEvent();
   }

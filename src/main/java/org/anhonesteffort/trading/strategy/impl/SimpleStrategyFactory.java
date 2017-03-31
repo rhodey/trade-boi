@@ -24,7 +24,6 @@ import org.anhonesteffort.trading.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.trading.strategy.OrderMatchingStrategy;
 import org.anhonesteffort.trading.strategy.StrategyFactory;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.util.LongCaster;
 
 public class SimpleStrategyFactory extends StrategyFactory {
 
@@ -39,11 +38,9 @@ public class SimpleStrategyFactory extends StrategyFactory {
   private static final Long ASK_ABORT_MS =  2_250l;
 
   private final RequestFactory requests = new RequestFactory();
-  private final LongCaster caster;
 
-  public SimpleStrategyFactory(HttpClientWrapper http, LongCaster caster) {
+  public SimpleStrategyFactory(HttpClientWrapper http) {
     super(http);
-    this.caster = caster;
   }
 
   private SimpleBidIdentifyingStrategy.Params bidParams() {
@@ -54,7 +51,7 @@ public class SimpleStrategyFactory extends StrategyFactory {
 
   @Override
   public BidIdentifyingStrategy newBidIdentifying() {
-    return new SimpleBidIdentifyingStrategy(bidParams(), caster, requests);
+    return new SimpleBidIdentifyingStrategy(bidParams(), requests);
   }
 
   @Override
@@ -68,7 +65,7 @@ public class SimpleStrategyFactory extends StrategyFactory {
 
   @Override
   public AskIdentifyingStrategy newAskIdentifying() {
-    return new SimpleAskIdentifyingStrategy(caster, requests);
+    return new SimpleAskIdentifyingStrategy(requests);
   }
 
 }

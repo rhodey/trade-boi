@@ -46,7 +46,7 @@ public class HttpClientWrapper implements Closeable {
 
   private static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
-  private static final String PROD_API_BASE     = "https://api.exchange.coinbase.com";
+  private static final String PROD_API_BASE     = "https://api.gdax.com";
   private static final String SANDBOX_API_BASE  = "https://api-public.sandbox.gdax.com";
   private static final String API_PATH_BOOK     = "/products/BTC-USD/book?level=3";
   private static final String API_PATH_ORDERS   = "/orders";
@@ -59,7 +59,6 @@ public class HttpClientWrapper implements Closeable {
   private final RequestSigner signer;
   private final String        API_BASE;
 
-  // todo: run callback on source thread
   public HttpClientWrapper(TradeBoiConfig config) throws NoSuchAlgorithmException {
     API_BASE = config.getGdaxSandbox() ? SANDBOX_API_BASE : PROD_API_BASE;
     signer   = new RequestSigner(

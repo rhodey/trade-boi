@@ -31,7 +31,6 @@ import org.anhonesteffort.trading.state.MatchingStateCurator;
 import org.anhonesteffort.trading.state.GdaxEvent;
 import org.anhonesteffort.trading.strategy.MetaStrategy;
 import org.anhonesteffort.trading.book.LimitOrderBook;
-import org.anhonesteffort.trading.util.LongCaster;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -43,12 +42,10 @@ import java.util.List;
 public class TradeBoi {
 
   private final TradeBoiConfig config;
-  private final LongCaster caster;
   private final HttpClientWrapper http;
 
   public TradeBoi() throws IOException, NoSuchAlgorithmException {
     config = new TradeBoiConfig();
-    caster = new LongCaster(config.getPrecision(), config.getAccuracy());
     http   = new HttpClientWrapper(config);
   }
 
@@ -76,8 +73,8 @@ public class TradeBoi {
     }
   }
 
-  public void run() throws Exception {
-    StrategyFactory strategies   = new SimpleStrategyFactory(http, caster);
+  private void run() throws Exception {
+    StrategyFactory strategies   = new SimpleStrategyFactory(http);
     Strategy        metaStrategy = new MetaStrategy(strategies);
     StatsService    statistics   = new StatsService(config);
 
@@ -85,7 +82,7 @@ public class TradeBoi {
         config, new BlockingWaitStrategy(), handlersForConfig(metaStrategy, statistics)
     );
 
-    WsService wsService = new WsService(config, disruptor.ringBuffer(), http, caster);
+    WsService wsService = new WsService(config, disruptor.ringBuffer(), http);
 
     if (config.getStatsEnabled()) { statistics.start(); }
     disruptor.start();

@@ -19,7 +19,7 @@ package org.anhonesteffort.trading.strategy;
 
 public abstract class AbortableStrategy<T> extends Strategy<T> {
 
-  private boolean abort = false;
+  private volatile boolean abort = false;
 
   public boolean isAborted() {
     return abort;

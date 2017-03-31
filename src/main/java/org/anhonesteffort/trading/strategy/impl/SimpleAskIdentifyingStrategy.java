@@ -21,25 +21,24 @@ import org.anhonesteffort.trading.http.request.RequestFactory;
 import org.anhonesteffort.trading.state.GdaxState;
 import org.anhonesteffort.trading.strategy.AskIdentifyingStrategy;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.util.LongCaster;
 
 import java.util.Optional;
 
 public class SimpleAskIdentifyingStrategy extends AskIdentifyingStrategy {
 
-  public SimpleAskIdentifyingStrategy(LongCaster caster, RequestFactory requests) {
-    super(caster, requests);
+  public SimpleAskIdentifyingStrategy(RequestFactory requests) {
+    super(requests);
   }
 
   @Override
   protected Optional<Double> identifyPrice(
       Order bidPosition, Optional<Order> lastAsk, GdaxState state, long nanoseconds
   ) {
-    double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
-    double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
-    double lastPrice  = lastAsk.isPresent() ? caster.toDouble(lastAsk.get().getPrice()) : -1l;
+    double bidFloor   = state.getOrderBook().getBidLimits().peek().get().getPrice();
+    double askCeiling = state.getOrderBook().getAskLimits().peek().get().getPrice();
+    double lastPrice  = lastAsk.isPresent() ? lastAsk.get().getPrice() : -1l;
     double nextPrice  = (lastPrice - 0.01d);
-    double bidPrice   = caster.toDouble(bidPosition.getPrice());
+    double bidPrice   = bidPosition.getPrice();
 
     if (!lastAsk.isPresent()) {
       return Optional.of(askCeiling);

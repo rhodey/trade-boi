@@ -21,20 +21,17 @@ import org.anhonesteffort.trading.http.request.RequestFactory;
 import org.anhonesteffort.trading.http.request.model.PostOrderRequest;
 import org.anhonesteffort.trading.state.GdaxState;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.util.LongCaster;
 
 import java.util.Optional;
 
 public abstract class AskIdentifyingStrategy extends Strategy<Optional<PostOrderRequest>> {
 
-  protected final LongCaster caster;
   private final RequestFactory requests;
 
   private Optional<Order> lastAsk     = Optional.empty();
   private Optional<Order> bidPosition = Optional.empty();
 
-  public AskIdentifyingStrategy(LongCaster caster, RequestFactory requests) {
-    this.caster   = caster;
+  public AskIdentifyingStrategy(RequestFactory requests) {
     this.requests = requests;
   }
 
@@ -56,7 +53,7 @@ public abstract class AskIdentifyingStrategy extends Strategy<Optional<PostOrder
     Optional<Double> askPrice = identifyPrice(bidPosition.get(), lastAsk, state, nanoseconds);
     if (askPrice.isPresent()) {
       return Optional.of(requests.newOrder(
-          Order.Side.ASK, askPrice.get(), caster.toDouble(bidPosition.get().getSize())
+          Order.Side.ASK, askPrice.get(), bidPosition.get().getSize()
       ));
     } else {
       return Optional.empty();

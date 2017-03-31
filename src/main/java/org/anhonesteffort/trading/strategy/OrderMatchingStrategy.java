@@ -55,7 +55,7 @@ public abstract class OrderMatchingStrategy extends AbortableStrategy<Boolean> {
 
     if (!maker.isPresent()) {
       return false;
-    } else if (maker.get().getSizeRemaining() > 0l) {
+    } else if (maker.get().getSizeRemaining() > 0d) {
       log.info("order partially matched, " + maker.get().getSizeRemaining() + " remaining");
       return false;
     } else {

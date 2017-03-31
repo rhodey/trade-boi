@@ -33,21 +33,21 @@ public class GdaxEvent {
   private String     orderId;
   private String     clientOid;
   private Order.Side side;
-  private long       price;
-  private long       size;
-  private long       funds;
+  private double     price;
+  private double     size;
+  private double     funds;
   private String     makerId;
   private String     takerId;
-  private long       oldSize;
-  private long       newSize;
-  private long       oldFunds;
-  private long       newFunds;
+  private double     oldSize;
+  private double     newSize;
+  private double     oldFunds;
+  private double     newFunds;
 
   // F12
   private void init(
       long nanoseconds, Type type, String orderId, String clientOid, Order.Side side,
-      long price, long size, long funds, String makerId, String takerId,
-      long oldSize, long newSize, long oldFunds, long newFunds
+      double price, double size, double funds, String makerId, String takerId,
+      double oldSize, double newSize, double oldFunds, double newFunds
   ) {
     this.nanoseconds = nanoseconds;
     this.type        = type;
@@ -65,44 +65,44 @@ public class GdaxEvent {
     this.newFunds    = newFunds;
   }
 
-  public void initLimitRx(long nanoseconds, String orderId, String clientOid, Order.Side side, long price, long size) {
-    init(nanoseconds, Type.LIMIT_RX, orderId, clientOid, side, price, size, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitRx(long nanoseconds, String orderId, String clientOid, Order.Side side, double price, double size) {
+    init(nanoseconds, Type.LIMIT_RX, orderId, clientOid, side, price, size, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
-  public void initMarketRx(long nanoseconds, String orderId, Order.Side side, long size, long funds) {
-    init(nanoseconds, Type.MARKET_RX, orderId, null, side, -1l, size, funds, null, null, -1l, -1l, -1l, -1l);
+  public void initMarketRx(long nanoseconds, String orderId, Order.Side side, double size, double funds) {
+    init(nanoseconds, Type.MARKET_RX, orderId, null, side, -1d, size, funds, null, null, -1d, -1d, -1d, -1d);
   }
 
-  public void initLimitOpen(long nanoseconds, String orderId, Order.Side side, long price, long openSize) {
-    init(nanoseconds, Type.LIMIT_OPEN, orderId, null, side, price, openSize, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitOpen(long nanoseconds, String orderId, Order.Side side, double price, double openSize) {
+    init(nanoseconds, Type.LIMIT_OPEN, orderId, null, side, price, openSize, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
-  public void initLimitDone(long nanoseconds, String orderId, Order.Side side, long price, long doneSize) {
-    init(nanoseconds, Type.LIMIT_DONE, orderId, null, side, price, doneSize, -1l, null, null, -1l, -1l, -1l, -1l);
+  public void initLimitDone(long nanoseconds, String orderId, Order.Side side, double price, double doneSize) {
+    init(nanoseconds, Type.LIMIT_DONE, orderId, null, side, price, doneSize, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
   public void initMarketDone(long nanoseconds, String orderId, Order.Side side) {
-    init(nanoseconds, Type.MARKET_DONE, orderId, null, side, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+    init(nanoseconds, Type.MARKET_DONE, orderId, null, side, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
-  public void initMatch(long nanoseconds, String makerId, String takerId, Order.Side side, long price, long size) {
-    init(nanoseconds, Type.MATCH, null, null, side, price, size, -1l, makerId, takerId, -1l, -1l, -1l, -1l);
+  public void initMatch(long nanoseconds, String makerId, String takerId, Order.Side side, double price, double size) {
+    init(nanoseconds, Type.MATCH, null, null, side, price, size, -1d, makerId, takerId, -1d, -1d, -1d, -1d);
   }
 
-  public void initLimitChange(long nanoseconds, String orderId, Order.Side side, long price, long oldSize, long newSize) {
-    init(nanoseconds, Type.LIMIT_CHANGE, orderId, null, side, price, -1l , -1l, null, null, oldSize, newSize, -1l, -1l);
+  public void initLimitChange(long nanoseconds, String orderId, Order.Side side, double price, double oldSize, double newSize) {
+    init(nanoseconds, Type.LIMIT_CHANGE, orderId, null, side, price, -1d , -1d, null, null, oldSize, newSize, -1d, -1d);
   }
 
-  public void initMarketChange(long nanoseconds, String orderId, Order.Side side, long oldSize, long newSize, long oldFunds, long newFunds) {
-    init(nanoseconds, Type.MARKET_CHANGE, orderId, null, side, -1l, -1l, -1l, null, null, oldSize, newSize, oldFunds, newFunds);
+  public void initMarketChange(long nanoseconds, String orderId, Order.Side side, double oldSize, double newSize, double oldFunds, double newFunds) {
+    init(nanoseconds, Type.MARKET_CHANGE, orderId, null, side, -1d, -1d, -1d, null, null, oldSize, newSize, oldFunds, newFunds);
   }
 
   public void initRebuildStart(long nanoseconds) {
-    init(nanoseconds, Type.REBUILD_START, null, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+    init(nanoseconds, Type.REBUILD_START, null, null, null, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
   public void initRebuildEnd(long nanoseconds) {
-    init(nanoseconds, Type.REBUILD_END, null, null, null, -1l, -1l, -1l, null, null, -1l, -1l, -1l, -1l);
+    init(nanoseconds, Type.REBUILD_END, null, null, null, -1d, -1d, -1d, null, null, -1d, -1d, -1d, -1d);
   }
 
   public long getNanoseconds() {
@@ -125,15 +125,15 @@ public class GdaxEvent {
     return side;
   }
 
-  public long getPrice() {
+  public double getPrice() {
     return price;
   }
 
-  public long getSize() {
+  public double getSize() {
     return size;
   }
 
-  public long getFunds() {
+  public double getFunds() {
     return funds;
   }
 
@@ -145,19 +145,19 @@ public class GdaxEvent {
     return takerId;
   }
 
-  public long getOldSize() {
+  public double getOldSize() {
     return oldSize;
   }
 
-  public long getNewSize() {
+  public double getNewSize() {
     return newSize;
   }
 
-  public long getOldFunds() {
+  public double getOldFunds() {
     return oldFunds;
   }
 
-  public long getNewFunds() {
+  public double getNewFunds() {
     return newFunds;
   }
 

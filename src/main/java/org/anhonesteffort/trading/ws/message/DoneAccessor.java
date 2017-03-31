@@ -22,14 +22,6 @@ import org.anhonesteffort.trading.ws.WsException;
 
 public class DoneAccessor extends Accessor {
 
-  public String getOrderType(JsonNode root) throws WsException {
-    if (root.get("order_type") != null && root.get("order_type").isTextual()) {
-      return root.get("order_type").textValue();
-    } else {
-      throw new WsException("done message has invalid order_type");
-    }
-  }
-
   public String getOrderId(JsonNode root) throws WsException {
     if (root.get("order_id") != null && root.get("order_id").isTextual()) {
       return root.get("order_id").textValue();

@@ -22,10 +22,10 @@ import org.anhonesteffort.trading.book.Limit;
 
 import java.util.Optional;
 
-public class SpreadComputation extends Computation<Optional<Long>> {
+public class SpreadComputation extends Computation<Optional<Double>> {
 
   @Override
-  protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
+  protected Optional<Double> computeNextResult(GdaxState state, long nanoseconds) {
     Optional<Limit> ask = state.getOrderBook().getAskLimits().peek();
     Optional<Limit> bid = state.getOrderBook().getBidLimits().peek();
 

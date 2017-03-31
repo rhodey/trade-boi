@@ -32,7 +32,7 @@ public class LimitOrderStateCurator extends StateCurator {
   }
 
   private Order newLimitOrderForEvent(GdaxEvent event) throws StateProcessingException {
-    if (event.getPrice() > 0l && event.getSize() > 0l) {
+    if (event.getPrice() > 0d && event.getSize() > 0d) {
       return new Order(event.getOrderId(), event.getSide(), event.getPrice(), event.getSize());
     } else {
       throw new StateProcessingException("limit order rx/open event has invalid price or size");
@@ -51,7 +51,7 @@ public class LimitOrderStateCurator extends StateCurator {
     }
   }
 
-  private long getSizeReducedForChange(GdaxEvent change) throws StateProcessingException {
+  private double getSizeReducedForChange(GdaxEvent change) throws StateProcessingException {
     if (change.getNewSize() >= change.getOldSize()) {
       throw new StateProcessingException("limit order size can only decrease");
     } else {
@@ -107,7 +107,7 @@ public class LimitOrderStateCurator extends StateCurator {
         checkRxLimitOrderForOpen(event);
         Order      openOrder = newLimitOrderForEvent(event);
         TakeResult result    = state.getOrderBook().add(openOrder);
-        if (result.getTakeSize() > 0l) {
+        if (result.getTakeSize() > 0d) {
           throw new StateProcessingException("opened limit order took " + result.getTakeSize() + " from the book");
         } else {
           state.setEvent(OrderEvent.open(openOrder, event.getNanoseconds()));
@@ -115,7 +115,7 @@ public class LimitOrderStateCurator extends StateCurator {
         break;
 
       case LIMIT_CHANGE:
-        long            reducedBy        = getSizeReducedForChange(event);
+        double          reducedBy        = getSizeReducedForChange(event);
         Optional<Order> changedRxOrder   = Optional.ofNullable(state.getRxLimitOrders().remove(event.getOrderId()));
         Optional<Order> changedOpenOrder = state.getOrderBook().reduce(event.getSide(), event.getPrice(), event.getOrderId(), reducedBy);
 
@@ -142,11 +142,11 @@ public class LimitOrderStateCurator extends StateCurator {
           return;
         }
 
-        if (event.getSize() <= 0l && doneOpenOrder.isPresent()) {
+        if (event.getSize() <= 0d && doneOpenOrder.isPresent()) {
           checkFilledLimitOrder(doneOpenOrder.get());
-        } else if (event.getSize() > 0l && !doneOpenOrder.isPresent()) {
+        } else if (event.getSize() > 0d && !doneOpenOrder.isPresent()) {
           throw new StateProcessingException("order for cancel order event not found on the book");
-        } else if (event.getSize() > 0l && doneOpenOrder.isPresent()) {
+        } else if (event.getSize() > 0d && doneOpenOrder.isPresent()) {
           checkCanceledLimitOrder(event, doneOpenOrder.get());
           state.setEvent(OrderEvent.cancel(doneOpenOrder.get(), event.getNanoseconds()));
         }

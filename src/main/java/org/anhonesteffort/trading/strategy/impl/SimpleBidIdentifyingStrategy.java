@@ -25,13 +25,11 @@ import org.anhonesteffort.trading.http.request.RequestFactory;
 import org.anhonesteffort.trading.state.GdaxState;
 import org.anhonesteffort.trading.strategy.BidIdentifyingStrategy;
 import org.anhonesteffort.trading.book.Order;
-import org.anhonesteffort.trading.util.LongCaster;
 
 import java.util.Optional;
 
 public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
 
-  private final LongCaster caster;
   private final Params params;
 
   private final SummingComputation buyVolumeRecent;
@@ -40,10 +38,9 @@ public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
   private final SummingComputation sellVolumeNow;
   private final SpreadComputation  spread;
 
-  public SimpleBidIdentifyingStrategy(Params params, LongCaster caster, RequestFactory requests) {
+  public SimpleBidIdentifyingStrategy(Params params, RequestFactory requests) {
     super(requests);
     this.params = params;
-    this.caster = caster;
 
     buyVolumeRecent  = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), params.recentMs);
     buyVolumeNow     = new SummingComputation(new TakeVolumeComputation(Order.Side.BID), params.nowMs);
@@ -57,13 +54,13 @@ public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
   private Optional<Double> getRecentBuyRatio() {
     if (!buyVolumeRecent.getResult().isPresent() || !sellVolumeRecent.getResult().isPresent()) {
       return Optional.empty();
-    } else if (caster.toDouble(buyVolumeRecent.getResult().get()) < params.recentBuyBtcMin) {
+    } else if (buyVolumeRecent.getResult().get() < params.recentBuyBtcMin) {
       return Optional.of(-1d);
-    } else if (sellVolumeRecent.getResult().get() == 0l) {
+    } else if (sellVolumeRecent.getResult().get() == 0d) {
       return Optional.of(Double.MAX_VALUE);
     } else {
       return Optional.of(
-          ((double) buyVolumeRecent.getResult().get()) / ((double) sellVolumeRecent.getResult().get())
+          buyVolumeRecent.getResult().get() / sellVolumeRecent.getResult().get()
       );
     }
   }
@@ -90,10 +87,10 @@ public class SimpleBidIdentifyingStrategy extends BidIdentifyingStrategy {
   @Override
   protected Optional<PostOrderRequest> identifyBid(GdaxState state, long nanoseconds) {
     if (isBullish()) {
-      double bidFloor   = caster.toDouble(state.getOrderBook().getBidLimits().peek().get().getPrice());
-      double askCeiling = caster.toDouble(state.getOrderBook().getAskLimits().peek().get().getPrice());
+      double bidFloor   = state.getOrderBook().getBidLimits().peek().get().getPrice();
+      double askCeiling = state.getOrderBook().getAskLimits().peek().get().getPrice();
 
-      if (caster.toDouble(spread.getResult().get()) > 0.02d) {
+      if (spread.getResult().get() > 0.02d) {
         return Optional.of(bidRequest(
             bidFloor + ((askCeiling - bidFloor) * params.bidPlacement),
             params.bidSize

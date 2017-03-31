@@ -37,7 +37,6 @@ import org.anhonesteffort.trading.TradeBoiConfig;
 import org.anhonesteffort.trading.Service;
 import org.anhonesteffort.trading.http.HttpClientWrapper;
 import org.anhonesteffort.trading.state.GdaxEvent;
-import org.anhonesteffort.trading.util.LongCaster;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -48,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 public class WsService implements Service {
 
-  private static final String  PROD_WS_HOST    = "ws-feed.exchange.coinbase.com";
+  private static final String  PROD_WS_HOST    = "ws-feed.gdax.com";
   private static final String  SANDBOX_WS_HOST = "ws-feed-public.sandbox.gdax.com";
   private static final Integer WS_PORT         = 443;
 
@@ -58,14 +57,9 @@ public class WsService implements Service {
 
   private Channel channel;
 
-  public WsService(
-      TradeBoiConfig config, RingBuffer<GdaxEvent> ringBuffer,
-      HttpClientWrapper http, LongCaster caster
-  ) {
+  public WsService(TradeBoiConfig config, RingBuffer<GdaxEvent> ringBuffer, HttpClientWrapper http) {
     this.config   = config;
-    messageSorter = new WsMessageSorter(
-        new WsRingPublisher(ringBuffer, caster), http
-    );
+    messageSorter = new WsMessageSorter(new WsRingPublisher(ringBuffer), http);
   }
 
   @Override

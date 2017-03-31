@@ -21,23 +21,22 @@ import org.anhonesteffort.trading.compute.Computation;
 import org.anhonesteffort.trading.state.GdaxState;
 import org.anhonesteffort.trading.state.StateProcessingException;
 
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class Strategy<T> extends Computation<T> {
 
-  private Optional<StateProcessingException> error = Optional.empty();
+  private final AtomicReference<StateProcessingException> error = new AtomicReference<>(null);
 
-  // todo: not thread safe
-  protected void handleAsyncError(StateProcessingException error) {
-    this.error = Optional.of(error);
+  protected void handleAsyncError(StateProcessingException err) {
+    error.set(err);
   }
 
   protected abstract T advanceStrategy(GdaxState state, long nanoseconds) throws StateProcessingException;
 
   @Override
   protected T computeNextResult(GdaxState state, long nanoseconds) throws StateProcessingException {
-    if (error.isPresent()) {
-      throw error.get();
+    if (error.get() != null) {
+      throw error.getAndSet(null);
     } else {
       return advanceStrategy(state, nanoseconds);
     }
@@ -46,13 +45,13 @@ public abstract class Strategy<T> extends Computation<T> {
   @Override
   public void onStateSyncStart(long nanoseconds) throws StateProcessingException {
     super.onStateSyncStart(nanoseconds);
-    if (error.isPresent()) { throw error.get(); }
+    if (error.get() != null) { throw error.getAndSet(null); }
   }
 
   @Override
   public void onStateSyncEnd(long nanoseconds) throws StateProcessingException {
     super.onStateSyncEnd(nanoseconds);
-    if (error.isPresent()) { throw error.get(); }
+    if (error.get() != null) { throw error.getAndSet(null); }
   }
 
 }

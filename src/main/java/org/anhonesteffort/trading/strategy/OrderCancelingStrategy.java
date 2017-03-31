@@ -22,11 +22,10 @@ import org.anhonesteffort.trading.state.StateProcessingException;
 import org.anhonesteffort.trading.state.GdaxState;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OrderCancelingStrategy extends Strategy<Boolean> {
 
-  private final AtomicBoolean canceled = new AtomicBoolean(false);
+  private volatile boolean canceled = false;
 
   public OrderCancelingStrategy(HttpClientWrapper http, String orderId) {
     try {
@@ -35,7 +34,7 @@ public class OrderCancelingStrategy extends Strategy<Boolean> {
         if (err != null) {
           handleAsyncError(new StateProcessingException("cancel order request completed with error", err));
         } else {
-          canceled.set(true);
+          canceled = true;
         }
       });
 
@@ -46,7 +45,7 @@ public class OrderCancelingStrategy extends Strategy<Boolean> {
 
   @Override
   protected Boolean advanceStrategy(GdaxState state, long nanoseconds) {
-    return canceled.get();
+    return canceled;
   }
 
 }

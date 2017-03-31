@@ -28,7 +28,7 @@ import java.util.Set;
 public abstract class StateCurator implements EventHandler<GdaxEvent> {
 
   private static final Logger log = LoggerFactory.getLogger(StateCurator.class);
-  protected static final long FORGIVE_SIZE = 9l;
+  protected static final double FORGIVE_SIZE = 0.000000000001d;
 
   protected final GdaxState state;
   protected final Set<StateListener> listeners;
@@ -46,7 +46,7 @@ public abstract class StateCurator implements EventHandler<GdaxEvent> {
   private void cleanupTempState() {
     if (state.getEvent().isPresent()) {
       state.getMakers().stream()
-           .filter(make -> make.getSizeRemaining() > 0l)
+           .filter(make -> make.getSizeRemaining() > 0d)
            .forEach(Order::clearValueRemoved);
       state.setEvent(null);
       state.getMakers().clear();

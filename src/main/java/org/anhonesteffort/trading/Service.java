@@ -4,10 +4,10 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Service {
 
-  public CompletableFuture<Void> shutdownFuture();
+  CompletableFuture<Void> shutdownFuture();
 
-  public void start() throws Exception;
+  void start() throws Exception;
 
-  public boolean shutdown();
+  boolean shutdown();
 
 }

@@ -19,7 +19,6 @@ package org.anhonesteffort.trading.http.response;
 
 import okhttp3.Call;
 import okhttp3.Response;
-import org.anhonesteffort.trading.http.HttpCallback;
 
 import java.util.concurrent.CompletableFuture;
 

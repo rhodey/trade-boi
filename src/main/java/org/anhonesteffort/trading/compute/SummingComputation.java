@@ -24,25 +24,25 @@ import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
 
-public class SummingComputation extends Computation<Optional<Long>> {
+public class SummingComputation extends Computation<Optional<Double>> {
 
-  private final Queue<long[]> history = new ArrayDeque<>();
-  private final Computation<Long> child;
+  private final Queue<double[]> history = new ArrayDeque<>();
+  private final Computation<Double> child;
   private final long periodNs;
-  private long sum = 0l;
+  private double sum = 0l;
 
-  public SummingComputation(Computation<Long> child, long periodMs) {
+  public SummingComputation(Computation<Double> child, long periodMs) {
     this.child    = child;
     this.periodNs = periodMs * 1_000l * 1_000l;
     addChildren(child);
   }
 
   @Override
-  protected Optional<Long> computeNextResult(GdaxState state, long nanoseconds) {
-    if (isSyncing()) return Optional.empty();
+  protected Optional<Double> computeNextResult(GdaxState state, long nanoseconds) {
+    if (isSyncing()) { return Optional.empty(); }
 
     sum += child.getResult();
-    history.add(new long[] { nanoseconds, child.getResult() });
+    history.add(new double[] { nanoseconds, child.getResult() });
 
     boolean historyComplete = false;
     while (!history.isEmpty()) {

@@ -23,10 +23,10 @@ import org.anhonesteffort.trading.ws.WsException;
 public class Accessor {
 
   public static final String TYPE_RECEIVED = "received";
-  public static final String TYPE_MATCH    = "match";
   public static final String TYPE_OPEN     = "open";
-  public static final String TYPE_DONE     = "done";
+  public static final String TYPE_MATCH    = "match";
   public static final String TYPE_CHANGE   = "change";
+  public static final String TYPE_DONE     = "done";
   public static final String TYPE_ERROR    = "error";
 
   protected double doubleValueOrZero(JsonNode root, String tag) {

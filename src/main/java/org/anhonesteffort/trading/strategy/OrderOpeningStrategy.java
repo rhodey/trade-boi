@@ -38,7 +38,7 @@ public class OrderOpeningStrategy extends AbortableStrategy<Optional<Order>> {
         if (err != null) {
           handleAsyncError(new StateProcessingException("post order request completed with error", err));
         } else if (!ok) {
-          abort(); // todo: not thread safe
+          abort();
         }
       });
 

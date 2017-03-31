@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import okhttp3.Call;
 import okhttp3.Response;
 import org.anhonesteffort.trading.http.response.model.GetOrderBookResponse;
-import org.anhonesteffort.trading.http.HttpCallback;
 import org.anhonesteffort.trading.http.HttpException;
 
 import java.io.IOException;
