@@ -3,7 +3,7 @@ dat boi trading on gdax.
 
 ## Build
 ```
-$ sbt assembly
+$ sbt tradeBoiJVM/assembly
 ```
 
 ## Config
@@ -13,7 +13,7 @@ $ cp example-scam.properties scam.properties
 
 ## Run
 ```
-$ java -jar target/scala-2.12/trade-boi-assembly-0.3.0.jar
+$ java -jar jvm/target/scala-2.12/tradeBoi-assembly-0.4.0.jar
 ```
 
 ## Development
