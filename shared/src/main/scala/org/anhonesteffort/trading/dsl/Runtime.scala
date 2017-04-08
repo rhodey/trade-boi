@@ -1,5 +1,7 @@
 package org.anhonesteffort.trading.dsl
 
+import java.util.Locale
+
 import org.anhonesteffort.trading.dsl.Ast.{Expression, Statement}
 import org.anhonesteffort.trading.state.{GdaxState, StateListener}
 
@@ -10,8 +12,7 @@ object Runtime {
   type EvalResult = Either[Boolean, Double]
   type EvalOption = Option[EvalResult]
 
-  class Context extends StateListener {
-
+  class DslContext extends StateListener {
     private val VARIABLES = mutable.HashMap[String, Evaluator]()
 
     def readVar(name: String): EvalOption = {
@@ -44,18 +45,29 @@ object Runtime {
       option
     }
 
-    private def exit(): String = {
-      "exit()"
+    def eval(statement: Statement): Either[EvalOption, Unit] = {
+      statement match {
+        case stmt: Statement.CreateVar  => Left(createVar(stmt.name, stmt.exp))
+        case stmt: Statement.DestroyVar => Right(destroyVar(stmt.name))
+        case stmt: Statement.Evaluate   => Left(evaluate(stmt.exp))
+        case       Statement.NoOp       => Right()
+      }
     }
 
-    def eval(statement: Statement): Any = {
-      statement match {
-        case stmt: Statement.CreateVar  => createVar(stmt.name, stmt.exp)
-        case stmt: Statement.DestroyVar => destroyVar(stmt.name)
-        case stmt: Statement.Evaluate   => evaluate(stmt.exp)
-        case       Statement.NoOp       => None
-        case       Statement.Exit       => exit()
-      }
+    def eval(statement: String): Unit = {
+      val parsed = Parsers.STATEMENT.parse(statement)
+
+      parsed.fold(
+        (_, _, _) => println(s"error: ${parsed.toString}"),
+        (stmt, _) => eval(stmt) match {
+          case Left(option) => option match {
+            case None                => println(option)
+            case Some(Left(bool))    => println(bool)
+            case Some(Right(double)) => println(f"$double%1.4f")
+          }
+          case _ => Unit
+        }
+      )
     }
 
     override def onStateChange(state: GdaxState, ns: Long): Unit = {
@@ -69,6 +81,6 @@ object Runtime {
     override def onStateSyncEnd(ns: Long): Unit = {
       VARIABLES.values.foreach(_.onStateSyncEnd(ns))
     }
-
   }
+
 }

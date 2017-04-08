@@ -4,7 +4,7 @@ import org.anhonesteffort.trading.state.{GdaxState, StateListener}
 
 import scala.collection.mutable
 
-case class Evaluator(ctx: Runtime.Context, exp: Ast.Expression) extends StateListener {
+case class Evaluator(ctx: Runtime.DslContext, exp: Ast.Expression) extends StateListener {
 
   private val COMPUTERS = mutable.HashMap[Ast.Computation, Computer]()
 

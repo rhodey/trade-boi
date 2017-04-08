@@ -77,7 +77,6 @@ object Parsers {
   val DESTROY_VAR: Parser[Ast.Statement] = P("!" ~ VAR ~ End).map(Ast.Statement.DestroyVar)
   val EVALUATE:    Parser[Ast.Statement] = P(EXPRESSION).map(Ast.Statement.Evaluate)
   val NO_OP:       Parser[Ast.Statement] = P(End).map(_ => Ast.Statement.NoOp)
-  val EXIT:        Parser[Ast.Statement] = P("exit()" ~ End).map(_ => Ast.Statement.Exit)
-  val STATEMENT:   Parser[Ast.Statement] = P(CREATE_VAR | DESTROY_VAR | EVALUATE | NO_OP | EXIT)
+  val STATEMENT:   Parser[Ast.Statement] = P(CREATE_VAR | DESTROY_VAR | EVALUATE | NO_OP)
 
 }

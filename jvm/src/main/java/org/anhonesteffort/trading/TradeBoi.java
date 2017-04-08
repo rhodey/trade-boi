@@ -21,6 +21,7 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import org.anhonesteffort.trading.book.CompatLimitOrderBook;
 import org.anhonesteffort.trading.disruptor.DisruptorService;
+import org.anhonesteffort.trading.dsl.Runtime.DslContext;
 import org.anhonesteffort.trading.http.HttpClientWrapper;
 import org.anhonesteffort.trading.state.StateListener;
 import org.anhonesteffort.trading.stats.StatsService;
@@ -43,10 +44,12 @@ public class TradeBoi {
 
   private final TradeBoiConfig config;
   private final HttpClientWrapper http;
+  private final DslContext dsl;
 
   public TradeBoi() throws IOException, NoSuchAlgorithmException {
     config = new TradeBoiConfig();
     http   = new HttpClientWrapper(config);
+    dsl    = new DslContext();
   }
 
   private EventHandler<GdaxEvent> handlerFor(StateListener... listeners) {
@@ -58,6 +61,8 @@ public class TradeBoi {
 
   private EventHandler[] handlersForConfig(Strategy strategy, StatsService stats) {
     List<EventHandler> handlerList = new LinkedList<>();
+
+    handlerList.add(handlerFor(dsl));
 
     if (config.getTradingEnabled()) {
       handlerList.add(handlerFor(strategy));
@@ -88,7 +93,7 @@ public class TradeBoi {
     disruptor.start();
     wsService.start();
 
-    new ShutdownProcedure(http, statistics, disruptor, wsService).call();
+    new ShutdownProcedure(http, dsl, statistics, disruptor, wsService).call();
   }
 
   public static void main(String[] args) throws Exception {

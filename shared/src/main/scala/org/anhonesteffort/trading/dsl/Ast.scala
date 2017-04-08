@@ -80,7 +80,6 @@ object Ast {
     case class  DestroyVar(name: String) extends Statement
     case class  Evaluate(exp: Expression) extends Statement
     case object NoOp extends Statement
-    case object Exit extends Statement
   }
 
 }
