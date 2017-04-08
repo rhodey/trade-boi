@@ -1,7 +1,7 @@
 package org.anhonesteffort.trading.dsl
 
 import org.anhonesteffort.trading.book.Orders
-import org.anhonesteffort.trading.compute.{Computation, SpreadComputation, SummingComputation, TakeVolumeComputation}
+import org.anhonesteffort.trading.compute._
 import org.anhonesteffort.trading.state.StateListener
 
 class Computer(computation: Ast.Computation) {
@@ -21,6 +21,7 @@ class Computer(computation: Ast.Computation) {
 
   private def instantiateEither(computation: Ast.Computation): Either[Compute, ComputeOption] = {
     computation match {
+      case       Ast.Computation.Latency    => Left(new LatencyComputation)
       case       Ast.Computation.Spread     => Right(new SpreadComputation)
       case take: Ast.Computation.TakeVolume => Left(instantiateCompute(take))
       case  sum: Ast.Computation.Sum        => Right(new SummingComputation(

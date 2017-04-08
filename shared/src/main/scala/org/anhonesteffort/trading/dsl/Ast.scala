@@ -69,6 +69,7 @@ object Ast {
 
   sealed trait Computation extends Expression
   object Computation {
+    case object Latency extends Computation
     case object Spread extends Computation
     case class  TakeVolume(side: Side) extends Computation
     case class  Sum(child: Computation, period: Period) extends Computation

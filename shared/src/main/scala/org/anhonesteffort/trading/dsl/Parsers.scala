@@ -45,14 +45,15 @@ object Parsers {
 
   val PERIOD: Parser[Ast.Period] = P(DOUBLE ~ PERIOD_UNIT).map(tup => Ast.Period(tup._1, tup._2))
 
-  val SPREAD: Parser[Ast.Computation] = P("spread()").map(_ => Ast.Computation.Spread)
-  val TAKE:   Parser[Ast.Computation] = P("take(" ~ SIDE ~ ")").map(side => Ast.Computation.TakeVolume(side))
-  val SUM:    Parser[Ast.Computation] = P("sum(" ~ (SPREAD | TAKE) ~ ", " ~ PERIOD ~ ")").map(tup => Ast.Computation.Sum(tup._1, tup._2))
+  val LATENCY: Parser[Ast.Computation] = P("latency()").map(_ => Ast.Computation.Latency)
+  val SPREAD:  Parser[Ast.Computation] = P("spread()").map(_ => Ast.Computation.Spread)
+  val TAKE:    Parser[Ast.Computation] = P("take(" ~ SIDE ~ ")").map(side => Ast.Computation.TakeVolume(side))
+  val SUM:     Parser[Ast.Computation] = P("sum(" ~ (SPREAD | TAKE) ~ ", " ~ PERIOD ~ ")").map(tup => Ast.Computation.Sum(tup._1, tup._2))
 
   val BOOL:        Parser[Ast.Expression.Bool]    = P(BOOLEAN).map(Ast.Expression.Bool)
   val NUMBER:      Parser[Ast.Expression.Number]  = P(DOUBLE).map(Ast.Expression.Number)
   val VAR_READ:    Parser[Ast.Expression.VarRead] = P(VAR).map(Ast.Expression.VarRead)
-  val COMPUTATION: Parser[Ast.Computation]        = P(SPREAD | TAKE | SUM)
+  val COMPUTATION: Parser[Ast.Computation]        = P(LATENCY | SPREAD | TAKE | SUM)
 
   val OPERATION: Parser[Ast.Expression.Operation] = P(
     (NUMBER | VAR_READ | COMPUTATION) ~ " " ~ OPERATOR ~ " " ~ (NUMBER | VAR_READ | COMPUTATION)
