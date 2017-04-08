@@ -1,6 +1,7 @@
 package org.anhonesteffort.trading.dsl
 
 import org.anhonesteffort.trading.dsl.Ast.{Expression, Statement}
+import org.anhonesteffort.trading.state.{GdaxState, StateListener}
 
 import scala.collection.mutable
 
@@ -9,7 +10,7 @@ object Runtime {
   type EvalResult = Either[Boolean, Double]
   type EvalOption = Option[EvalResult]
 
-  class Context {
+  class Context extends StateListener {
 
     private val VARIABLES = mutable.HashMap[String, Evaluator]()
 
@@ -55,6 +56,18 @@ object Runtime {
         case       Statement.NoOp       => None
         case       Statement.Exit       => exit()
       }
+    }
+
+    override def onStateChange(state: GdaxState, ns: Long): Unit = {
+      VARIABLES.values.foreach(_.onStateChange(state, ns))
+    }
+
+    override def onStateSyncStart(ns: Long): Unit = {
+      VARIABLES.values.foreach(_.onStateSyncStart(ns))
+    }
+
+    override def onStateSyncEnd(ns: Long): Unit = {
+      VARIABLES.values.foreach(_.onStateSyncEnd(ns))
     }
 
   }

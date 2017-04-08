@@ -2,8 +2,9 @@ package org.anhonesteffort.trading.dsl
 
 import org.anhonesteffort.trading.book.Orders
 import org.anhonesteffort.trading.compute.{Computation, SpreadComputation, SummingComputation, TakeVolumeComputation}
+import org.anhonesteffort.trading.state.StateListener
 
-private class Computer(computation: Ast.Computation) {
+class Computer(computation: Ast.Computation) {
 
   private type Compute       = Computation[Double]
   private type ComputeOption = Computation[Option[Double]]
@@ -29,6 +30,11 @@ private class Computer(computation: Ast.Computation) {
   }
 
   private val instance: Either[Compute, ComputeOption] = instantiateEither(computation)
+
+  val listener: StateListener = instance match {
+    case Left(left)   => left
+    case Right(right) => right
+  }
 
   def compute(): Option[Double] = {
     instance match {

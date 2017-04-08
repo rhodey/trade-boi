@@ -1,8 +1,10 @@
 package org.anhonesteffort.trading.dsl
 
+import org.anhonesteffort.trading.state.{GdaxState, StateListener}
+
 import scala.collection.mutable
 
-case class Evaluator(ctx: Runtime.Context, exp: Ast.Expression) {
+case class Evaluator(ctx: Runtime.Context, exp: Ast.Expression) extends StateListener {
 
   private val COMPUTERS = mutable.HashMap[Ast.Computation, Computer]()
 
@@ -103,6 +105,18 @@ case class Evaluator(ctx: Runtime.Context, exp: Ast.Expression) {
       case comp:    Ast.Expression.Comparison    => eval(comp)
       case boolOp:  Ast.Expression.BoolOperation => eval(boolOp)
     }
+  }
+
+  override def onStateChange(state: GdaxState, ns: Long): Unit = {
+    COMPUTERS.values.foreach(_.listener.onStateChange(state, ns))
+  }
+
+  override def onStateSyncStart(ns: Long): Unit = {
+    COMPUTERS.values.foreach(_.listener.onStateSyncStart(ns))
+  }
+
+  override def onStateSyncEnd(ns: Long): Unit = {
+    COMPUTERS.values.foreach(_.listener.onStateSyncEnd(ns))
   }
 
   def destroy(): Unit = {
