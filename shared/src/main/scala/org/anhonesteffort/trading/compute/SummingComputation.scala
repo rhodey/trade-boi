@@ -9,6 +9,7 @@ class SummingComputation(child: Computation[Double], periodMs: Long) extends Com
   private val history  : mutable.Queue[(Long, Double)] = new mutable.Queue[(Long, Double)]()
   private val periodNs : Long = periodMs * 1000 * 1000
   private var sum      : Double = 0d
+  private var filled   : Boolean = false
 
   addChild(child)
 
@@ -18,19 +19,12 @@ class SummingComputation(child: Computation[Double], periodMs: Long) extends Com
     sum += child.getResult
     history.enqueue((ns, child.getResult))
 
-    var historyComplete = false
-    var break           = false
-
-    while (history.nonEmpty && !break) {
-      if ((ns - history.head._1) > periodNs) {
-        historyComplete = true
-        sum -= history.dequeue()._2
-      } else {
-        break = true
-      }
+    while (history.nonEmpty && (ns - history.head._1) > periodNs) {
+      filled = true
+      sum -= history.dequeue()._2
     }
 
-    if (historyComplete) {
+    if (filled) {
       Some(sum)
     } else {
       None
@@ -41,6 +35,7 @@ class SummingComputation(child: Computation[Double], periodMs: Long) extends Com
     super.onStateSyncStart(ns)
     history.clear()
     sum = 0d
+    filled = false
   }
 
 }
