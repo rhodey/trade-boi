@@ -31,6 +31,7 @@ public class TradeBoiConfig {
   private final String  gdaxAccessKey;
   private final String  gdaxSecretKey;
   private final String  gdaxPassword;
+  private final Boolean replEnabled;
   private final Boolean statsEnabled;
   private final Integer statsPort;
 
@@ -46,6 +47,7 @@ public class TradeBoiConfig {
     gdaxAccessKey      = properties.getProperty("gdax_access_key");
     gdaxSecretKey      = properties.getProperty("gdax_secret_key");
     gdaxPassword       = properties.getProperty("gdax_key_password");
+    replEnabled        = Boolean.parseBoolean(properties.getProperty("repl_enabled"));
     statsEnabled       = Boolean.parseBoolean(properties.getProperty("stats_enabled"));
     statsPort          = Integer.parseInt(properties.getProperty("stats_port"));
   }
@@ -80,6 +82,10 @@ public class TradeBoiConfig {
 
   public String getGdaxPassword() {
     return gdaxPassword;
+  }
+
+  public Boolean getReplEnabled() {
+    return replEnabled;
   }
 
   public Boolean getStatsEnabled() {

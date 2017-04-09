@@ -47,8 +47,8 @@ public class StatsService implements Service {
     this.config = config;
   }
 
-  public StateListener[] listeners() {
-    return new StateListener[] { handlers };
+  public StateListener listener() {
+    return handlers;
   }
 
   @Override

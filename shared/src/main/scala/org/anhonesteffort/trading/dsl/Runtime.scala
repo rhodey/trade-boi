@@ -1,7 +1,5 @@
 package org.anhonesteffort.trading.dsl
 
-import java.util.Locale
-
 import org.anhonesteffort.trading.dsl.Ast.{Expression, Statement}
 import org.anhonesteffort.trading.state.{GdaxState, StateListener}
 
@@ -18,7 +16,7 @@ object Runtime {
     def readVar(name: String): EvalOption = {
       VARIABLES.get(name) match {
         case Some(eval) => eval.eval()
-        case None => throw new RuntimeException(s"variable with name '$name' is undefined")
+        case None       => None
       }
     }
 

@@ -22,6 +22,7 @@ import org.anhonesteffort.trading.http.HttpClientWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -35,10 +36,10 @@ public class ShutdownProcedure implements Callable<Void> {
   private final ExecutorService pool = Executors.newFixedThreadPool(1);
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final HttpClientWrapper http;
-  private final DslContext dsl;
+  private final Optional<DslContext> dsl;
   private final Service[] services;
 
-  public ShutdownProcedure(HttpClientWrapper http, DslContext dsl, Service... services) {
+  public ShutdownProcedure(HttpClientWrapper http, Optional<DslContext> dsl, Service... services) {
     this.http     = http;
     this.dsl      = dsl;
     this.services = services;
@@ -64,11 +65,21 @@ public class ShutdownProcedure implements Callable<Void> {
       service.shutdownFuture().whenComplete((ok, err) -> shutdown(err));
     }
 
-    Scanner console = new Scanner(System.in);
-    while (console.hasNextLine()) { dsl.eval(console.nextLine()); }
-    shutdown(null);
+    try (Scanner console = new Scanner(System.in)) {
 
-    console.close();
+      while (console.hasNextLine()) {
+        if (dsl.isPresent()) {
+          dsl.get().eval(console.nextLine());
+        } else {
+          console.nextLine();
+        }
+      }
+      shutdown(null);
+
+    } catch (Throwable err) {
+      shutdown(err);
+    }
+
     return null;
   }
 

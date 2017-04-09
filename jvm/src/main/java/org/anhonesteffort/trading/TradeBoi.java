@@ -26,8 +26,6 @@ import org.anhonesteffort.trading.http.HttpClientWrapper;
 import org.anhonesteffort.trading.state.StateListener;
 import org.anhonesteffort.trading.stats.StatsService;
 import org.anhonesteffort.trading.strategy.MetaStrategy;
-import org.anhonesteffort.trading.strategy.Strategy;
-import org.anhonesteffort.trading.strategy.StrategyFactory;
 import org.anhonesteffort.trading.strategy.impl.SimpleStrategyFactory;
 import org.anhonesteffort.trading.ws.WsService;
 import org.anhonesteffort.trading.state.MatchingStateCurator;
@@ -39,17 +37,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class TradeBoi {
 
   private final TradeBoiConfig config;
   private final HttpClientWrapper http;
-  private final DslContext dsl;
 
   public TradeBoi() throws IOException, NoSuchAlgorithmException {
     config = new TradeBoiConfig();
     http   = new HttpClientWrapper(config);
-    dsl    = new DslContext();
   }
 
   private EventHandler<GdaxEvent> handlerFor(StateListener... listeners) {
@@ -59,32 +56,31 @@ public class TradeBoi {
     );
   }
 
-  private EventHandler[] handlersForConfig(Strategy strategy, StatsService stats) {
-    List<EventHandler> handlerList = new LinkedList<>();
-
-    handlerList.add(handlerFor(dsl));
+  private void run() throws Exception {
+    List<EventHandler> processors = new LinkedList<>();
+    StatsService       statistics = new StatsService(config);
+    DslContext         dslContext = null;
 
     if (config.getTradingEnabled()) {
-      handlerList.add(handlerFor(strategy));
+      processors.add(handlerFor(
+          new MetaStrategy(new SimpleStrategyFactory(http))
+      ));
     }
+
+    if (config.getReplEnabled()) {
+      processors.add(handlerFor(dslContext = new DslContext()));
+    }
+
     if (config.getStatsEnabled()) {
-      handlerList.add(handlerFor(stats.listeners()));
+      processors.add(handlerFor(statistics.listener()));
     }
 
-    if (handlerList.isEmpty()) {
+    if (processors.isEmpty()) {
       throw new RuntimeException("you gotta enable something, dude");
-    } else {
-      return handlerList.toArray(new EventHandler[handlerList.size()]);
     }
-  }
-
-  private void run() throws Exception {
-    StrategyFactory strategies   = new SimpleStrategyFactory(http);
-    Strategy        metaStrategy = new MetaStrategy(strategies);
-    StatsService    statistics   = new StatsService(config);
 
     DisruptorService disruptor = new DisruptorService(
-        config, new BlockingWaitStrategy(), handlersForConfig(metaStrategy, statistics)
+        config, new BlockingWaitStrategy(), processors.toArray(new EventHandler[processors.size()])
     );
 
     WsService wsService = new WsService(config, disruptor.ringBuffer(), http);
@@ -93,7 +89,7 @@ public class TradeBoi {
     disruptor.start();
     wsService.start();
 
-    new ShutdownProcedure(http, dsl, statistics, disruptor, wsService).call();
+    new ShutdownProcedure(http, Optional.ofNullable(dslContext), statistics, disruptor, wsService).call();
   }
 
   public static void main(String[] args) throws Exception {
