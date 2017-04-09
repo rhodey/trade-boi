@@ -16,7 +16,7 @@ object Runtime {
     def readVar(name: String): EvalOption = {
       VARIABLES.get(name) match {
         case Some(eval) => eval.eval()
-        case None       => None
+        case None       => throw new RuntimeException(s"variable with name '$name' is undefined")
       }
     }
 
