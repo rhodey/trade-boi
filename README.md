@@ -1,5 +1,5 @@
 # trade-boi
-dat boi trading on gdax.
+High-frequency trading on GDAX with embedded domain-specific-language.
 
 ## Build
 ```
